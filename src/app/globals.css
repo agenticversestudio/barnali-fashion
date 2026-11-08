@@ -1,26 +1,63 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --brand-plum: #4B1835;
+    --brand-plum-dark: #320F23;
+    --brand-plum-light: #6A254D;
+    --brand-plum-soft: #F9F1F5;
+    --brand-gold: #B89558;
+    --brand-gold-dark: #8C6F3B;
+    --brand-gold-light: #D4B67F;
+    --brand-gold-soft: #FAF5EB;
+    --brand-ivory: #F7F3EC;
+    --brand-ivory-warm: #EFE9DD;
+    --brand-charcoal: #27222A;
+    --brand-sage: #66786C;
+    --brand-sage-light: #EBF0ED;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #FBF9F5;
+  color: #27222A;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1ede6;
+}
+::-webkit-scrollbar-thumb {
+  background: #d5ccbe;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b89558;
+}
+
+/* Print Styles for Invoices, Handover & 80mm Thermal Receipts */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .thermal-receipt {
+    width: 80mm !important;
+    max-width: 80mm !important;
+    font-size: 11px !important;
+    padding: 4mm !important;
+    margin: 0 auto !important;
+  }
 }
