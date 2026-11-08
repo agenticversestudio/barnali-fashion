@@ -2,6 +2,8 @@
 
 **Location**: In front of LIC Office, near Keshariya Restaurant, Bargarh Road, Bargarh, Odisha — 768028  
 **Phone**: +91 7978256488  
+**Live Production URL**: [https://barnali-erp.vercel.app](https://barnali-erp.vercel.app)  
+**GitHub Repository**: [https://github.com/agenticversestudio/barnali-fashion](https://github.com/agenticversestudio/barnali-fashion)  
 **Platform**: Full-Stack Functional Client Approval Prototype  
 
 ---
