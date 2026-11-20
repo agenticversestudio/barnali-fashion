@@ -5,25 +5,18 @@ import Link from "next/link";
 import {
   Shirt,
   Search,
-  Filter,
   Plus,
   QrCode,
-  Tag,
   Grid,
   List,
-  CheckCircle2,
   MapPin,
-  Sparkles,
   X,
-  History,
-  Printer,
   ChevronRight,
-  ShieldAlert,
 } from "lucide-react";
 import { DataStore } from "@/lib/dataStore";
 import { formatINR } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { GarmentUnit, ProductCategory, GarmentStatus } from "@/types";
+import { GarmentUnit, ProductCategory } from "@/types";
 
 export default function InventoryPage() {
   const [garments, setGarments] = useState<GarmentUnit[]>([]);
@@ -32,7 +25,7 @@ export default function InventoryPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
-  // Add Costume Modal state (Matching Client 11 Fields)
+  // Add Costume Modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [costumeId, setCostumeId] = useState("");
   const [category, setCategory] = useState<ProductCategory>("Bridal Lehenga");
@@ -46,7 +39,6 @@ export default function InventoryPage() {
   const [location, setLocation] = useState("Godown Rack A-01");
   const [photoUrl, setPhotoUrl] = useState("https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=600");
 
-  // Barcode / QR Label Modal
   const [qrGarment, setQrGarment] = useState<GarmentUnit | null>(null);
 
   useEffect(() => {
@@ -64,15 +56,14 @@ export default function InventoryPage() {
     "Royal Jewellery & Accessories",
   ];
 
-  // Exact 6 statuses requested by client
   const statuses = [
-    { label: "ALL", value: "ALL" },
-    { label: "🟢 Available", value: "AVAILABLE" },
-    { label: "🟠 Booked", value: "BOOKED" },
-    { label: "🔵 Out on rent", value: "OUT_ON_RENT" },
-    { label: "🟣 Returned – cleaning pending", value: "RETURNED_CLEANING" },
-    { label: "🔴 Damaged / Repair", value: "DAMAGED_REPAIR" },
-    { label: "⚫ Unavailable", value: "UNAVAILABLE" },
+    { label: "All", value: "ALL" },
+    { label: "Available", value: "AVAILABLE" },
+    { label: "Booked", value: "BOOKED" },
+    { label: "Out on rent", value: "OUT_ON_RENT" },
+    { label: "Cleaning", value: "RETURNED_CLEANING" },
+    { label: "In repair", value: "DAMAGED_REPAIR" },
+    { label: "Unavailable", value: "UNAVAILABLE" },
   ];
 
   const filteredGarments = garments.filter((g) => {
@@ -123,103 +114,96 @@ export default function InventoryPage() {
       status: "AVAILABLE",
       rentalCount: 0,
       image: photoUrl || "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=600",
-      notes: "Newly entered into Barnali store catalogue",
+      notes: "Newly entered piece",
     };
 
     DataStore.saveGarment(newUnit);
     setGarments(DataStore.getGarments());
     setShowAddModal(false);
-    alert(`Costume ${newUnit.id} added successfully to stock!`);
   };
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#8C6F3B] font-semibold uppercase tracking-wider mb-1">
-            <Shirt className="w-4 h-4 text-[#4B1835]" />
-            <span>Costumes &amp; Godown Stock</span>
-          </div>
-          <h1 className="text-2xl font-serif font-bold text-[#27222A]">Costume Inventory</h1>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Exact 11 costume fields, godown rack locations, and 6 active status states.
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Inventory</h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Manage catalogue garments, rack assignments, and rental pricing.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           {/* View Mode Toggle */}
-          <div className="flex items-center bg-[#F3EFE7] p-1 rounded-xl border border-[#E8DFD1]">
+          <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
             <button
               onClick={() => setViewMode("table")}
-              className={`p-1.5 rounded-lg text-xs transition-all ${
-                viewMode === "table" ? "bg-white text-[#4B1835] shadow-xs font-bold" : "text-gray-500"
+              className={`p-1.5 rounded-md text-xs transition-colors ${
+                viewMode === "table" ? "bg-white text-slate-900 shadow-xs font-semibold" : "text-slate-500"
               }`}
               title="Table View"
             >
-              <List className="w-4 h-4" />
+              <List className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded-lg text-xs transition-all ${
-                viewMode === "grid" ? "bg-white text-[#4B1835] shadow-xs font-bold" : "text-gray-500"
+              className={`p-1.5 rounded-md text-xs transition-colors ${
+                viewMode === "grid" ? "bg-white text-slate-900 shadow-xs font-semibold" : "text-slate-500"
               }`}
-              title="Grid Card View"
+              title="Grid View"
             >
-              <Grid className="w-4 h-4" />
+              <Grid className="w-3.5 h-3.5" />
             </button>
           </div>
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="bg-[#4B1835] hover:bg-[#320F23] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs flex items-center gap-2 transition-all"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#6B1D2F] hover:bg-[#551624] text-white text-xs font-medium rounded-lg shadow-xs transition-colors"
           >
-            <Plus className="w-4 h-4 text-[#D4B67F]" />
-            <span>Add New Costume</span>
+            <Plus className="w-4 h-4" />
+            <span>Add Piece</span>
           </button>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-[#EFE9DD] shadow-xs space-y-3">
+      <div className="bg-white p-4 rounded-xl border border-[#E2E8F0] shadow-[0_1px_2px_rgba(0,0,0,0.03)] space-y-3">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-[#B89558] absolute left-3 top-2.5" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
-              placeholder="Search by Costume ID (e.g. LF-001), Name, Colour, or Godown Rack..."
+              placeholder="Search by SKU, name, color, or rack..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-xs pl-9 pr-4 py-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl focus:outline-hidden focus:border-[#4B1835] text-gray-800"
+              className="w-full text-xs pl-8 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-[#6B1D2F] text-slate-800"
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="text-xs py-2 px-3 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold text-gray-800 focus:outline-hidden"
-            >
-              {categories.map((c) => (
-                <option key={c} value={c}>
-                  {c === "ALL" ? "All Categories" : c}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="text-xs py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-hidden"
+          >
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c === "ALL" ? "All Categories" : c}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* 6 Exact Status Filter Buttons */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs border-t border-[#EFE9DD] pt-2.5">
-          <span className="text-[10px] uppercase font-bold text-[#8C6F3B] shrink-0 mr-1">Status:</span>
+        {/* Clean Status Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs border-t border-slate-100 pt-2.5">
+          <span className="text-[11px] font-medium text-slate-400 shrink-0 mr-1">Status:</span>
           {statuses.map((st) => (
             <button
               key={st.value}
               onClick={() => setSelectedStatus(st.value)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium whitespace-nowrap transition-colors ${
                 selectedStatus === st.value
-                  ? "bg-[#4B1835] text-white shadow-xs"
-                  : "bg-[#FBF9F5] text-gray-700 hover:bg-[#F3EFE7] border border-[#E8DFD1]"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80"
               }`}
             >
               {st.label}
@@ -228,88 +212,77 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* Garments Presentation */}
+      {/* Table Presentation */}
       {viewMode === "table" ? (
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] shadow-xs overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#E2E8F0] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF5EB] border-b border-[#EFE9DD] text-[#8C6F3B] uppercase text-[10px] tracking-wider font-bold">
+              <thead className="bg-slate-50/80 border-b border-[#E2E8F0] text-slate-500 uppercase text-[10px] tracking-wider font-semibold">
                 <tr>
-                  <th className="py-3 px-4">Costume ID &amp; Photo</th>
-                  <th className="py-3 px-3">Name</th>
+                  <th className="py-3 px-4">Item</th>
                   <th className="py-3 px-3">Category</th>
-                  <th className="py-3 px-3">Size &amp; Colour</th>
-                  <th className="py-3 px-3">Godown Location</th>
-                  <th className="py-3 px-3">Purchase Price</th>
-                  <th className="py-3 px-3">Rental Price</th>
+                  <th className="py-3 px-3">Size &amp; Color</th>
+                  <th className="py-3 px-3">Location</th>
+                  <th className="py-3 px-3">Rental Rate</th>
                   <th className="py-3 px-3">Security Deposit</th>
                   <th className="py-3 px-3">Status</th>
-                  <th className="py-3 px-3">Condition</th>
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F1ECE3]">
+              <tbody className="divide-y divide-slate-100">
                 {filteredGarments.map((g) => (
-                  <tr key={g.id} className="hover:bg-[#FBF9F5] transition-colors group">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2.5">
+                  <tr key={g.id} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-3">
                         <img
                           src={g.image}
                           alt={g.productName}
-                          className="w-12 h-12 rounded-lg object-cover border border-[#EFE9DD] shrink-0"
+                          className="w-11 h-11 rounded-lg object-cover border border-slate-200 shrink-0"
                         />
                         <div>
-                          <span className="font-mono font-bold text-sm text-[#4B1835] bg-[#F5EFE6] px-1.5 py-0.5 rounded border border-[#E8DFD1]">
+                          <span className="font-mono text-xs font-semibold text-slate-900">
                             {g.id}
                           </span>
+                          <div className="text-slate-700 font-medium line-clamp-1 max-w-[200px]">
+                            {g.productName}
+                          </div>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-3 font-semibold text-gray-900 max-w-[180px]">
-                      <div className="line-clamp-2">{g.productName}</div>
-                    </td>
-                    <td className="py-3 px-3 text-gray-600 font-medium whitespace-nowrap">{g.category}</td>
-                    <td className="py-3 px-3">
-                      <div className="font-bold text-gray-900">{g.size}</div>
-                      <div className="text-[11px] text-gray-500">{g.colour || "Standard"}</div>
+                    <td className="py-3 px-3 text-slate-500 font-medium whitespace-nowrap">{g.category}</td>
+                    <td className="py-3 px-3 whitespace-nowrap">
+                      <div className="font-medium text-slate-800">{g.size}</div>
+                      <div className="text-[11px] text-slate-400">{g.colour || "—"}</div>
                     </td>
                     <td className="py-3 px-3 whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1 text-gray-700 font-medium bg-gray-100 px-2 py-0.5 rounded text-[11px]">
-                        <MapPin className="w-3 h-3 text-[#8C6F3B]" />
+                      <span className="inline-flex items-center gap-1 text-slate-600 font-medium bg-slate-50 border border-slate-200 px-2 py-0.5 rounded text-[11px]">
+                        <MapPin className="w-3 h-3 text-slate-400" />
                         <span>{g.location || g.storageLocation}</span>
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-gray-600 font-medium whitespace-nowrap">
-                      {formatINR(g.purchasePrice || 25000)}
-                    </td>
-                    <td className="py-3 px-3 font-bold text-[#4B1835] whitespace-nowrap">
+                    <td className="py-3 px-3 font-semibold text-slate-900 whitespace-nowrap">
                       {formatINR(g.rentalPrice)}
                     </td>
-                    <td className="py-3 px-3 font-semibold text-[#8C6F3B] whitespace-nowrap">
+                    <td className="py-3 px-3 text-slate-500 font-medium whitespace-nowrap">
                       {formatINR(g.securityDeposit)}
                     </td>
                     <td className="py-3 px-3 whitespace-nowrap">
                       <StatusBadge status={g.status} />
                     </td>
-                    <td className="py-3 px-3 whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                        {g.condition || g.conditionRating}
-                      </span>
-                    </td>
                     <td className="py-3 px-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1.5">
+                      <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => setQrGarment(g)}
-                          title="Generate Barcode / Rack Tag"
-                          className="p-1.5 bg-[#FAF5EB] hover:bg-[#F3EFE7] text-[#8C6F3B] rounded-lg transition-colors"
+                          title="View Rack Tag"
+                          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
                         >
                           <QrCode className="w-3.5 h-3.5" />
                         </button>
                         <Link
                           href={`/erp/inventory/${g.id}`}
-                          className="px-2 py-1 bg-[#4B1835] text-white hover:bg-[#320F23] rounded-lg transition-colors text-[11px] font-semibold"
+                          className="px-2.5 py-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors text-[11px] font-medium"
                         >
-                          View
+                          Details
                         </Link>
                       </div>
                     </td>
@@ -320,60 +293,47 @@ export default function InventoryPage() {
           </div>
         </div>
       ) : (
-        /* Grid View */
+        /* Grid Presentation */
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredGarments.map((g) => (
             <div
               key={g.id}
-              className="bg-white rounded-2xl border border-[#EFE9DD] overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+              className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-slate-300 transition-colors flex flex-col justify-between"
             >
               <div className="relative">
-                <img src={g.image} alt={g.productName} className="w-full h-48 object-cover" />
-                <div className="absolute top-2 left-2 bg-[#4B1835] text-white text-xs font-mono font-bold px-2.5 py-1 rounded-md shadow-xs border border-[#D4B67F]/40">
+                <img src={g.image} alt={g.productName} className="w-full h-44 object-cover" />
+                <div className="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur-xs text-slate-900 text-xs font-mono font-semibold px-2 py-0.5 rounded shadow-xs border border-slate-200">
                   {g.id}
                 </div>
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2.5 right-2.5">
                   <StatusBadge status={g.status} />
                 </div>
               </div>
 
               <div className="p-4 flex-1 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between text-[10px] font-bold text-[#8C6F3B] uppercase">
+                  <div className="flex items-center justify-between text-[11px] text-slate-400">
                     <span>{g.category}</span>
-                    <span className="text-gray-500 font-semibold">{g.size}</span>
+                    <span>{g.size}</span>
                   </div>
-                  <h3 className="font-bold text-gray-900 text-sm mt-1 line-clamp-2">
+                  <h3 className="font-semibold text-slate-900 text-xs mt-1 line-clamp-2">
                     {g.productName}
                   </h3>
-                  <div className="text-[11px] text-gray-600 mt-2 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-[#8C6F3B]" />
-                    <span className="font-medium">{g.location || g.storageLocation}</span>
+                  <div className="text-[11px] text-slate-500 mt-2 flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-slate-400" />
+                    <span>{g.location || g.storageLocation}</span>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-[#EFE9DD] grid grid-cols-2 gap-2 text-xs">
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                   <div>
-                    <div className="text-[10px] text-gray-400">Rental Price</div>
-                    <div className="font-bold text-[#4B1835]">{formatINR(g.rentalPrice)}</div>
+                    <div className="text-[10px] text-slate-400">Rental</div>
+                    <div className="font-semibold text-slate-900">{formatINR(g.rentalPrice)}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-[10px] text-gray-400">Security Deposit</div>
-                    <div className="font-bold text-[#8C6F3B]">{formatINR(g.securityDeposit)}</div>
+                    <div className="text-[10px] text-slate-400">Deposit</div>
+                    <div className="text-slate-600 font-medium">{formatINR(g.securityDeposit)}</div>
                   </div>
-                </div>
-
-                <div className="mt-3 pt-2 border-t border-[#EFE9DD] flex items-center justify-between">
-                  <span className="text-[11px] text-gray-600 font-medium">
-                    Colour: <strong>{g.colour || "Standard"}</strong>
-                  </span>
-                  <button
-                    onClick={() => setQrGarment(g)}
-                    className="p-1.5 bg-[#FAF5EB] text-[#8C6F3B] rounded-lg hover:bg-[#F3EFE7]"
-                    title="Print Rack Tag"
-                  >
-                    <QrCode className="w-3.5 h-3.5" />
-                  </button>
                 </div>
               </div>
             </div>
@@ -381,49 +341,44 @@ export default function InventoryPage() {
         </div>
       )}
 
-      {/* --- ADD NEW COSTUME MODAL (EXACT 11 CLIENT FIELDS) --- */}
+      {/* Add Piece Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl border border-[#EFE9DD] max-w-xl w-full p-6 text-xs animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-[#EFE9DD]">
-              <div className="flex items-center gap-2 font-bold text-base text-[#4B1835]">
-                <Plus className="w-5 h-5 text-[#8C6F3B]" />
-                <span>Add New Costume (Client 11 Fields Form)</span>
-              </div>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-lg w-full p-6 text-xs animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <span className="font-semibold text-sm text-slate-900">Add Inventory Piece</span>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="p-1 text-gray-400 hover:text-gray-600 rounded-lg"
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleAddCostume} className="mt-4 space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
-                {/* 1. Costume ID */}
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                    Costume ID * (e.g. LF-001)
+                  <label className="block text-[11px] font-medium text-slate-700 mb-1">
+                    Costume SKU *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="LF-001"
+                    placeholder="e.g. LF-010"
                     value={costumeId}
                     onChange={(e) => setCostumeId(e.target.value)}
-                    className="w-full p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-mono font-bold text-[#4B1835]"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-mono font-semibold"
                   />
                 </div>
 
-                {/* 2. Category */}
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                  <label className="block text-[11px] font-medium text-slate-700 mb-1">
                     Category *
                   </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value as ProductCategory)}
-                    className="w-full p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-semibold"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-medium"
                   >
                     {categories.filter((c) => c !== "ALL").map((c) => (
                       <option key={c} value={c}>
@@ -434,26 +389,24 @@ export default function InventoryPage() {
                 </div>
               </div>
 
-              {/* 3. Name */}
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                  Costume Name * (e.g. Red Royal Bridal Lehenga)
+                <label className="block text-[11px] font-medium text-slate-700 mb-1">
+                  Item Title *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Red Royal Bridal Lehenga"
+                  placeholder="e.g. Red Royal Velvet Bridal Lehenga"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-medium"
+                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                {/* 4. Size */}
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                    Size * (e.g. M / Adjustable)
+                  <label className="block text-[11px] font-medium text-slate-700 mb-1">
+                    Size *
                   </label>
                   <input
                     type="text"
@@ -461,14 +414,13 @@ export default function InventoryPage() {
                     placeholder="M / Adjustable"
                     value={size}
                     onChange={(e) => setSize(e.target.value)}
-                    className="w-full p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
                   />
                 </div>
 
-                {/* 5. Colour */}
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                    Colour * (e.g. Red, Maroon, Ivory)
+                  <label className="block text-[11px] font-medium text-slate-700 mb-1">
+                    Colour *
                   </label>
                   <input
                     type="text"
@@ -476,42 +428,39 @@ export default function InventoryPage() {
                     placeholder="Red"
                     value={colour}
                     onChange={(e) => setColour(e.target.value)}
-                    className="w-full p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
-                {/* 6. Purchase Price */}
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-700 uppercase mb-1">
+                  <label className="block text-[10px] font-medium text-slate-700 mb-1">
                     Purchase Price (₹)
                   </label>
                   <input
                     type="number"
                     value={purchasePrice}
                     onChange={(e) => setPurchasePrice(e.target.value)}
-                    className="w-full p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-medium"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
                   />
                 </div>
 
-                {/* 7. Rental Price */}
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-700 uppercase mb-1">
-                    Rental Price (₹) *
+                  <label className="block text-[10px] font-medium text-slate-700 mb-1">
+                    Rental Rate (₹) *
                   </label>
                   <input
                     type="number"
                     required
                     value={rentalPrice}
                     onChange={(e) => setRentalPrice(e.target.value)}
-                    className="w-full p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-bold text-[#4B1835]"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold"
                   />
                 </div>
 
-                {/* 8. Security Deposit */}
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-700 uppercase mb-1">
+                  <label className="block text-[10px] font-medium text-slate-700 mb-1">
                     Security Deposit (₹) *
                   </label>
                   <input
@@ -519,21 +468,20 @@ export default function InventoryPage() {
                     required
                     value={securityDeposit}
                     onChange={(e) => setSecurityDeposit(e.target.value)}
-                    className="w-full p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-bold text-[#8C6F3B]"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                {/* 10. Condition */}
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                    Condition (e.g. Excellent)
+                  <label className="block text-[11px] font-medium text-slate-700 mb-1">
+                    Condition
                   </label>
                   <select
                     value={condition}
                     onChange={(e) => setCondition(e.target.value)}
-                    className="w-full p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-semibold"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
                   >
                     <option value="Excellent">Excellent</option>
                     <option value="Good">Good</option>
@@ -542,10 +490,9 @@ export default function InventoryPage() {
                   </select>
                 </div>
 
-                {/* 11. Location */}
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                    Location * (e.g. Godown Rack A-01)
+                  <label className="block text-[11px] font-medium text-slate-700 mb-1">
+                    Godown Rack *
                   </label>
                   <input
                     type="text"
@@ -553,37 +500,24 @@ export default function InventoryPage() {
                     placeholder="Godown Rack A-01"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    className="w-full p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-medium"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
                   />
                 </div>
               </div>
 
-              {/* Photo URL */}
-              <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                  Costume Photo Image URL
-                </label>
-                <input
-                  type="text"
-                  value={photoUrl}
-                  onChange={(e) => setPhotoUrl(e.target.value)}
-                  className="w-full p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg text-gray-600"
-                />
-              </div>
-
-              <div className="pt-3 border-t border-[#EFE9DD] flex items-center justify-end gap-2">
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-xl font-semibold text-gray-700 hover:bg-gray-50"
+                  className="px-3.5 py-1.5 border border-slate-200 rounded-lg font-medium text-slate-700 hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#4B1835] hover:bg-[#320F23] text-white font-bold rounded-xl shadow-xs"
+                  className="px-4 py-1.5 bg-[#6B1D2F] hover:bg-[#551624] text-white font-medium rounded-lg shadow-xs"
                 >
-                  Save Costume to Stock
+                  Save Piece
                 </button>
               </div>
             </form>
@@ -591,25 +525,24 @@ export default function InventoryPage() {
         </div>
       )}
 
-      {/* Barcode Tag Modal */}
+      {/* Rack Tag Modal */}
       {qrGarment && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full border border-[#EFE9DD] shadow-2xl text-center">
-            <h3 className="font-serif font-bold text-base text-[#27222A]">Godown Rack Tag</h3>
-            <p className="text-xs text-gray-500 mt-1">{qrGarment.productName}</p>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 max-w-xs w-full border border-slate-200 shadow-xl text-center">
+            <h3 className="font-semibold text-sm text-slate-900">Storage Rack Label</h3>
+            <p className="text-xs text-slate-500 mt-0.5">{qrGarment.productName}</p>
 
-            <div className="my-4 p-4 border-2 border-dashed border-[#B89558] rounded-xl bg-[#FAF5EB] flex flex-col items-center">
-              <div className="text-2xl font-mono font-black text-[#4B1835]">{qrGarment.id}</div>
-              <div className="text-xs font-semibold text-gray-800 mt-1">{qrGarment.category} — {qrGarment.size}</div>
-              <div className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded mt-1.5">
+            <div className="my-4 p-4 border border-dashed border-slate-300 rounded-lg bg-slate-50 flex flex-col items-center">
+              <div className="text-xl font-mono font-bold text-slate-900">{qrGarment.id}</div>
+              <div className="text-xs text-slate-600 mt-1">{qrGarment.category} · {qrGarment.size}</div>
+              <div className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 mt-2">
                 Rack: {qrGarment.location || qrGarment.storageLocation}
               </div>
-              <div className="mt-3 text-[10px] text-gray-500 font-mono">BARNALI FASHION • BARGARH</div>
             </div>
 
             <button
               onClick={() => setQrGarment(null)}
-              className="w-full py-2 bg-[#4B1835] text-white rounded-xl text-xs font-bold"
+              className="w-full py-2 bg-slate-900 text-white rounded-lg text-xs font-medium hover:bg-slate-800"
             >
               Close
             </button>

@@ -32,64 +32,60 @@ export default function AvailabilityCalendarPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#8C6F3B] font-semibold uppercase tracking-wider mb-1">
-            <CalendarDays className="w-4 h-4 text-[#4B1835]" />
-            <span>Operational Schedule &amp; Buffer Management</span>
-          </div>
-          <h1 className="text-2xl font-serif font-bold text-[#27222A]">Availability Calendar</h1>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Visualize reserved dates, active rentals, and post-event laundry buffers across physical units.
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Calendar</h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Availability matrix across physical items with automatic post-event buffer.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="p-2 bg-white border border-[#EFE9DD] rounded-xl hover:bg-[#F3EFE7] text-gray-700">
+          <button className="p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700">
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="font-bold text-xs text-[#4B1835] bg-[#FAF5EB] px-3 py-1.5 rounded-xl border border-[#E8DFD1]">
+          <span className="font-semibold text-xs text-slate-900 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
             {selectedMonth}
           </span>
-          <button className="p-2 bg-white border border-[#EFE9DD] rounded-xl hover:bg-[#F3EFE7] text-gray-700">
+          <button className="p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700">
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {/* Legend & Instructions */}
-      <div className="bg-[#FAF5EB] p-4 rounded-2xl border border-[#E8DFD1] flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="bg-white p-4 rounded-xl border border-[#E2E8F0] shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5 font-medium text-gray-700">
-            <span className="w-3 h-3 rounded-sm bg-purple-600"></span> Active Out on Rent
+          <span className="flex items-center gap-1.5 font-medium text-slate-600">
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Out on Rent
           </span>
-          <span className="flex items-center gap-1.5 font-medium text-gray-700">
-            <span className="w-3 h-3 rounded-sm bg-amber-500"></span> Confirmed Reservation
+          <span className="flex items-center gap-1.5 font-medium text-slate-600">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Confirmed Reservation
           </span>
-          <span className="flex items-center gap-1.5 font-medium text-gray-700">
-            <span className="w-3 h-3 rounded-sm bg-cyan-400"></span> 24h Cleaning Buffer
+          <span className="flex items-center gap-1.5 font-medium text-slate-600">
+            <span className="w-2.5 h-2.5 rounded-full bg-purple-400"></span> Cleaning Buffer
           </span>
         </div>
-        <div className="text-[11px] text-gray-500 flex items-center gap-1">
-          <Info className="w-3.5 h-3.5 text-[#B89558]" />
-          <span>Asia/Kolkata Business Hours (9:30 AM – 8:30 PM)</span>
+        <div className="text-[11px] text-slate-400 flex items-center gap-1">
+          <Info className="w-3.5 h-3.5 text-slate-400" />
+          <span>Bargarh Studio (9:30 AM – 8:30 PM IST)</span>
         </div>
       </div>
 
       {/* Interactive Gantt / Timeline Matrix */}
-      <div className="bg-white rounded-2xl border border-[#EFE9DD] shadow-xs overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#E2E8F0] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="overflow-x-auto">
           <div className="min-w-[900px]">
             {/* Days Header */}
-            <div className="grid grid-cols-31 bg-[#FAF5EB] border-b border-[#EFE9DD] text-[10px] font-bold text-gray-600">
-              <div className="p-2 border-r border-[#EFE9DD] w-48 shrink-0 font-bold text-[#4B1835]">
-                Physical SKU
+            <div className="grid grid-cols-31 bg-slate-50 border-b border-slate-200 text-[10px] font-semibold text-slate-500">
+              <div className="p-2.5 border-r border-slate-200 w-48 shrink-0 font-semibold text-slate-800">
+                Piece SKU
               </div>
               {daysInMonth.map((d) => (
                 <div
                   key={d}
-                  className={`p-2 text-center border-r border-[#EFE9DD] ${
-                    d === 8 ? "bg-[#4B1835] text-[#D4B67F] font-bold" : ""
+                  className={`p-2 text-center border-r border-slate-200 ${
+                    d === 8 ? "bg-slate-900 text-white font-bold" : ""
                   }`}
                 >
                   {d}
