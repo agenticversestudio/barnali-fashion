@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Scissors,
   Plus,
@@ -12,6 +13,7 @@ import {
   Shirt,
   MapPin,
   Calendar,
+  RotateCcw,
 } from "lucide-react";
 import { DataStore } from "@/lib/dataStore";
 import { StitchingCareJob, DryCleanCareJob, GarmentUnit } from "@/types";
@@ -113,14 +115,22 @@ export default function StitchingAndDryCleanPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
         <div>
           <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-slate-900">
-            Care &amp; Laundry
+            Return &amp; Care
           </h1>
           <p className="text-[11px] md:text-xs text-slate-500 mt-0.5">
-            Log dispatch (Out) and receipt (Rcv) for tailoring alterations &amp; dry cleaning.
+            After-return Stitching &amp; Washing tracker with Out Date and Rcv Date.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/erp/bookings?action=return"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 md:px-3.5 md:py-2 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 text-xs font-semibold rounded-lg transition-colors"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-rose-600" />
+            <span>Customer Return</span>
+          </Link>
+
           {activeTab === "stitching" ? (
             <button
               onClick={() => setShowStitchingModal(true)}

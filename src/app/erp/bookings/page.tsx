@@ -857,10 +857,11 @@ function BookingsContent() {
                   >
                     <option value="ALL">All Garment Types</option>
                     <option value="Bridal Lehenga">Bridal Lehenga</option>
+                    <option value="Indo-Western">Indo-Western</option>
+                    <option value="Jodhpuri Suit">Jodhpuri Suit</option>
                     <option value="Groom Sherwani">Groom Sherwani</option>
                     <option value="Party Gown">Party Gown</option>
                     <option value="Silk Saree">Silk Saree</option>
-                    <option value="Indo-Western">Indo-Western</option>
                     <option value="Kids Festive Wear">Kids Festive Wear</option>
                   </select>
                 </div>

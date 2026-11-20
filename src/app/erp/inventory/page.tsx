@@ -70,11 +70,12 @@ export default function InventoryPage() {
   ];
 
   const statuses = [
-    { label: "All", value: "ALL", count: garments.length },
+    { label: "All Costumes", value: "ALL", count: garments.length, dot: "" },
     {
       label: "Available",
       value: "AVAILABLE",
       count: garments.filter((g) => g.status === "AVAILABLE").length,
+      dot: "bg-emerald-500",
     },
     {
       label: "Booked",
@@ -82,14 +83,16 @@ export default function InventoryPage() {
       count: garments.filter(
         (g) => g.status === "BOOKED" || g.status === "RESERVED" || g.status === "PREPARING"
       ).length,
+      dot: "bg-amber-500",
     },
     {
       label: "Out on rent",
       value: "OUT_ON_RENT",
       count: garments.filter((g) => g.status === "OUT_ON_RENT" || g.status === "RENTED").length,
+      dot: "bg-blue-500",
     },
     {
-      label: "Cleaning",
+      label: "Returned – cleaning pending",
       value: "RETURNED_CLEANING",
       count: garments.filter(
         (g) =>
@@ -97,9 +100,10 @@ export default function InventoryPage() {
           g.status === "RETURN_RECEIVED" ||
           g.status === "IN_LAUNDRY"
       ).length,
+      dot: "bg-purple-500",
     },
     {
-      label: "In repair",
+      label: "Damaged / Repair",
       value: "DAMAGED_REPAIR",
       count: garments.filter(
         (g) =>
@@ -107,11 +111,13 @@ export default function InventoryPage() {
           g.status === "UNDER_REPAIR" ||
           g.status === "REPAIR_PENDING"
       ).length,
+      dot: "bg-rose-500",
     },
     {
       label: "Unavailable",
       value: "UNAVAILABLE",
       count: garments.filter((g) => g.status === "UNAVAILABLE" || g.status === "RETIRED").length,
+      dot: "bg-slate-400",
     },
   ];
 
@@ -248,7 +254,7 @@ export default function InventoryPage() {
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
-              placeholder="Search SKU (LF-001), name, colour, or rack..."
+              placeholder="Search Costume ID (LF-001), category, size, colour, or rack..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full text-xs pl-8 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-[#6B1D2F] text-slate-800"
@@ -268,7 +274,7 @@ export default function InventoryPage() {
           </select>
         </div>
 
-        {/* Single-Row Horizontally Scrollable Status Pills */}
+        {/* Single-Row Horizontally Scrollable Status Pills with Colour Dots */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs border-t border-slate-100 pt-2 select-none no-scrollbar">
           {statuses.map((st) => (
             <button
@@ -280,6 +286,7 @@ export default function InventoryPage() {
                   : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80"
               }`}
             >
+              {st.dot && <span className={`w-2 h-2 rounded-full ${st.dot}`} />}
               <span>{st.label}</span>
               <span
                 className={`text-[9px] px-1 py-0.2 rounded-full font-bold ${

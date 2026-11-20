@@ -32,7 +32,7 @@ export function ErpHeader() {
   const [role, setRole] = useState<UserRole>("owner");
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [showNotifMenu, setShowNotifMenu] = useState(false);
-  const [showRoleSheet, setShowRoleSheet] = useState(false);
+  const [showShopSheet, setShowShopSheet] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -46,7 +46,7 @@ export function ErpHeader() {
   const handleRoleChange = (newRole: UserRole) => {
     setRole(newRole);
     DataStore.setCurrentRole(newRole);
-    setShowRoleSheet(false);
+    setShowShopSheet(false);
   };
 
   const handleResetData = () => {
@@ -60,22 +60,22 @@ export function ErpHeader() {
     }
   };
 
-  // Determine active title on mobile
+  // Everyday shop titles for data entry operator
   const getPageTitle = () => {
-    if (pathname.startsWith("/erp/dashboard")) return "Dashboard";
-    if (pathname.startsWith("/erp/bookings")) return "Orders";
-    if (pathname.startsWith("/erp/inventory")) return "Inventory";
-    if (pathname.startsWith("/erp/customers")) return "Customers";
-    if (pathname.startsWith("/erp/operations/laundry")) return "Care & Laundry";
-    if (pathname.startsWith("/erp/calendar")) return "Calendar";
-    return "Barnali ERP";
+    if (pathname.startsWith("/erp/dashboard")) return "Alerts & Today";
+    if (pathname.startsWith("/erp/bookings")) return "New Booking & Handover";
+    if (pathname.startsWith("/erp/inventory")) return "Costumes & Stock";
+    if (pathname.startsWith("/erp/operations/laundry")) return "Return & Care";
+    if (pathname.startsWith("/erp/calendar")) return "Costume Calendar";
+    if (pathname.startsWith("/erp/customers")) return "Customer Register";
+    return "Barnali Fashion";
   };
 
-  // Determine contextual quick create button
+  // Contextual quick create button
   const getQuickAction = () => {
     if (pathname.startsWith("/erp/inventory")) {
       return {
-        label: "+ Piece",
+        label: "+ Costume",
         href: "/erp/inventory?action=new",
       };
     }
@@ -87,12 +87,12 @@ export function ErpHeader() {
     }
     if (pathname.startsWith("/erp/customers")) {
       return {
-        label: "+ Client",
+        label: "+ Customer",
         href: "/erp/customers?action=new",
       };
     }
     return {
-      label: "+ Order",
+      label: "+ Booking",
       href: "/erp/bookings?new=1",
     };
   };
@@ -135,10 +135,10 @@ export function ErpHeader() {
     <>
       <header className="h-14 md:h-16 bg-white border-b border-[#E2E8F0] px-3.5 md:px-6 flex items-center justify-between sticky top-0 z-30 shadow-[0_1px_2px_rgba(0,0,0,0.03)] select-none">
         {/* ========================================================= */}
-        {/* MOBILE STICKY TOP BAR (< 768px)                           */}
+        {/* MOBILE STICKY TOP BAR: EXACT 3 CONTROLS MAX (< 768px)     */}
         {/* ========================================================= */}
         <div className="flex md:hidden items-center justify-between w-full">
-          {/* Left: Studio Badge + Active Page Title */}
+          {/* Left: Studio Badge + Page Title */}
           <div className="flex items-center gap-2.5 min-w-0">
             <Link
               href="/erp/dashboard"
@@ -151,14 +151,14 @@ export function ErpHeader() {
                 {getPageTitle()}
               </h1>
               <div className="text-[10px] text-slate-400 font-normal leading-none mt-0.5">
-                Barnali · Bargarh
+                Bargarh Studio
               </div>
             </div>
           </div>
 
-          {/* Right Action Controls: 1. Search | 2. Quick Create | 3. Role/Alerts Avatar */}
+          {/* Right Action Controls: EXACT 3 (Search, Quick Create, Shop/Account) */}
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* Action 1: Search Icon Button */}
+            {/* 1. Quick Search Icon */}
             <button
               onClick={() => setShowSearchModal(true)}
               className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors"
@@ -167,7 +167,7 @@ export function ErpHeader() {
               <Search className="w-4 h-4" />
             </button>
 
-            {/* Action 2: Contextual Quick Create '+' Button */}
+            {/* 2. Contextual Quick Action '+' Button */}
             <Link
               href={quickAction.href}
               className="h-8 px-2.5 rounded-lg bg-[#6B1D2F] hover:bg-[#551624] text-white text-xs font-semibold flex items-center gap-1 transition-colors shadow-xs"
@@ -176,11 +176,11 @@ export function ErpHeader() {
               <span className="text-[11px]">{quickAction.label}</span>
             </Link>
 
-            {/* Action 3: Compact Avatar / Role & Alerts Trigger */}
+            {/* 3. Shop & Role Avatar */}
             <button
-              onClick={() => setShowRoleSheet(true)}
+              onClick={() => setShowShopSheet(true)}
               className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center transition-colors relative"
-              aria-label="User role and notifications"
+              aria-label="Shop Menu"
             >
               <User className="w-4 h-4 text-slate-700" />
               {unreadCount > 0 && (
@@ -202,7 +202,7 @@ export function ErpHeader() {
             >
               <span className="flex items-center gap-2">
                 <Search className="w-3.5 h-3.5 text-slate-400" />
-                <span>Search costume, client, order...</span>
+                <span>Search Costume ID, Client, Order...</span>
               </span>
               <kbd className="bg-white text-[10px] text-slate-400 font-mono px-1.5 py-0.5 rounded border border-slate-200">
                 ⌘K
@@ -211,7 +211,7 @@ export function ErpHeader() {
 
             <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-full text-[11px] font-medium text-slate-600">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span>Bargarh Studio (LIC Road)</span>
+              <span>Bargarh Studio (In front of LIC Office)</span>
             </div>
           </div>
 
@@ -222,7 +222,7 @@ export function ErpHeader() {
               target="_blank"
               className="flex items-center gap-1.5 text-xs font-medium text-slate-700 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-2.5 py-1.5 rounded-lg transition-colors"
             >
-              <span>Storefront</span>
+              <span>Customer Storefront</span>
               <ExternalLink className="w-3 h-3 text-slate-400" />
             </Link>
 
@@ -231,10 +231,10 @@ export function ErpHeader() {
               className="flex items-center gap-1.5 bg-[#6B1D2F] hover:bg-[#551624] text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-xs transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>New Order</span>
+              <span>New Booking</span>
             </Link>
 
-            {/* Notification Center */}
+            {/* Notification Bell */}
             <div className="relative">
               <button
                 onClick={() => setShowNotifMenu(!showNotifMenu)}
@@ -251,10 +251,10 @@ export function ErpHeader() {
                 <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white border border-[#E2E8F0] rounded-xl shadow-2xl py-2 z-50 text-xs animate-in fade-in slide-in-from-top-1">
                   <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between">
                     <span className="font-semibold text-slate-900 text-sm">
-                      Notifications & Alerts
+                      Delivery Alerts &amp; Alarms
                     </span>
                     <span className="text-[11px] bg-rose-50 text-rose-700 px-2 py-0.5 rounded-full font-semibold">
-                      {unreadCount} Unread
+                      {unreadCount} Due
                     </span>
                   </div>
                   <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
@@ -307,12 +307,10 @@ export function ErpHeader() {
                 className="bg-transparent text-xs font-semibold text-slate-800 focus:outline-hidden cursor-pointer"
               >
                 <option value="owner">Owner (Full Access)</option>
+                <option value="sales_staff">Counter Operator</option>
                 <option value="admin">Admin</option>
-                <option value="manager">Manager</option>
-                <option value="sales_staff">Counter Staff</option>
-                <option value="laundry_staff">Laundry Ops</option>
-                <option value="accountant">Accountant</option>
-                <option value="viewer">Viewer (Read-Only)</option>
+                <option value="laundry_staff">Laundry / Care Staff</option>
+                <option value="viewer">Viewer</option>
               </select>
             </div>
           </div>
@@ -320,54 +318,81 @@ export function ErpHeader() {
       </header>
 
       {/* ========================================================= */}
-      {/* MOBILE ROLE & NOTIFICATIONS BOTTOM SHEET                  */}
+      {/* SHOP / ROLE / RESET SHEET (MOBILE)                        */}
       {/* ========================================================= */}
-      {showRoleSheet && (
+      {showShopSheet && (
         <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end">
           <div
-            onClick={() => setShowRoleSheet(false)}
+            onClick={() => setShowShopSheet(false)}
             className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in"
           />
           <div className="relative bg-white rounded-t-2xl shadow-2xl border-t border-[#E2E8F0] p-4 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200 text-xs">
-            {/* Grab Handle */}
             <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3" />
 
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#6B1D2F] text-white flex items-center justify-center font-bold text-xs">
-                  {role.slice(0, 2).toUpperCase()}
+                <div className="w-8 h-8 rounded-lg bg-[#6B1D2F] text-white flex items-center justify-center font-bold text-xs">
+                  BF
                 </div>
                 <div>
-                  <div className="font-semibold text-slate-900 text-sm capitalize">
-                    {role.replace("_", " ")} Mode
+                  <div className="font-semibold text-slate-900 text-sm">
+                    Barnali Fashion, Bargarh
                   </div>
-                  <div className="text-[11px] text-slate-500">
-                    Switch role or review studio alerts
+                  <div className="text-[10px] text-slate-500">
+                    Boutique &amp; Rental Studio Operations
                   </div>
                 </div>
               </div>
               <button
-                onClick={() => setShowRoleSheet(false)}
+                onClick={() => setShowShopSheet(false)}
                 className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Role Options */}
-            <div className="py-3">
+            {/* Quick Links */}
+            <div className="py-3 space-y-1.5">
+              <Link
+                href="/erp/calendar"
+                onClick={() => setShowShopSheet(false)}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 font-medium text-slate-800"
+              >
+                <span>Costume Code Calendar View</span>
+                <span className="text-[10px] text-slate-400">Nov 2026 &rarr;</span>
+              </Link>
+
+              <Link
+                href="/erp/customers"
+                onClick={() => setShowShopSheet(false)}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 font-medium text-slate-800"
+              >
+                <span>Customer Contacts &amp; Ledger</span>
+                <span className="text-[10px] text-slate-400">View Clients &rarr;</span>
+              </Link>
+
+              <Link
+                href="/"
+                target="_blank"
+                onClick={() => setShowShopSheet(false)}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 font-medium text-slate-800"
+              >
+                <span>Open Public Storefront</span>
+                <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+              </Link>
+            </div>
+
+            {/* Switch Mode */}
+            <div className="pt-2 border-t border-slate-100">
               <div className="text-[10px] font-semibold uppercase text-slate-400 tracking-wider mb-2">
-                Simulate Role Access
+                Operator Mode
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { id: "owner", label: "Owner (Full)" },
+                  { id: "sales_staff", label: "Counter Operator" },
                   { id: "admin", label: "Admin" },
-                  { id: "manager", label: "Manager" },
-                  { id: "sales_staff", label: "Counter Staff" },
                   { id: "laundry_staff", label: "Laundry Ops" },
-                  { id: "accountant", label: "Accountant" },
-                  { id: "viewer", label: "Viewer" },
                 ].map((r) => (
                   <button
                     key={r.id}
@@ -384,40 +409,14 @@ export function ErpHeader() {
               </div>
             </div>
 
-            {/* Notifications Section */}
-            <div className="pt-2 border-t border-slate-100">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-semibold uppercase text-slate-400 tracking-wider">
-                  Recent Alerts ({unreadCount} unread)
-                </span>
-              </div>
-              <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                {notifications.slice(0, 4).map((n) => (
-                  <div
-                    key={n.id}
-                    onClick={() => {
-                      DataStore.markNotificationRead(n.id);
-                      setNotifications(DataStore.getNotifications());
-                      if (n.actionUrl) router.push(n.actionUrl);
-                      setShowRoleSheet(false);
-                    }}
-                    className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-[11px] cursor-pointer"
-                  >
-                    <div className="font-semibold text-slate-900">{n.title}</div>
-                    <div className="text-slate-500 text-[10px] mt-0.5">{n.message}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Reset Button */}
+            {/* Reset Prototype Data */}
             <div className="pt-3 mt-3 border-t border-slate-100">
               <button
                 onClick={handleResetData}
                 className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-rose-50 text-rose-700 font-medium border border-rose-200 transition-colors"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset Prototype Data</span>
+                <span>Reset Demo Shop Data</span>
               </button>
             </div>
           </div>
@@ -425,18 +424,17 @@ export function ErpHeader() {
       )}
 
       {/* ========================================================= */}
-      {/* GLOBAL SEARCH MODAL (OPTIMIZED FOR MOBILE & DESKTOP)      */}
+      {/* FAST OPERATOR SEARCH MODAL                                */}
       {/* ========================================================= */}
       {showSearchModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-start justify-center pt-3 md:pt-20 px-3 z-50 animate-in fade-in">
           <div className="bg-white rounded-2xl shadow-2xl border border-[#E2E8F0] w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-150">
-            {/* Search Header */}
             <div className="p-3.5 border-b border-slate-200 flex items-center gap-2.5">
               <Search className="w-4 h-4 text-slate-400 shrink-0" />
               <input
                 type="text"
                 autoFocus
-                placeholder="Search SKU (LF-001), Customer, Phone, or Order ID..."
+                placeholder="Search Costume ID (LF-001, SH-001), Client, Phone, Order..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full text-xs md:text-sm text-slate-900 focus:outline-hidden placeholder:text-slate-400"
@@ -449,13 +447,12 @@ export function ErpHeader() {
               </button>
             </div>
 
-            {/* Search Results */}
             <div className="max-h-[70vh] md:max-h-96 overflow-y-auto p-3 space-y-3 text-xs">
               {searchQuery.trim() === "" ? (
-                <div className="text-center py-8 text-slate-400">
-                  <p className="font-medium text-slate-600">Quick Search</p>
+                <div className="text-center py-6 text-slate-400">
+                  <p className="font-semibold text-slate-700">Quick Shop Search</p>
                   <p className="text-[11px] text-slate-400 mt-1">
-                    Search costumes, counter orders, or customer phone numbers.
+                    Enter Costume ID (`LF-001`), customer mobile number, or booking code.
                   </p>
                 </div>
               ) : (
@@ -464,7 +461,7 @@ export function ErpHeader() {
                     <div>
                       <div className="font-semibold text-slate-400 uppercase text-[10px] tracking-wider mb-1.5 flex items-center gap-1.5">
                         <Shirt className="w-3 h-3 text-[#6B1D2F]" />
-                        <span>Garments ({filteredGarments.length})</span>
+                        <span>Costumes ({filteredGarments.length})</span>
                       </div>
                       <div className="space-y-1">
                         {filteredGarments.map((g) => (
@@ -481,7 +478,9 @@ export function ErpHeader() {
                                 {g.id}
                               </span>
                               <span className="font-medium text-slate-900">{g.productName}</span>
-                              <span className="text-slate-400 text-[11px] ml-1.5">({g.size})</span>
+                              <span className="text-slate-400 text-[11px] ml-1.5">
+                                · Rack: {g.location || g.storageLocation}
+                              </span>
                             </div>
                             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
                               {g.status}
@@ -496,7 +495,7 @@ export function ErpHeader() {
                     <div>
                       <div className="font-semibold text-slate-400 uppercase text-[10px] tracking-wider mb-1.5 flex items-center gap-1.5">
                         <ClipboardList className="w-3 h-3 text-amber-600" />
-                        <span>Orders ({filteredBookings.length})</span>
+                        <span>Bookings ({filteredBookings.length})</span>
                       </div>
                       <div className="space-y-1">
                         {filteredBookings.map((b) => (
