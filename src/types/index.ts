@@ -18,15 +18,21 @@ export interface UserProfile {
 }
 
 export type GarmentStatus =
-  | "AVAILABLE"
+  | "AVAILABLE" // 🟢 Available (Green)
+  | "BOOKED" // 🟠 Booked (Orange)
+  | "OUT_ON_RENT" // 🔵 Out on rent (Blue)
+  | "RETURNED_CLEANING" // 🟣 Returned – cleaning pending (Purple)
+  | "DAMAGED_REPAIR" // 🔴 Damaged / Repair (Red)
+  | "UNAVAILABLE" // ⚫ Unavailable (Grey)
+  // Legacy aliases for backwards compatibility
+  | "RENTED"
   | "RESERVED"
   | "PREPARING"
-  | "RENTED"
   | "RETURN_RECEIVED"
   | "INSPECTION_PENDING"
   | "IN_LAUNDRY"
-  | "REPAIR_PENDING"
   | "UNDER_REPAIR"
+  | "REPAIR_PENDING"
   | "QUALITY_CHECK"
   | "DAMAGED"
   | "RETIRED";
@@ -57,19 +63,24 @@ export interface Product {
 }
 
 export interface GarmentUnit {
-  id: string; // SKU e.g. "BF-LH-001"
+  id: string; // SKU / Costume ID e.g. "LF-001"
+  costumeId?: string; // Alias e.g. "LF-001"
   productId: string;
   productName: string;
   category: ProductCategory;
   barcode: string;
-  size: "XS" | "S" | "M" | "L" | "XL" | "XXL" | "Free Size";
+  size: "XS" | "S" | "M" | "L" | "XL" | "XXL" | "Free Size" | "M / Adjustable" | string;
+  colour?: string; // e.g. "Red", "Ivory", "Royal Blue"
+  purchasePrice?: number; // e.g. 25000
   chest?: string;
   waist?: string;
   length?: string;
   blouseSize?: string;
-  storageLocation: string; // e.g. "Rack A-3, Bargarh Store"
+  storageLocation: string; // e.g. "Godown Rack A-01"
+  location?: string; // Alias for storageLocation e.g. "Godown Rack A-01"
   status: GarmentStatus;
-  conditionRating: "Pristine" | "Good" | "Minor Wear" | "Repairs Needed";
+  conditionRating: "Excellent" | "Pristine" | "Good" | "Minor Wear" | "Repairs Needed" | string;
+  condition?: string; // Alias e.g. "Excellent"
   rentalCount: number;
   lastRentedDate?: string;
   notes?: string;
@@ -102,26 +113,59 @@ export interface Booking {
   customerPhone: string;
   customerWhatsApp: string;
   customerCity: string;
+  customerAddress?: string;
   eventName: string; // e.g. "Sister's Wedding Reception"
   eventDate: string;
   pickupDate: string;
   returnDueDate: string;
   actualReturnDate?: string;
   items: BookingItem[];
+  costumeCode?: string; // Main costume ID e.g. "LF-001"
   rentalTotal: number;
   securityDepositTotal: number;
+  deliveryCharges?: number; // Delivery / shipping charges
   advancePaid: number;
   remainingRentalDue: number;
   status: BookingStatus;
   depositStatus: "HELD" | "PARTIALLY_REFUNDED" | "FULLY_REFUNDED" | "FORFEITED";
   damageDeduction: number;
+  cleaningDeduction?: number;
   lateFee: number;
+  lateDays?: number;
+  lateFeePercentage?: number; // 15% per day
   refundAmount: number;
+  netRefundCalculated?: number;
+  refundPaid?: boolean;
+  handoverDate?: string;
+  handoverCondition?: string; // Recorded at pickup/handover
   paymentMethod: "CASH" | "UPI" | "CARD" | "BANK_TRANSFER";
   notes?: string;
   createdAt: string;
   issuedByStaff?: string;
   receivedByStaff?: string;
+}
+
+export interface StitchingCareJob {
+  id: string;
+  costumeId: string;
+  costumeName: string;
+  customerName?: string;
+  tailorName: string;
+  outDate: string;
+  rcvDate?: string;
+  notes?: string;
+  status: "OUT" | "RECEIVED";
+}
+
+export interface DryCleanCareJob {
+  id: string;
+  costumeId: string;
+  costumeName: string;
+  vendorName: string;
+  outDate: string;
+  rcvDate?: string;
+  notes?: string;
+  status: "OUT" | "RECEIVED";
 }
 
 export interface Customer {

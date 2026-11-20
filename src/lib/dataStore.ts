@@ -14,6 +14,8 @@ import {
   PublicEnquiry,
   GarmentStatus,
   UserRole,
+  StitchingCareJob,
+  DryCleanCareJob,
 } from "@/types";
 import {
   INITIAL_PRODUCTS,
@@ -27,6 +29,8 @@ import {
   INITIAL_CASH_CLOSING,
   INITIAL_NOTIFICATIONS,
   INITIAL_ENQUIRIES,
+  INITIAL_STITCHING_CARE,
+  INITIAL_DRYCLEAN_CARE,
 } from "./mockData";
 
 const STORAGE_KEYS = {
@@ -42,6 +46,8 @@ const STORAGE_KEYS = {
   NOTIFICATIONS: "barnali_notifications",
   ENQUIRIES: "barnali_enquiries",
   CURRENT_ROLE: "barnali_current_role",
+  STITCHING: "barnali_stitching_care",
+  DRYCLEAN: "barnali_dryclean_care",
 };
 
 // Safe LocalStorage helpers
@@ -462,5 +468,170 @@ export const DataStore = {
     enquiries.unshift(newEnquiry);
     setStored(STORAGE_KEYS.ENQUIRIES, enquiries);
     return newEnquiry;
+  },
+
+  // --- CLIENT 5-STEP & INDIAN BOUTIQUE EXTENSIONS ---
+
+  // Delivery Date Alarms (4 Days & 3 Days Before Notification)
+  getDeliveryAlerts: (referenceDate = "2026-11-08") => {
+    const bookings = DataStore.getBookings();
+    const ref = new Date(referenceDate).getTime();
+    const dayMs = 24 * 60 * 60 * 1000;
+
+    const alerts4Days: Booking[] = [];
+    const alerts3Days: Booking[] = [];
+    const todayPickups: Booking[] = [];
+    const overdueReturns: (Booking & { calculatedLateDays: number; calculatedLateFee: number })[] = [];
+
+    bookings.forEach((b) => {
+      if (b.status === "CANCELLED" || b.status === "COMPLETED") return;
+
+      const pDate = new Date(b.pickupDate).getTime();
+      const diffDays = Math.round((pDate - ref) / dayMs);
+
+      if (diffDays === 4) {
+        alerts4Days.push(b);
+      } else if (diffDays === 3) {
+        alerts3Days.push(b);
+      } else if (diffDays === 0 && (b.status === "CONFIRMED" || b.status === "PICKUP_PENDING")) {
+        todayPickups.push(b);
+      }
+
+      // Check overdue returns
+      if (b.status === "OUT_ON_RENT") {
+        const rDate = new Date(b.returnDueDate).getTime();
+        const overDays = Math.round((ref - rDate) / dayMs);
+        if (overDays > 0) {
+          const lateFee = Math.round(b.rentalTotal * 0.15 * overDays);
+          overdueReturns.push({
+            ...b,
+            calculatedLateDays: overDays,
+            calculatedLateFee: lateFee,
+          });
+        }
+      }
+    });
+
+    return { alerts4Days, alerts3Days, todayPickups, overdueReturns };
+  },
+
+  // 5-Step Counter Return Processing with 15% late fee & deductions
+  settleReturn5Step: (
+    bookingId: string,
+    actualReturnDate: string,
+    damageCharge: number,
+    cleaningCharge: number,
+    returnNotes: string,
+    nextCare: "AVAILABLE" | "STITCHING" | "DRY_CLEAN"
+  ) => {
+    const bookings = DataStore.getBookings();
+    const bIndex = bookings.findIndex((b) => b.id === bookingId);
+    if (bIndex === -1) return { success: false, error: "Booking not found" };
+
+    const b = bookings[bIndex];
+    const dueDate = new Date(b.returnDueDate).getTime();
+    const actualDate = new Date(actualReturnDate).getTime();
+    const dayMs = 24 * 60 * 60 * 1000;
+    const lateDays = Math.max(0, Math.round((actualDate - dueDate) / dayMs));
+    const lateFee = lateDays > 0 ? Math.round(b.rentalTotal * 0.15 * lateDays) : 0;
+    const totalDeduction = lateFee + damageCharge + cleaningCharge;
+    const netRefund = Math.max(0, b.securityDepositTotal - totalDeduction);
+
+    b.status = "COMPLETED";
+    b.actualReturnDate = actualReturnDate;
+    b.lateDays = lateDays;
+    b.lateFee = lateFee;
+    b.damageDeduction = damageCharge;
+    b.cleaningDeduction = cleaningCharge;
+    b.refundAmount = netRefund;
+    b.netRefundCalculated = netRefund;
+    b.refundPaid = true;
+    b.depositStatus = netRefund === b.securityDepositTotal ? "FULLY_REFUNDED" : "PARTIALLY_REFUNDED";
+    b.notes = returnNotes || b.notes;
+
+    // Update garments
+    for (const item of b.items) {
+      if (nextCare === "STITCHING") {
+        DataStore.updateGarmentStatus(item.garmentUnitId, "DAMAGED_REPAIR", `Sent for stitching: ${returnNotes}`);
+        DataStore.addStitchingJob({
+          costumeId: item.garmentUnitId,
+          costumeName: item.productName,
+          customerName: b.customerName,
+          tailorName: "Master Salim (In-house Tailor)",
+          outDate: actualReturnDate,
+          notes: returnNotes || "Post-return fitting & seam repair",
+        });
+      } else if (nextCare === "DRY_CLEAN") {
+        DataStore.updateGarmentStatus(item.garmentUnitId, "RETURNED_CLEANING", `Sent for dry clean: ${returnNotes}`);
+        DataStore.addDryCleanJob({
+          costumeId: item.garmentUnitId,
+          costumeName: item.productName,
+          vendorName: "Maa Samleswari Dry Cleaners, Bargarh",
+          outDate: actualReturnDate,
+          notes: returnNotes || "Post-return standard wash/dry clean",
+        });
+      } else {
+        DataStore.updateGarmentStatus(item.garmentUnitId, "AVAILABLE", "Returned in excellent condition");
+      }
+    }
+
+    setStored(STORAGE_KEYS.BOOKINGS, bookings);
+    return { success: true, netRefund, lateDays, lateFee };
+  },
+
+  // Stitching Care Khata (Tailor Register)
+  getStitchingJobs: (): StitchingCareJob[] => {
+    return getStored<StitchingCareJob[]>(STORAGE_KEYS.STITCHING, INITIAL_STITCHING_CARE);
+  },
+  addStitchingJob: (job: Omit<StitchingCareJob, "id" | "status">): StitchingCareJob => {
+    const jobs = DataStore.getStitchingJobs();
+    const newJob: StitchingCareJob = {
+      ...job,
+      id: `STITCH-${String(jobs.length + 1).padStart(3, "0")}`,
+      status: "OUT",
+    };
+    jobs.unshift(newJob);
+    setStored(STORAGE_KEYS.STITCHING, jobs);
+    return newJob;
+  },
+  markStitchingReceived: (id: string, rcvDate: string) => {
+    const jobs = DataStore.getStitchingJobs();
+    const job = jobs.find((j) => j.id === id);
+    if (!job) return false;
+    job.status = "RECEIVED";
+    job.rcvDate = rcvDate;
+    setStored(STORAGE_KEYS.STITCHING, jobs);
+
+    // Costume returns to AVAILABLE (Green)
+    DataStore.updateGarmentStatus(job.costumeId, "AVAILABLE", "Stitching completed, back in stock");
+    return true;
+  },
+
+  // Dry Clean Care Khata (Washing Register)
+  getDryCleanJobs: (): DryCleanCareJob[] => {
+    return getStored<DryCleanCareJob[]>(STORAGE_KEYS.DRYCLEAN, INITIAL_DRYCLEAN_CARE);
+  },
+  addDryCleanJob: (job: Omit<DryCleanCareJob, "id" | "status">): DryCleanCareJob => {
+    const jobs = DataStore.getDryCleanJobs();
+    const newJob: DryCleanCareJob = {
+      ...job,
+      id: `DRY-${String(jobs.length + 1).padStart(3, "0")}`,
+      status: "OUT",
+    };
+    jobs.unshift(newJob);
+    setStored(STORAGE_KEYS.DRYCLEAN, jobs);
+    return newJob;
+  },
+  markDryCleanReceived: (id: string, rcvDate: string) => {
+    const jobs = DataStore.getDryCleanJobs();
+    const job = jobs.find((j) => j.id === id);
+    if (!job) return false;
+    job.status = "RECEIVED";
+    job.rcvDate = rcvDate;
+    setStored(STORAGE_KEYS.DRYCLEAN, jobs);
+
+    // Costume returns to AVAILABLE (Green)
+    DataStore.updateGarmentStatus(job.costumeId, "AVAILABLE", "Dry clean completed, back in stock");
+    return true;
   },
 };

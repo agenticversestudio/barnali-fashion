@@ -3,21 +3,21 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  TrendingUp,
   Shirt,
   CalendarCheck,
   AlertCircle,
-  Sparkles,
-  Wrench,
-  Wallet,
-  Clock,
-  ArrowUpRight,
-  PackageCheck,
-  RotateCcw,
   Plus,
   Phone,
-  MessageSquare,
-  ShieldCheck,
+  MessageCircle,
+  Clock,
+  Sparkles,
+  RotateCcw,
+  PackageCheck,
+  CheckCircle2,
+  CalendarDays,
+  ArrowRight,
+  MapPin,
+  AlertTriangle,
 } from "lucide-react";
 import { DataStore } from "@/lib/dataStore";
 import { formatINR, formatDate } from "@/lib/utils";
@@ -27,383 +27,406 @@ import { Booking, GarmentUnit } from "@/types";
 export default function DashboardPage() {
   const [garments, setGarments] = useState<GarmentUnit[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [selectedMonth, setSelectedMonth] = useState<string>("November 2026");
 
   useEffect(() => {
     setGarments(DataStore.getGarments());
     setBookings(DataStore.getBookings());
   }, []);
 
-  // Compute metrics
-  const totalGarments = garments.length;
-  const availableGarments = garments.filter((g) => g.status === "AVAILABLE").length;
-  const rentedGarments = garments.filter((g) => g.status === "RENTED").length;
-  const laundryGarments = garments.filter((g) => g.status === "IN_LAUNDRY").length;
-  const repairGarments = garments.filter((g) => g.status === "UNDER_REPAIR" || g.status === "REPAIR_PENDING").length;
-  const reservedGarments = garments.filter((g) => g.status === "RESERVED" || g.status === "PREPARING").length;
+  const alerts = DataStore.getDeliveryAlerts("2026-11-08");
 
-  const activeRentals = bookings.filter((b) => b.status === "OUT_ON_RENT");
-  const upcomingPickups = bookings.filter((b) => b.status === "CONFIRMED" || b.status === "PICKUP_PENDING");
-  const pendingReturns = bookings.filter((b) => b.status === "RETURN_RECEIVED");
+  // Status Counts for exact 6 states
+  const countAvailable = garments.filter((g) => g.status === "AVAILABLE").length;
+  const countBooked = garments.filter((g) => g.status === "BOOKED" || g.status === "RESERVED" || g.status === "PREPARING").length;
+  const countOutOnRent = garments.filter((g) => g.status === "OUT_ON_RENT" || g.status === "RENTED").length;
+  const countCleaning = garments.filter(
+    (g) => g.status === "RETURNED_CLEANING" || g.status === "RETURN_RECEIVED" || g.status === "IN_LAUNDRY"
+  ).length;
+  const countDamaged = garments.filter(
+    (g) => g.status === "DAMAGED_REPAIR" || g.status === "UNDER_REPAIR" || g.status === "REPAIR_PENDING"
+  ).length;
+  const countUnavailable = garments.filter((g) => g.status === "UNAVAILABLE" || g.status === "RETIRED").length;
 
-  // Overdue returns: returnDueDate < today and not completed
-  const todayStr = "2026-11-08";
-  const overdueBookings = bookings.filter(
-    (b) => b.status === "OUT_ON_RENT" && b.returnDueDate < todayStr
-  );
-
-  // Financial aggregates
-  const totalDepositsHeld = bookings
-    .filter((b) => b.depositStatus === "HELD")
-    .reduce((acc, b) => acc + b.securityDepositTotal, 0);
-
-  const totalRentalRevenue = bookings
-    .filter((b) => b.status !== "CANCELLED")
-    .reduce((acc, b) => acc + b.rentalTotal, 0);
+  // Calendar dates mock with costume codes mapped
+  const calendarDays = [
+    { day: 5, weekday: "Thu", bookings: [{ code: "SH-001", customer: "Rajesh M.", status: "OUT_ON_RENT" }] },
+    { day: 6, weekday: "Fri", bookings: [{ code: "LF-001", customer: "Sunita P.", status: "OUT_ON_RENT" }] },
+    { day: 7, weekday: "Sat", bookings: [{ code: "IW-001", customer: "Amit P.", status: "RETURNED_CLEANING" }] },
+    { day: 8, weekday: "Sun", isToday: true, bookings: [{ code: "IW-001", customer: "Amit P.", status: "PICKUP" }] },
+    { day: 9, weekday: "Mon", bookings: [{ code: "SH-001", customer: "Rajesh M. (Due)", status: "DUE_RETURN" }] },
+    { day: 10, weekday: "Tue", bookings: [{ code: "LF-001", customer: "Sunita P. (Due)", status: "DUE_RETURN" }] },
+    { day: 11, weekday: "Wed", is3DayAlert: true, bookings: [{ code: "GW-001", customer: "Priyanka D.", status: "BOOKED" }] },
+    { day: 12, weekday: "Thu", is4DayAlert: true, bookings: [{ code: "LF-002", customer: "Sunita P.", status: "BOOKED" }] },
+    { day: 13, weekday: "Fri", bookings: [{ code: "SR-001", customer: "Wedding Mehendi", status: "BOOKED" }] },
+    { day: 14, weekday: "Sat", bookings: [{ code: "LF-002", customer: "Wedding Barat", status: "BOOKED" }] },
+  ];
 
   return (
     <div className="space-y-6">
-      {/* Top Banner / Welcome */}
-      <div className="bg-gradient-to-r from-[#4B1835] via-[#5C1F42] to-[#3B1129] rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 bg-[radial-gradient(#B89558_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+      {/* Top Banner / Store Header */}
+      <div className="bg-gradient-to-r from-[#4B1835] via-[#5C1F42] to-[#3B1129] rounded-2xl p-6 text-white shadow-md relative overflow-hidden border border-[#D4B67F]/20">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[11px] font-bold tracking-widest text-[#D4B67F] uppercase">
-                Operations Command Center
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[11px] font-bold tracking-widest text-[#D4B67F] uppercase bg-black/30 px-2.5 py-0.5 rounded-full border border-[#D4B67F]/30">
+                Barnali Fashion — Bargarh, Odisha
               </span>
-              <span className="bg-[#D4B67F]/20 text-[#D4B67F] text-[10px] px-2 py-0.5 rounded-full font-semibold border border-[#D4B67F]/30">
-                Bargarh Flagship Store
-              </span>
+              <span className="text-xs text-[#D4B67F]/90">Ph: +91 7978256488</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-white">
-              Barnali Fashion Rental ERP
+              Daily Counter &amp; Delivery Alarm Board
             </h1>
-            <p className="text-sm text-[#F7F3EC]/80 mt-1 max-w-xl">
-              Live operational monitoring of wedding wear inventory, customer bookings, rental issue &amp; return cycles, laundry, and security deposits.
+            <p className="text-xs md:text-sm text-[#F7F3EC]/80 mt-1 max-w-2xl">
+              Automatic 4-Day &amp; 3-Day delivery notifications, booking calendar with costume codes, and 5-step rental counter.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <Link
-              href="/erp/bookings/new"
-              className="bg-[#B89558] hover:bg-[#A38248] text-[#27222A] font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2"
+              href="/erp/bookings"
+              className="bg-[#D4B67F] hover:bg-[#C2A166] text-[#27222A] font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2"
             >
               <Plus className="w-4 h-4 text-[#27222A]" />
-              <span>Create New Booking</span>
+              <span>5-Step Counter Order</span>
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Critical Overdue Banner if any */}
-      {overdueBookings.length > 0 && (
-        <div className="bg-rose-50 border-l-4 border-rose-600 p-4 rounded-xl shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
-            <div>
-              <div className="font-bold text-rose-900 text-sm">
-                Attention: {overdueBookings.length} Rental Return Overdue!
-              </div>
-              <div className="text-xs text-rose-700">
-                {overdueBookings.map((b) => (
-                  <span key={b.id} className="mr-3">
-                    <strong>{b.customerName}</strong> ({b.items[0]?.productName}) was due on {formatDate(b.returnDueDate)}.
-                  </span>
-                ))}
-              </div>
-            </div>
+      {/* --- DELIVERY DATE ALARMS SECTION (CLIENT EXACT REQUIREMENT) --- */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-[#8C6F3B]" />
+            <h2 className="text-sm font-bold uppercase tracking-wider text-[#27222A]">
+              Delivery Date Alarms (4 Days &amp; 3 Days Before Notifications)
+            </h2>
           </div>
-          <Link
-            href="/erp/operations/returns"
-            className="bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg shadow-xs transition-colors shrink-0"
-          >
-            Review Overdue &amp; Follow Up →
-          </Link>
-        </div>
-      )}
-
-      {/* Primary KPI Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Out on Rent */}
-        <div className="bg-white p-4 rounded-xl border border-[#EFE9DD] shadow-xs">
-          <div className="flex items-center justify-between text-gray-500 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">Out on Rent</span>
-            <div className="p-2 bg-purple-50 text-purple-700 rounded-lg">
-              <Shirt className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-bold text-[#27222A]">{rentedGarments} <span className="text-xs text-gray-400 font-normal">garments</span></div>
-          <div className="text-[11px] text-purple-700 font-medium mt-1">
-            Across {activeRentals.length} active customer bookings
-          </div>
+          <span className="text-[11px] text-gray-500 font-medium">Reference: Today (08 Nov 2026)</span>
         </div>
 
-        {/* Ready Available Stock */}
-        <div className="bg-white p-4 rounded-xl border border-[#EFE9DD] shadow-xs">
-          <div className="flex items-center justify-between text-gray-500 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">Ready in Store</span>
-            <div className="p-2 bg-emerald-50 text-emerald-700 rounded-lg">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-bold text-emerald-700">{availableGarments} <span className="text-xs text-gray-400 font-normal">/ {totalGarments} units</span></div>
-          <div className="text-[11px] text-gray-500 font-medium mt-1">
-            {reservedGarments} reserved for upcoming events
-          </div>
-        </div>
-
-        {/* Laundry & Repairs */}
-        <div className="bg-white p-4 rounded-xl border border-[#EFE9DD] shadow-xs">
-          <div className="flex items-center justify-between text-gray-500 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">In Process (Wash/Tailor)</span>
-            <div className="p-2 bg-cyan-50 text-cyan-700 rounded-lg">
-              <Sparkles className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-bold text-[#27222A]">{laundryGarments + repairGarments} <span className="text-xs text-gray-400 font-normal">units</span></div>
-          <div className="text-[11px] text-cyan-700 font-medium mt-1">
-            {laundryGarments} at Dry Cleaners • {repairGarments} with Tailor
-          </div>
-        </div>
-
-        {/* Security Deposits Held */}
-        <div className="bg-white p-4 rounded-xl border border-[#EFE9DD] shadow-xs">
-          <div className="flex items-center justify-between text-gray-500 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">Deposits Held (Vault)</span>
-            <div className="p-2 bg-amber-50 text-amber-700 rounded-lg">
-              <Wallet className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-bold text-[#B89558]">{formatINR(totalDepositsHeld)}</div>
-          <div className="text-[11px] text-gray-500 font-medium mt-1">
-            Strictly refundable liability (separate from revenue)
-          </div>
-        </div>
-      </div>
-
-      {/* Main Operational Split: Upcoming Pickups & Returns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left: Upcoming Pickups & Deliveries */}
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-5 shadow-xs">
-          <div className="flex items-center justify-between pb-3 border-b border-[#EFE9DD]">
-            <div className="flex items-center gap-2">
-              <PackageCheck className="w-4 h-4 text-[#4B1835]" />
-              <h2 className="font-bold text-gray-900 text-sm">Upcoming Pickups &amp; Issues</h2>
-            </div>
-            <Link href="/erp/operations/pickup" className="text-xs text-[#B89558] hover:underline font-semibold">
-              Issue Counter →
-            </Link>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {upcomingPickups.length === 0 ? (
-              <div className="text-center py-6 text-xs text-gray-400">No scheduled pickups pending.</div>
-            ) : (
-              upcomingPickups.map((b) => (
-                <div
-                  key={b.id}
-                  className="p-3 bg-[#FBF9F5] rounded-xl border border-[#E8DFD1] flex items-center justify-between text-xs"
-                >
-                  <div>
-                    <div className="flex items-center gap-2 font-bold text-gray-900">
-                      <span>{b.customerName}</span>
-                      <span className="text-[10px] text-gray-400 font-mono">({b.customerPhone})</span>
-                    </div>
-                    <div className="text-gray-600 mt-0.5">
-                      {b.items.map((i) => i.productName).join(", ")}
-                    </div>
-                    <div className="text-[11px] text-[#4B1835] font-semibold mt-1 flex items-center gap-2">
-                      <Clock className="w-3 h-3 text-[#B89558]" />
-                      Pickup Date: {formatDate(b.pickupDate)} • Event: {b.eventName}
-                    </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* 4-Day Before Delivery Alert */}
+          {alerts.alerts4Days.map((alert) => (
+            <div
+              key={alert.id}
+              className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 shadow-xs relative overflow-hidden"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 font-bold text-sm shadow-xs">
+                    4D
                   </div>
-
-                  <div className="text-right shrink-0">
-                    <StatusBadge status={b.status} />
-                    <div className="text-[11px] text-gray-500 mt-1 font-mono">
-                      Rem. Due: {formatINR(b.remainingRentalDue)}
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-black uppercase tracking-wider bg-amber-200 text-amber-900 px-2 py-0.5 rounded-md">
+                        4 Days Before Delivery Alert
+                      </span>
+                      <span className="text-xs text-amber-800 font-semibold">Delivery: 12 Nov 2026</span>
+                    </div>
+                    <h3 className="text-base font-bold text-[#27222A] mt-1">{alert.customerName}</h3>
+                    <p className="text-xs text-gray-700">
+                      Costume: <strong className="text-[#4B1835]">{alert.costumeCode}</strong> — {alert.items[0]?.productName}
+                    </p>
+                    <p className="text-[11px] text-gray-600 mt-0.5">
+                      Event Date: {alert.eventDate} ({alert.eventName}) | Advance: {formatINR(alert.advancePaid)}
+                    </p>
+                    <div className="mt-2 text-[11px] font-medium text-amber-950 bg-amber-100/80 px-2.5 py-1 rounded-lg border border-amber-200">
+                      🎯 <strong>Action Required:</strong> Call customer for blouse &amp; waist fitting trial before final delivery!
                     </div>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
-        </div>
+              </div>
 
-        {/* Right: Active Rentals & Expected Returns */}
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-5 shadow-xs">
-          <div className="flex items-center justify-between pb-3 border-b border-[#EFE9DD]">
-            <div className="flex items-center gap-2">
-              <RotateCcw className="w-4 h-4 text-[#4B1835]" />
-              <h2 className="font-bold text-gray-900 text-sm">Current Active Rentals (Return Due Tracking)</h2>
-            </div>
-            <Link href="/erp/operations/returns" className="text-xs text-[#B89558] hover:underline font-semibold">
-              Return Desk →
-            </Link>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {activeRentals.length === 0 ? (
-              <div className="text-center py-6 text-xs text-gray-400">No active garments currently out.</div>
-            ) : (
-              activeRentals.map((b) => {
-                const isOverdue = b.returnDueDate < todayStr;
-                return (
-                  <div
-                    key={b.id}
-                    className={`p-3 rounded-xl border flex items-center justify-between text-xs transition-colors ${
-                      isOverdue
-                        ? "bg-rose-50/70 border-rose-200"
-                        : "bg-[#FBF9F5] border-[#E8DFD1]"
-                    }`}
+              {/* Action Buttons */}
+              <div className="mt-3.5 pt-3 border-t border-amber-200 flex items-center justify-between gap-2">
+                <div className="text-xs font-mono text-gray-700 flex items-center gap-1">
+                  <Phone className="w-3.5 h-3.5 text-amber-700" />
+                  <span>+91 {alert.customerPhone}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`https://wa.me/91${alert.customerPhone}?text=Namaste%20${encodeURIComponent(
+                      alert.customerName
+                    )},%20Barnali%20Fashion%20se%20aapka%20Costume%20${alert.costumeCode}%20trial%20ready%20hai.%20Kripya%20fitting%20ke%20liye%20aayein.`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-xs"
                   >
-                    <div>
-                      <div className="flex items-center gap-2 font-bold text-gray-900">
-                        <span>{b.customerName}</span>
-                        {isOverdue && (
-                          <span className="bg-rose-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold uppercase">
-                            Overdue
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-gray-600 mt-0.5">
-                        {b.items.map((i) => `${i.productName} (${i.garmentUnitId})`).join(", ")}
-                      </div>
-                      <div className="text-[11px] mt-1 flex items-center gap-2">
-                        <span className={isOverdue ? "text-rose-700 font-bold" : "text-gray-600 font-medium"}>
-                          Return Due: {formatDate(b.returnDueDate)}
-                        </span>
-                        <span>• Deposit Held: {formatINR(b.securityDepositTotal)}</span>
-                      </div>
-                    </div>
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>WhatsApp Alert</span>
+                  </a>
+                  <a
+                    href={`tel:+91${alert.customerPhone}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-colors shadow-xs"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Call</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
 
+          {/* 3-Day Before Delivery Alert */}
+          {alerts.alerts3Days.map((alert) => (
+            <div
+              key={alert.id}
+              className="bg-sky-50 border-2 border-sky-300 rounded-2xl p-4 shadow-xs relative overflow-hidden"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center shrink-0 font-bold text-sm shadow-xs">
+                    3D
+                  </div>
+                  <div>
                     <div className="flex items-center gap-2">
-                      <a
-                        href={`https://wa.me/91${b.customerWhatsApp}?text=Namaste%20${encodeURIComponent(
-                          b.customerName
-                        )},%20this%20is%20a%20gentle%20reminder%20from%20Barnali%20Fashion%20Bargarh%20regarding%20the%20scheduled%20return%20of%20your%20rental%20garment.`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg transition-colors"
-                        title="Send WhatsApp Reminder"
-                      >
-                        <MessageSquare className="w-3.5 h-3.5" />
-                      </a>
-                      <Link
-                        href={`/erp/operations/returns?bookingId=${b.id}`}
-                        className="bg-[#4B1835] hover:bg-[#320F23] text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-lg shadow-xs"
-                      >
-                        Check-in
-                      </Link>
+                      <span className="text-[11px] font-black uppercase tracking-wider bg-sky-200 text-sky-900 px-2 py-0.5 rounded-md">
+                        3 Days Before Delivery Alert
+                      </span>
+                      <span className="text-xs text-sky-800 font-semibold">Delivery: 11 Nov 2026</span>
+                    </div>
+                    <h3 className="text-base font-bold text-[#27222A] mt-1">{alert.customerName}</h3>
+                    <p className="text-xs text-gray-700">
+                      Costume: <strong className="text-[#4B1835]">{alert.costumeCode}</strong> — {alert.items[0]?.productName}
+                    </p>
+                    <p className="text-[11px] text-gray-600 mt-0.5">
+                      Event Date: {alert.eventDate} ({alert.eventName}) | Advance: {formatINR(alert.advancePaid)}
+                    </p>
+                    <div className="mt-2 text-[11px] font-medium text-sky-950 bg-sky-100/80 px-2.5 py-1 rounded-lg border border-sky-200">
+                      📦 <strong>Action Required:</strong> Final steam pressing, quality check &amp; pack in dust bag ready for dispatch!
                     </div>
                   </div>
-                );
-              })
-            )}
-          </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-3.5 pt-3 border-t border-sky-200 flex items-center justify-between gap-2">
+                <div className="text-xs font-mono text-gray-700 flex items-center gap-1">
+                  <Phone className="w-3.5 h-3.5 text-sky-700" />
+                  <span>+91 {alert.customerPhone}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`https://wa.me/91${alert.customerPhone}?text=Namaste%20${encodeURIComponent(
+                      alert.customerName
+                    )},%20Barnali%20Fashion%20se%20aapka%20outfit%20${alert.costumeCode}%20packed%20ready%20hai%20dispatch%20ke%20liye.`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-xs"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>WhatsApp Alert</span>
+                  </a>
+                  <a
+                    href={`tel:+91${alert.customerPhone}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-700 hover:bg-sky-800 text-white text-xs font-bold transition-colors shadow-xs"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Call</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Stock Health & Operational Workflows Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Category Distribution */}
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-5 shadow-xs">
-          <h3 className="font-bold text-gray-900 text-sm mb-3">Inventory Status Breakdown</h3>
-          <div className="space-y-2 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-emerald-800 font-medium">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Available / Pristine
-              </span>
-              <span className="font-bold">{availableGarments} units</span>
+      {/* --- OVERDUE RETURN WITH 15% LATE FEE PENALTY ALERT --- */}
+      {alerts.overdueReturns.length > 0 && (
+        <div className="bg-rose-50 border-2 border-rose-300 rounded-2xl p-4 shadow-xs">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="p-2.5 bg-rose-500 text-white rounded-xl">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider bg-rose-200 text-rose-900 px-2 py-0.5 rounded-md">
+                    Overdue Return — 15% Late Fee Applied
+                  </span>
+                  <span className="text-xs font-semibold text-rose-700">
+                    {alerts.overdueReturns[0].calculatedLateDays} Days Late
+                  </span>
+                </div>
+                <h4 className="text-sm font-bold text-gray-900 mt-1">
+                  {alerts.overdueReturns[0].customerName} (+91 {alerts.overdueReturns[0].customerPhone})
+                </h4>
+                <p className="text-xs text-gray-700">
+                  Costume: <strong>{alerts.overdueReturns[0].costumeCode}</strong> | Due Date: {alerts.overdueReturns[0].returnDueDate}
+                </p>
+                <div className="mt-1 text-xs text-rose-900 font-semibold">
+                  Late Fee: {formatINR(alerts.overdueReturns[0].calculatedLateFee)} (15% per day on rental of {formatINR(alerts.overdueReturns[0].rentalTotal)})
+                  — Deducted from {formatINR(alerts.overdueReturns[0].securityDepositTotal)} Security Deposit.
+                </div>
+              </div>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-purple-800 font-medium">
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Out on Rent
-              </span>
-              <span className="font-bold">{rentedGarments} units</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-cyan-800 font-medium">
-                <span className="w-2.5 h-2.5 rounded-full bg-cyan-500"></span> In Dry Clean / Laundry
-              </span>
-              <span className="font-bold">{laundryGarments} units</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-amber-800 font-medium">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Reserved for Bookings
-              </span>
-              <span className="font-bold">{reservedGarments} units</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-orange-800 font-medium">
-                <span className="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Under Tailor Repair
-              </span>
-              <span className="font-bold">{repairGarments} units</span>
-            </div>
-          </div>
-          <div className="mt-4 pt-3 border-t border-[#EFE9DD]">
+
             <Link
-              href="/erp/inventory"
-              className="text-xs text-[#4B1835] hover:text-[#B89558] font-bold flex items-center justify-between"
+              href="/erp/bookings"
+              className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2 rounded-xl shrink-0 text-center shadow-xs"
             >
-              <span>Explore All Garments &amp; SKUs</span>
-              <ArrowUpRight className="w-4 h-4" />
+              Process Return &amp; Refund
             </Link>
           </div>
         </div>
+      )}
 
-        {/* Laundry & Care Summary */}
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-5 shadow-xs">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-gray-900 text-sm">Laundry &amp; Sanitization</h3>
-            <Link href="/erp/operations/laundry" className="text-xs text-[#B89558] hover:underline font-semibold">
-              Manage →
-            </Link>
-          </div>
-          <p className="text-xs text-gray-600 leading-relaxed mb-4">
-            Garments are automatically quarantined after return and routed through partner vendors like Maa Samleswari Dry Cleaners before returning to available status.
-          </p>
-          <div className="bg-[#FAF5EB] p-3 rounded-xl border border-[#E8DFD1] text-xs">
-            <div className="flex justify-between font-bold text-gray-800">
-              <span>Next Expected Return:</span>
-              <span className="text-[#4B1835]">09 Nov (Tomorrow)</span>
-            </div>
-            <div className="text-[11px] text-gray-500 mt-1">
-              Unit BF-LH-003 (Royal Zardozi Crimson Lehenga)
-            </div>
-          </div>
+      {/* --- 6 EXACT COSTUME STATUS CARDS --- */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-[#8C6F3B]">
+            Costumes by Exact 6 States (Total: {garments.length} Items)
+          </h2>
+          <Link href="/erp/inventory" className="text-xs text-[#4B1835] hover:underline font-semibold">
+            View All Stock &rarr;
+          </Link>
         </div>
 
-        {/* Financial Snapshot */}
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-5 shadow-xs">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-gray-900 text-sm">Financial Snapshot</h3>
-            <Link href="/erp/billing/cash-closing" className="text-xs text-[#B89558] hover:underline font-semibold">
-              Cash Closing →
-            </Link>
-          </div>
-          <div className="space-y-2 text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <Link
+            href="/erp/inventory?status=AVAILABLE"
+            className="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl hover:shadow-sm transition-all"
+          >
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Total Rental Turnover:</span>
-              <span className="font-bold text-gray-900">{formatINR(totalRentalRevenue)}</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span className="text-lg font-bold text-emerald-900">{countAvailable}</span>
             </div>
+            <div className="text-xs font-bold text-emerald-900 mt-1">Available</div>
+            <div className="text-[10px] text-emerald-700">Ready in Godown</div>
+          </Link>
+
+          <Link
+            href="/erp/inventory?status=BOOKED"
+            className="p-3 bg-amber-50/80 border border-amber-200 rounded-xl hover:shadow-sm transition-all"
+          >
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Active Deposit Liability:</span>
-              <span className="font-bold text-[#B89558]">{formatINR(totalDepositsHeld)}</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+              <span className="text-lg font-bold text-amber-900">{countBooked}</span>
             </div>
+            <div className="text-xs font-bold text-amber-900 mt-1">Booked</div>
+            <div className="text-[10px] text-amber-700">Reserved for wedding</div>
+          </Link>
+
+          <Link
+            href="/erp/inventory?status=OUT_ON_RENT"
+            className="p-3 bg-blue-50/80 border border-blue-200 rounded-xl hover:shadow-sm transition-all"
+          >
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Total Completed Bookings:</span>
-              <span className="font-bold text-emerald-700">
-                {bookings.filter((b) => b.status === "COMPLETED").length}
-              </span>
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+              <span className="text-lg font-bold text-blue-900">{countOutOnRent}</span>
+            </div>
+            <div className="text-xs font-bold text-blue-900 mt-1">Out on rent</div>
+            <div className="text-[10px] text-blue-700">With customer</div>
+          </Link>
+
+          <Link
+            href="/erp/operations/laundry"
+            className="p-3 bg-purple-50/80 border border-purple-200 rounded-xl hover:shadow-sm transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <span className="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+              <span className="text-lg font-bold text-purple-900">{countCleaning}</span>
+            </div>
+            <div className="text-xs font-bold text-purple-900 mt-1">Cleaning</div>
+            <div className="text-[10px] text-purple-700">Washing pending</div>
+          </Link>
+
+          <Link
+            href="/erp/operations/laundry"
+            className="p-3 bg-rose-50/80 border border-rose-200 rounded-xl hover:shadow-sm transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
+              <span className="text-lg font-bold text-rose-900">{countDamaged}</span>
+            </div>
+            <div className="text-xs font-bold text-rose-900 mt-1">Damaged / Repair</div>
+            <div className="text-[10px] text-rose-700">With tailor</div>
+          </Link>
+
+          <Link
+            href="/erp/inventory?status=UNAVAILABLE"
+            className="p-3 bg-gray-50 border border-gray-200 rounded-xl hover:shadow-sm transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <span className="w-2.5 h-2.5 rounded-full bg-gray-500"></span>
+              <span className="text-lg font-bold text-gray-900">{countUnavailable}</span>
+            </div>
+            <div className="text-xs font-bold text-gray-900 mt-1">Unavailable</div>
+            <div className="text-[10px] text-gray-600">Not for rent</div>
+          </Link>
+        </div>
+      </div>
+
+      {/* --- CALENDAR WITH COSTUME CODES (CLIENT REQUIREMENT) --- */}
+      <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#EFE9DD]">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="w-5 h-5 text-[#8C6F3B]" />
+            <div>
+              <h2 className="text-base font-serif font-bold text-[#27222A]">
+                Costume Booking Calendar ({selectedMonth})
+              </h2>
+              <p className="text-xs text-gray-500">
+                All booking dates mapped with Costume IDs (Anti-double-booking view)
+              </p>
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-[#EFE9DD] flex items-center justify-between text-xs">
-            <span className="text-gray-500">Shop Daily Closing:</span>
-            <span className="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded-full font-bold text-[10px] border border-emerald-200">
-              Yesterday Balanced
-            </span>
-          </div>
+
+          <Link
+            href="/erp/calendar"
+            className="text-xs font-bold text-[#4B1835] hover:underline flex items-center gap-1"
+          >
+            <span>Full Month Grid</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {/* 10-Day Strip showing Costume Codes */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2">
+          {calendarDays.map((cd) => (
+            <div
+              key={cd.day}
+              className={`p-2.5 rounded-xl border text-center transition-all ${
+                cd.isToday
+                  ? "bg-[#4B1835] text-white border-[#4B1835] shadow-xs"
+                  : cd.is4DayAlert
+                  ? "bg-amber-50 border-amber-300"
+                  : cd.is3DayAlert
+                  ? "bg-sky-50 border-sky-300"
+                  : "bg-[#FBF9F5] border-[#EFE9DD]"
+              }`}
+            >
+              <div className={`text-[10px] uppercase font-bold ${cd.isToday ? "text-[#D4B67F]" : "text-gray-500"}`}>
+                {cd.weekday}
+              </div>
+              <div className={`text-lg font-serif font-black ${cd.isToday ? "text-white" : "text-[#27222A]"}`}>
+                {cd.day}
+              </div>
+
+              {/* Badges for costume codes */}
+              <div className="mt-2 space-y-1">
+                {cd.bookings.map((b, i) => (
+                  <div
+                    key={i}
+                    className={`text-[9px] font-mono font-bold py-0.5 px-1 rounded-sm truncate ${
+                      cd.isToday
+                        ? "bg-emerald-500 text-white"
+                        : b.status === "OUT_ON_RENT"
+                        ? "bg-blue-100 text-blue-900 border border-blue-200"
+                        : b.status === "DUE_RETURN"
+                        ? "bg-rose-100 text-rose-900 border border-rose-200"
+                        : "bg-amber-100 text-amber-900 border border-amber-200"
+                    }`}
+                    title={`${b.code} - ${b.customer}`}
+                  >
+                    {b.code}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
