@@ -133,7 +133,7 @@ export function ErpHeader() {
 
   return (
     <>
-      <header className="h-14 md:h-16 bg-white border-b border-[#E2E8F0] px-3.5 md:px-6 flex items-center justify-between sticky top-0 z-30 shadow-[0_1px_2px_rgba(0,0,0,0.03)] select-none">
+      <header className="h-14 md:h-16 bg-white border-b border-[#E6E4DF] px-3.5 md:px-6 flex items-center justify-between sticky top-0 z-30 shadow-[0_1px_2px_rgba(0,0,0,0.03)] select-none">
         {/* ========================================================= */}
         {/* MOBILE STICKY TOP BAR: EXACT 3 CONTROLS MAX (< 768px)     */}
         {/* ========================================================= */}

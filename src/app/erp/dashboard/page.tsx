@@ -142,12 +142,12 @@ export default function DashboardPage() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* 4-Day Before Delivery Alert */}
           {alerts.alerts4Days.map((alert) => (
             <div
               key={alert.id}
-              className="bg-white border-2 border-amber-200/80 hover:border-amber-300 rounded-xl p-3.5 shadow-2xs transition-colors flex flex-col justify-between gap-2.5"
+              className="bg-white border-2 border-amber-300 rounded-xl p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-colors flex flex-col justify-between gap-2.5"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -158,7 +158,7 @@ export default function DashboardPage() {
                     <span className="font-mono font-bold text-xs bg-slate-900 text-white px-2 py-0.5 rounded">
                       {alert.costumeCode}
                     </span>
-                    <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded">
+                    <span className="text-[10px] font-bold text-amber-900 bg-amber-50 border border-amber-300 px-1.5 py-0.2 rounded">
                       Trial Due: 4 Days Before
                     </span>
                   </div>
@@ -171,12 +171,12 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Customer Address & Delivery Date */}
-                  <div className="mt-2 space-y-1 text-[11px] text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-200/60">
+                  <div className="mt-2 space-y-1 text-[11px] text-slate-700 bg-[#FAF9F6] p-2.5 rounded-lg border border-[#EFECE6]">
                     <div className="flex items-center gap-1.5">
                       <CalendarDays className="w-3.5 h-3.5 text-[#6B1D2F] shrink-0" />
                       <span>
                         Delivery Date:{" "}
-                        <strong className="text-slate-900">{alert.pickupDate}</strong>
+                        <strong className="text-slate-900 font-semibold">{alert.pickupDate}</strong>
                       </span>
                     </div>
                     <div className="flex items-start gap-1.5">
@@ -190,10 +190,10 @@ export default function DashboardPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-between pt-1 border-t border-slate-100 gap-2">
+              <div className="flex items-center justify-between pt-2 border-t border-[#EFECE6] gap-2">
                 <button
                   onClick={() => setSelectedAlert(alert)}
-                  className="px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-100 rounded-lg transition-colors"
+                  className="h-8 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors"
                 >
                   Full Details
                 </button>
@@ -205,15 +205,15 @@ export default function DashboardPage() {
                     )},%20Barnali%20Fashion%20Bargarh%20se%20aapka%20costume%20${alert.costumeCode}%20trial%20ready%20hai.%20Delivery%20date:%20${alert.pickupDate}.`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 text-xs font-semibold flex items-center gap-1 transition-colors"
+                    className="h-8 px-3 rounded-lg bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                   >
                     <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
                     <span>WhatsApp</span>
                   </a>
                   <a
                     href={`tel:+91${alert.customerPhone}`}
-                    className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
-                    title="Call"
+                    className="h-8 w-8 rounded-lg bg-white hover:bg-slate-50 border border-[#E6E4DF] text-slate-700 flex items-center justify-center transition-colors"
+                    title="Call Customer"
                   >
                     <Phone className="w-3.5 h-3.5" />
                   </a>
@@ -226,7 +226,7 @@ export default function DashboardPage() {
           {alerts.alerts3Days.map((alert) => (
             <div
               key={alert.id}
-              className="bg-white border-2 border-blue-200/80 hover:border-blue-300 rounded-xl p-3.5 shadow-2xs transition-colors flex flex-col justify-between gap-2.5"
+              className="bg-white border-2 border-blue-300 rounded-xl p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-colors flex flex-col justify-between gap-2.5"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -237,7 +237,7 @@ export default function DashboardPage() {
                     <span className="font-mono font-bold text-xs bg-slate-900 text-white px-2 py-0.5 rounded">
                       {alert.costumeCode}
                     </span>
-                    <span className="text-[10px] font-bold text-blue-800 bg-blue-50 border border-blue-200 px-1.5 py-0.2 rounded">
+                    <span className="text-[10px] font-bold text-blue-900 bg-blue-50 border border-blue-300 px-1.5 py-0.2 rounded">
                       Packing Ready: 3 Days Before
                     </span>
                   </div>
@@ -250,12 +250,12 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Customer Address & Delivery Date */}
-                  <div className="mt-2 space-y-1 text-[11px] text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-200/60">
+                  <div className="mt-2 space-y-1 text-[11px] text-slate-700 bg-[#FAF9F6] p-2.5 rounded-lg border border-[#EFECE6]">
                     <div className="flex items-center gap-1.5">
                       <CalendarDays className="w-3.5 h-3.5 text-[#6B1D2F] shrink-0" />
                       <span>
                         Delivery Date:{" "}
-                        <strong className="text-slate-900">{alert.pickupDate}</strong>
+                        <strong className="text-slate-900 font-semibold">{alert.pickupDate}</strong>
                       </span>
                     </div>
                     <div className="flex items-start gap-1.5">
@@ -269,10 +269,10 @@ export default function DashboardPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-between pt-1 border-t border-slate-100 gap-2">
+              <div className="flex items-center justify-between pt-2 border-t border-[#EFECE6] gap-2">
                 <button
                   onClick={() => setSelectedAlert(alert)}
-                  className="px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-100 rounded-lg transition-colors"
+                  className="h-8 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors"
                 >
                   Full Details
                 </button>
@@ -284,15 +284,15 @@ export default function DashboardPage() {
                     )},%20Barnali%20Fashion%20se%20aapka%20costume%20${alert.costumeCode}%20packing%20ready%20hai.%20Delivery%20date:%20${alert.pickupDate}.`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 text-xs font-semibold flex items-center gap-1 transition-colors"
+                    className="h-8 px-3 rounded-lg bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                   >
                     <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
                     <span>WhatsApp</span>
                   </a>
                   <a
                     href={`tel:+91${alert.customerPhone}`}
-                    className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
-                    title="Call"
+                    className="h-8 w-8 rounded-lg bg-white hover:bg-slate-50 border border-[#E6E4DF] text-slate-700 flex items-center justify-center transition-colors"
+                    title="Call Customer"
                   >
                     <Phone className="w-3.5 h-3.5" />
                   </a>
@@ -306,15 +306,15 @@ export default function DashboardPage() {
       {/* ========================================================= */}
       {/* 2. TODAY'S PENDING WORK (OVERDUE RETURNS & HANDOVERS)      */}
       {/* ========================================================= */}
-      <div className="bg-white border border-[#E2E8F0] rounded-xl p-3.5 md:p-5 shadow-2xs space-y-2.5">
-        <div className="flex items-center justify-between pb-1.5 border-b border-slate-100">
+      <div className="bg-white border border-[#E6E4DF] rounded-xl p-3.5 md:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-2.5">
+        <div className="flex items-center justify-between pb-1.5 border-b border-[#EFECE6]">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
             <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
               Today&apos;s Pending Actions (Bargarh Studio)
             </h2>
           </div>
-          <span className="text-[10px] text-slate-400 font-medium">Sun, 08 Nov</span>
+          <span className="text-[10px] text-slate-500 font-medium">Sun, 08 Nov</span>
         </div>
 
         <div className="space-y-2">
@@ -326,7 +326,7 @@ export default function DashboardPage() {
                   <span className="font-bold text-slate-900">
                     {alerts.overdueReturns[0].customerName}
                   </span>
-                  <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-1.5 py-0.2 rounded">
+                  <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.2 rounded border border-rose-300">
                     {alerts.overdueReturns[0].calculatedLateDays}d overdue
                   </span>
                 </div>
@@ -336,7 +336,7 @@ export default function DashboardPage() {
                     {alerts.overdueReturns[0].costumeCode}
                   </strong>{" "}
                   · 15% Late Fee:{" "}
-                  <strong className="text-rose-700">
+                  <strong className="text-rose-800">
                     {formatINR(alerts.overdueReturns[0].calculatedLateFee)}
                   </strong>
                 </div>
@@ -344,7 +344,7 @@ export default function DashboardPage() {
 
               <button
                 onClick={() => handleAction("return", alerts.overdueReturns[0].id)}
-                className="shrink-0 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg shadow-2xs text-[11px] transition-colors"
+                className="shrink-0 px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white font-bold rounded-lg shadow-2xs text-[11px] transition-colors"
               >
                 Return &amp; Refund
               </button>
@@ -352,11 +352,11 @@ export default function DashboardPage() {
           )}
 
           {/* Handover Ready Action Row */}
-          <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between gap-3 text-xs">
+          <div className="p-3 bg-[#FAF9F6] border border-[#EFECE6] rounded-xl flex items-center justify-between gap-3 text-xs">
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="font-bold text-slate-900">Amit Patel</span>
-                <span className="text-[10px] font-medium text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.2 rounded">
+                <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-300 px-1.5 py-0.2 rounded">
                   Handover Due
                 </span>
               </div>
@@ -368,18 +368,18 @@ export default function DashboardPage() {
 
             <button
               onClick={() => handleAction("handover", "BF-BK-2026-084")}
-              className="shrink-0 px-3 py-1.5 bg-[#6B1D2F] hover:bg-[#551624] text-white font-bold rounded-lg shadow-2xs text-[11px] transition-colors"
+              className="shrink-0 px-3.5 py-1.5 bg-[#6B1D2F] hover:bg-[#551624] text-white font-bold rounded-lg shadow-xs text-[11px] transition-colors"
             >
               Handover
             </button>
           </div>
 
           {/* Care / Tailoring Follow-up Action Row */}
-          <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between gap-3 text-xs">
+          <div className="p-3 bg-[#FAF9F6] border border-[#EFECE6] rounded-xl flex items-center justify-between gap-3 text-xs">
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="font-bold text-slate-900">Master Salim (Tailor)</span>
-                <span className="text-[10px] font-medium text-purple-800 bg-purple-50 border border-purple-200/60 px-1.5 py-0.2 rounded">
+                <span className="text-[10px] font-semibold text-purple-800 bg-purple-50 border border-purple-300 px-1.5 py-0.2 rounded">
                   Fitting Ready
                 </span>
               </div>
@@ -391,7 +391,7 @@ export default function DashboardPage() {
 
             <button
               onClick={() => handleAction("care")}
-              className="shrink-0 px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold rounded-lg text-[11px] transition-colors"
+              className="shrink-0 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-800 border border-[#E6E4DF] font-semibold rounded-lg text-[11px] transition-colors shadow-2xs"
             >
               Mark Rcv
             </button>
@@ -402,7 +402,7 @@ export default function DashboardPage() {
       {/* ========================================================= */}
       {/* 3. CALENDAR VIEW OF BOOKED DATES WITH COSTUME CODES       */}
       {/* ========================================================= */}
-      <div className="bg-white border border-[#E2E8F0] rounded-xl p-3.5 md:p-5 shadow-2xs space-y-2.5">
+      <div className="bg-white border border-[#E6E4DF] rounded-xl p-3.5 md:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <CalendarDays className="w-4 h-4 text-slate-600" />
@@ -430,7 +430,7 @@ export default function DashboardPage() {
                   ? "bg-amber-50/70 border-amber-300"
                   : cd.alert === "3d"
                   ? "bg-blue-50/70 border-blue-300"
-                  : "bg-slate-50/70 border-slate-200"
+                  : "bg-[#FAF9F6] border-[#EFECE6]"
               }`}
             >
               <div
@@ -455,7 +455,7 @@ export default function DashboardPage() {
                     className={`text-[8px] font-mono font-bold py-0.5 px-0.5 rounded truncate ${
                       cd.isToday
                         ? "bg-white/20 text-white"
-                        : "bg-white border border-slate-200 text-[#6B1D2F]"
+                        : "bg-white border border-[#E6E4DF] text-[#6B1D2F]"
                     }`}
                     title={`${b.code} - ${b.customer}`}
                   >
@@ -471,8 +471,8 @@ export default function DashboardPage() {
       {/* ========================================================= */}
       {/* 4. STOCK SUMMARY (6 EXACT STATES WITH COLOUR DOTS)        */}
       {/* ========================================================= */}
-      <div className="bg-white border border-[#E2E8F0] rounded-xl p-3.5 md:p-5 shadow-2xs space-y-2.5">
-        <div className="flex items-center justify-between pb-1.5 border-b border-slate-100">
+      <div className="bg-white border border-[#E6E4DF] rounded-xl p-3.5 md:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-2.5">
+        <div className="flex items-center justify-between pb-1.5 border-b border-[#EFECE6]">
           <div className="flex items-center gap-1.5">
             <Shirt className="w-4 h-4 text-[#6B1D2F]" />
             <span className="text-xs font-bold text-slate-900 uppercase tracking-wide">
@@ -490,9 +490,9 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
           <Link
             href="/erp/inventory?status=AVAILABLE"
-            className="p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200/60"
+            className="p-2.5 rounded-lg bg-[#FAF9F6] hover:bg-slate-100 transition-colors border border-[#EFECE6]"
           >
-            <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+            <div className="flex items-center gap-1.5 text-xs text-slate-700 font-semibold">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>Available</span>
             </div>
@@ -501,9 +501,9 @@ export default function DashboardPage() {
 
           <Link
             href="/erp/inventory?status=BOOKED"
-            className="p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200/60"
+            className="p-2.5 rounded-lg bg-[#FAF9F6] hover:bg-slate-100 transition-colors border border-[#EFECE6]"
           >
-            <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+            <div className="flex items-center gap-1.5 text-xs text-slate-700 font-semibold">
               <span className="w-2 h-2 rounded-full bg-amber-500" />
               <span>Booked</span>
             </div>
@@ -512,9 +512,9 @@ export default function DashboardPage() {
 
           <Link
             href="/erp/inventory?status=OUT_ON_RENT"
-            className="p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200/60"
+            className="p-2.5 rounded-lg bg-[#FAF9F6] hover:bg-slate-100 transition-colors border border-[#EFECE6]"
           >
-            <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+            <div className="flex items-center gap-1.5 text-xs text-slate-700 font-semibold">
               <span className="w-2 h-2 rounded-full bg-blue-500" />
               <span>Out on rent</span>
             </div>
@@ -523,9 +523,9 @@ export default function DashboardPage() {
 
           <Link
             href="/erp/operations/laundry"
-            className="p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200/60"
+            className="p-2.5 rounded-lg bg-[#FAF9F6] hover:bg-slate-100 transition-colors border border-[#EFECE6]"
           >
-            <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+            <div className="flex items-center gap-1.5 text-xs text-slate-700 font-semibold">
               <span className="w-2 h-2 rounded-full bg-purple-500" />
               <span>Cleaning</span>
             </div>
@@ -534,9 +534,9 @@ export default function DashboardPage() {
 
           <Link
             href="/erp/operations/laundry"
-            className="p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200/60"
+            className="p-2.5 rounded-lg bg-[#FAF9F6] hover:bg-slate-100 transition-colors border border-[#EFECE6]"
           >
-            <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+            <div className="flex items-center gap-1.5 text-xs text-slate-700 font-semibold">
               <span className="w-2 h-2 rounded-full bg-rose-500" />
               <span>Damaged/Repair</span>
             </div>
@@ -545,9 +545,9 @@ export default function DashboardPage() {
 
           <Link
             href="/erp/inventory?status=UNAVAILABLE"
-            className="p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200/60"
+            className="p-2.5 rounded-lg bg-[#FAF9F6] hover:bg-slate-100 transition-colors border border-[#EFECE6]"
           >
-            <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+            <div className="flex items-center gap-1.5 text-xs text-slate-700 font-semibold">
               <span className="w-2 h-2 rounded-full bg-slate-400" />
               <span>Unavailable</span>
             </div>

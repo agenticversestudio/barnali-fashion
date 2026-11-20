@@ -63,9 +63,9 @@ export function ErpSidebar() {
   ];
 
   return (
-    <aside className="hidden md:flex fixed top-0 bottom-0 left-0 w-64 bg-white border-r border-[#E2E8F0] flex-col z-30 shadow-xs">
+    <aside className="hidden md:flex fixed top-0 bottom-0 left-0 w-64 bg-white border-r border-[#E6E4DF] flex-col z-30 shadow-xs">
       {/* Brand Header */}
-      <div className="h-16 px-6 border-b border-[#E2E8F0] flex items-center justify-between">
+      <div className="h-16 px-6 border-b border-[#E6E4DF] flex items-center justify-between">
         <Link href="/erp/dashboard" className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-[#6B1D2F] flex items-center justify-center text-white font-semibold text-sm shadow-xs">
             BF
@@ -125,7 +125,7 @@ export function ErpSidebar() {
       </div>
 
       {/* Footer Info */}
-      <div className="p-4 border-t border-[#E2E8F0] space-y-2">
+      <div className="p-4 border-t border-[#E6E4DF] space-y-2">
         <Link
           href="/"
           target="_blank"

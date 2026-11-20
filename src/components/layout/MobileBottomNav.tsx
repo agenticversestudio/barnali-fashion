@@ -60,7 +60,7 @@ export function MobileBottomNav() {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-[#E2E8F0] z-40 flex items-center justify-around px-1 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] select-none">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-[#E6E4DF] z-40 flex items-center justify-around px-1 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] select-none">
       {navItems.map((item) => {
         const isActive =
           pathname === item.href ||

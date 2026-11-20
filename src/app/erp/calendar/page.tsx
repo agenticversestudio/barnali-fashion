@@ -89,19 +89,19 @@ export default function AvailabilityCalendarPage() {
       </div>
 
       {/* Legend & Instructions */}
-      <div className="bg-white p-3 md:p-4 rounded-xl border border-[#E2E8F0] shadow-2xs flex flex-wrap items-center justify-between gap-2.5 text-xs">
+      <div className="bg-white p-3 md:p-4 rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-wrap items-center justify-between gap-2.5 text-xs">
         <div className="flex items-center gap-3 md:gap-4 flex-wrap">
-          <span className="flex items-center gap-1.5 font-medium text-slate-600 text-[11px] md:text-xs">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-500" /> Out on Rent
+          <span className="flex items-center gap-1.5 font-semibold text-slate-700 text-[11px] md:text-xs">
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-600" /> Out on Rent
           </span>
-          <span className="flex items-center gap-1.5 font-medium text-slate-600 text-[11px] md:text-xs">
+          <span className="flex items-center gap-1.5 font-semibold text-slate-700 text-[11px] md:text-xs">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Confirmed Reservation
           </span>
-          <span className="flex items-center gap-1.5 font-medium text-slate-600 text-[11px] md:text-xs">
-            <span className="w-2.5 h-2.5 rounded-full bg-purple-400" /> Cleaning Buffer
+          <span className="flex items-center gap-1.5 font-semibold text-slate-700 text-[11px] md:text-xs">
+            <span className="w-2.5 h-2.5 rounded-full bg-purple-500" /> Cleaning Buffer
           </span>
         </div>
-        <div className="text-[10px] md:text-[11px] text-slate-400 flex items-center gap-1">
+        <div className="text-[10px] md:text-[11px] text-slate-500 flex items-center gap-1">
           <Info className="w-3.5 h-3.5 text-slate-400" />
           <span>Bargarh Studio (9:30 AM – 8:30 PM IST)</span>
         </div>
@@ -112,7 +112,7 @@ export default function AvailabilityCalendarPage() {
       {/* ========================================================= */}
       <div className="block md:hidden space-y-3">
         {/* Horizontal Scrollable Day Strip */}
-        <div className="bg-white p-2.5 rounded-xl border border-[#E2E8F0] shadow-2xs">
+        <div className="bg-white p-2.5 rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar select-none">
             {weekDays.map((wd) => {
               const isSelected = selectedDay === wd.day;
@@ -133,12 +133,12 @@ export default function AvailabilityCalendarPage() {
                       ? "bg-slate-900 text-white shadow-xs"
                       : wd.isToday
                       ? "bg-[#6B1D2F]/10 text-[#6B1D2F] border border-[#6B1D2F]/30"
-                      : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/60"
+                      : "bg-[#FAF9F6] text-slate-700 hover:bg-slate-100 border border-[#EFECE6]"
                   }`}
                 >
                   <div
                     className={`text-[9px] uppercase font-semibold ${
-                      isSelected ? "text-slate-300" : "text-slate-400"
+                      isSelected ? "text-slate-300" : "text-slate-500"
                     }`}
                   >
                     {wd.weekday}
@@ -162,8 +162,8 @@ export default function AvailabilityCalendarPage() {
         </div>
 
         {/* Selected Day Agenda Schedule List */}
-        <div className="bg-white rounded-xl border border-[#E2E8F0] p-3.5 shadow-2xs space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100 text-xs">
+        <div className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-[#EFECE6] text-xs">
             <span className="font-semibold text-slate-900">
               Schedule for {selectedDay} Nov 2026 {selectedDay === 8 && "(Today)"}
             </span>
@@ -182,11 +182,11 @@ export default function AvailabilityCalendarPage() {
                 <div
                   key={b.id}
                   onClick={() => setSelectedBookingDetails(b)}
-                  className="p-3 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200/80 transition-colors flex items-center justify-between gap-3 text-xs cursor-pointer"
+                  className="p-3 bg-[#FAF9F6] hover:bg-slate-100/80 rounded-xl border border-[#EFECE6] transition-colors flex items-center justify-between gap-3 text-xs cursor-pointer"
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-[#6B1D2F]">
+                      <span className="font-mono font-bold text-[#6B1D2F] bg-rose-50/60 px-1.5 py-0.2 rounded border border-rose-200/60">
                         {b.costumeCode || b.items[0]?.garmentUnitId}
                       </span>
                       <StatusBadge status={b.status} />
@@ -194,8 +194,8 @@ export default function AvailabilityCalendarPage() {
                     <div className="text-slate-900 font-semibold mt-1">
                       {b.items[0]?.productName}
                     </div>
-                    <div className="text-[11px] text-slate-500 mt-0.5">
-                      Client: <strong>{b.customerName}</strong> · Pickup: {b.pickupDate} &rarr; Return:{" "}
+                    <div className="text-[11px] text-slate-600 mt-0.5">
+                      Client: <strong className="text-slate-900">{b.customerName}</strong> · Pickup: {b.pickupDate} &rarr; Return:{" "}
                       {b.returnDueDate}
                     </div>
                   </div>
@@ -211,7 +211,7 @@ export default function AvailabilityCalendarPage() {
       {/* ========================================================= */}
       {/* DESKTOP 30-DAY TIMELINE MATRIX (>= 768px)                 */}
       {/* ========================================================= */}
-      <div className="hidden md:block bg-white rounded-xl border border-[#E2E8F0] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+      <div className="hidden md:block bg-white rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <div className="overflow-x-auto">
           <div className="min-w-[900px]">
             {/* Days Header */}

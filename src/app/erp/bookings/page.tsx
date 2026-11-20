@@ -360,11 +360,11 @@ function BookingsContent() {
       </div>
 
       {/* ========================================================= */}
-      {/* MOBILE ORDER CARDS (< 768px): ZERO HORIZONTAL SCROLL      */}
+      {/* MOBILE ORDER CARDS (< 768px): 4-ROW ZERO-SCROLL LAYOUT    */}
       {/* ========================================================= */}
-      <div className="block md:hidden space-y-2.5">
+      <div className="block md:hidden space-y-3">
         {filteredBookings.length === 0 ? (
-          <div className="bg-white p-8 rounded-xl border border-slate-200 text-center text-xs text-slate-500">
+          <div className="bg-white p-8 rounded-xl border border-[#E6E4DF] text-center text-xs text-slate-500 shadow-2xs">
             No orders found matching your filter.
           </div>
         ) : (
@@ -376,89 +376,111 @@ function BookingsContent() {
             return (
               <div
                 key={b.id}
-                className="bg-white rounded-xl border border-[#E2E8F0] p-3.5 shadow-2xs space-y-2.5"
+                className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] space-y-2.5"
               >
-                {/* Top Row: Order ID + Customer Name + Phone + Status */}
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-bold text-slate-900">{b.id}</span>
-                      <StatusBadge status={b.status} />
-                    </div>
-                    <div className="text-xs font-semibold text-slate-900 mt-1">
-                      {b.customerName}
-                    </div>
-                    <div className="text-[11px] text-slate-500 font-mono mt-0.5">
-                      +91 {b.customerPhone}
-                    </div>
-                  </div>
-
-                  <a
-                    href={`https://wa.me/91${b.customerPhone}?text=Namaste%20${encodeURIComponent(
-                      b.customerName
-                    )},%20Barnali%20Fashion%20se%20Order%20${b.id}%20ka%20update.`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60"
-                    title="WhatsApp"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                  </a>
+                {/* Row 1: Header (Order ID on left, Status Badge on right) */}
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-xs font-bold text-slate-900 bg-slate-100/80 px-2 py-0.5 rounded border border-slate-200">
+                    {b.id}
+                  </span>
+                  <StatusBadge status={b.status} />
                 </div>
 
-                {/* Middle Row: Costume SKU + Name + Dates + Overdue */}
-                <div className="p-2.5 bg-slate-50/80 rounded-lg border border-slate-200/60 space-y-1 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-[#6B1D2F]">
+                {/* Row 2: Body Block (Customer on top, SKU & Name, paired dates & amounts) */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold text-slate-900 truncate">
+                        {b.customerName}
+                      </div>
+                      <div className="text-[11px] text-slate-500 font-mono">
+                        +91 {b.customerPhone}
+                      </div>
+                    </div>
+
+                    <a
+                      href={`https://wa.me/91${b.customerPhone}?text=Namaste%20${encodeURIComponent(
+                        b.customerName
+                      )},%20Barnali%20Fashion%20se%20Order%20${b.id}%20ka%20update.`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition-colors"
+                      title="WhatsApp Customer"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </a>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-xs pt-0.5">
+                    <span className="font-mono font-bold text-[#6B1D2F] bg-rose-50/60 px-1.5 py-0.5 rounded border border-rose-200/60 shrink-0">
                       {b.costumeCode || b.items[0]?.garmentUnitId}
                     </span>
-                    <span className="text-slate-600 font-medium truncate ml-2">
+                    <span className="text-slate-700 font-medium truncate">
                       {b.items[0]?.productName}
                     </span>
                   </div>
-                  <div className="text-[11px] text-slate-500 flex items-center justify-between pt-0.5">
-                    <span>Pickup: {b.pickupDate}</span>
-                    <span className="flex items-center gap-1 font-medium">
-                      <span>Due: {b.returnDueDate}</span>
-                      {b.lateDays && b.lateDays > 0 ? (
-                        <span className="text-[9px] font-bold text-rose-700 bg-rose-100 px-1 py-0.2 rounded">
-                          {b.lateDays}d late
-                        </span>
-                      ) : null}
-                    </span>
+
+                  {/* Clean 2-Col Data Strip for Dates and Financials */}
+                  <div className="bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg space-y-1.5 text-xs mt-1">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Pickup Date</span>
+                        <span className="font-mono font-semibold text-slate-800">{b.pickupDate}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Return Due</span>
+                        <div className="flex items-center gap-1">
+                          <span className="font-mono font-semibold text-slate-800">{b.returnDueDate}</span>
+                          {b.lateDays && b.lateDays > 0 ? (
+                            <span className="text-[9px] font-bold text-rose-800 bg-rose-100 px-1 rounded border border-rose-300">
+                              {b.lateDays}d late
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-1 pt-1.5 border-t border-[#EFECE6] text-[11px]">
+                      <div>
+                        <span className="text-[9px] text-slate-500 uppercase block">Adv Paid</span>
+                        <span className="font-semibold text-emerald-800">{formatINR(b.advancePaid)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-slate-500 uppercase block">Balance Due</span>
+                        <span className="font-semibold text-slate-900">{formatINR(b.remainingRentalDue || 0)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-slate-500 uppercase block">Deposit</span>
+                        <span className="font-semibold text-slate-700">{formatINR(b.securityDepositTotal)}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Bottom Row: Advance / Balance / Deposit + Primary Action + Details */}
-                <div className="flex items-center justify-between pt-1 border-t border-slate-100 gap-2 text-xs">
-                  <div>
-                    <div className="text-[10px] text-slate-400">
-                      Adv: <strong className="text-emerald-700">{formatINR(b.advancePaid)}</strong>{" "}
-                      · Bal:{" "}
-                      <strong className="text-slate-900">
-                        {formatINR(b.remainingRentalDue || 0)}
-                      </strong>
-                    </div>
-                    <div className="text-[10px] text-slate-400">
-                      Deposit: <strong>{formatINR(b.securityDepositTotal)}</strong>
-                    </div>
+                {/* Row 3: Notes if present */}
+                {b.eventName && (
+                  <div className="bg-[#FAF9F6] border border-[#EFECE6] p-2 rounded-lg text-[11px] text-slate-700 italic">
+                    Event: {b.eventName}
                   </div>
+                )}
+
+                {/* Row 4: Footer (Details on left, Primary Action on right) */}
+                <div className="flex items-center justify-between pt-2 border-t border-[#EFECE6] gap-2">
+                  <button
+                    onClick={() => setSelectedOrder(b)}
+                    className="h-8 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors"
+                  >
+                    Details
+                  </button>
 
                   <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => setSelectedOrder(b)}
-                      className="px-2 py-1.5 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-100 rounded-lg transition-colors"
-                    >
-                      Details
-                    </button>
-
                     {isConfirmed && (
                       <button
                         onClick={() => {
                           setHandoverBooking(b);
                           setHandoverDate("2026-11-08");
                         }}
-                        className="px-2.5 py-1.5 bg-[#6B1D2F] hover:bg-[#551624] text-white font-semibold rounded-lg text-[11px] transition-colors shadow-2xs"
+                        className="h-8 px-3.5 bg-[#6B1D2F] hover:bg-[#551624] text-white font-semibold rounded-lg text-xs transition-colors shadow-xs"
                       >
                         Handover
                       </button>
@@ -472,14 +494,14 @@ function BookingsContent() {
                           setDamageCharge(0);
                           setCleaningCharge(0);
                         }}
-                        className="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-[11px] transition-colors shadow-2xs"
+                        className="h-8 px-3.5 bg-rose-700 hover:bg-rose-800 text-white font-semibold rounded-lg text-xs transition-colors shadow-xs"
                       >
-                        Return
+                        Return &amp; Inspect
                       </button>
                     )}
 
                     {isCompleted && (
-                      <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-1 rounded border border-emerald-200">
+                      <span className="h-8 px-3 inline-flex items-center text-xs text-emerald-800 font-semibold bg-emerald-50 rounded-lg border border-emerald-300">
                         Settled
                       </span>
                     )}
@@ -494,10 +516,10 @@ function BookingsContent() {
       {/* ========================================================= */}
       {/* DESKTOP ORDERS TABLE (>= 768px)                           */}
       {/* ========================================================= */}
-      <div className="hidden md:block bg-white rounded-xl border border-[#E2E8F0] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+      <div className="hidden md:block bg-white rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50/80 border-b border-[#E2E8F0] text-slate-500 uppercase text-[10px] tracking-wider font-semibold">
+            <thead className="bg-[#FAF9F6] border-b border-[#E6E4DF] text-slate-600 uppercase text-[10px] tracking-wider font-semibold">
               <tr>
                 <th className="py-3 px-4">Order &amp; Client</th>
                 <th className="py-3 px-3">Costume Item</th>
@@ -509,7 +531,7 @@ function BookingsContent() {
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[#EFECE6]">
               {filteredBookings.map((b) => {
                 const isOut = b.status === "OUT_ON_RENT";
                 const isConfirmed = b.status === "CONFIRMED" || b.status === "PICKUP_PENDING";
@@ -569,7 +591,7 @@ function BookingsContent() {
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => setSelectedOrder(b)}
-                          className="px-2 py-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors text-[11px] font-medium"
+                          className="px-2.5 py-1 text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors text-[11px] font-medium"
                         >
                           Details
                         </button>
@@ -580,7 +602,7 @@ function BookingsContent() {
                               setHandoverBooking(b);
                               setHandoverDate("2026-11-08");
                             }}
-                            className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg text-xs flex items-center gap-1 transition-colors"
+                            className="px-3 py-1 bg-[#6B1D2F] hover:bg-[#551624] text-white font-semibold rounded-lg text-xs flex items-center gap-1 transition-colors shadow-2xs"
                           >
                             <PackageCheck className="w-3.5 h-3.5" />
                             <span>Handover</span>
@@ -595,7 +617,7 @@ function BookingsContent() {
                               setDamageCharge(0);
                               setCleaningCharge(0);
                             }}
-                            className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg text-xs flex items-center gap-1 transition-colors"
+                            className="px-3 py-1 bg-rose-700 hover:bg-rose-800 text-white font-semibold rounded-lg text-xs flex items-center gap-1 transition-colors shadow-2xs"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
                             <span>Return</span>
@@ -603,8 +625,8 @@ function BookingsContent() {
                         )}
 
                         {isCompleted && (
-                          <span className="text-[11px] text-emerald-700 font-medium flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200/60">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span className="text-[11px] text-emerald-800 font-semibold flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-300">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                             <span>Settled</span>
                           </span>
                         )}
@@ -615,7 +637,7 @@ function BookingsContent() {
                           )},%20Barnali%20Fashion%20se%20Order%20${b.id}%20ka%20update.`}
                           target="_blank"
                           rel="noreferrer"
-                          className="p-1.5 text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                          className="p-1.5 text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 rounded-lg border border-emerald-200/60 transition-colors"
                           title="WhatsApp Message"
                         >
                           <MessageCircle className="w-3.5 h-3.5" />

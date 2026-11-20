@@ -152,12 +152,12 @@ export default function StitchingAndDryCleanPage() {
       </div>
 
       {/* Segmented Control Toggle */}
-      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 w-full sm:max-w-xs">
+      <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-[#E6E4DF] w-full sm:max-w-xs shadow-2xs">
         <button
           onClick={() => setActiveTab("stitching")}
           className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-colors ${
             activeTab === "stitching"
-              ? "bg-white text-slate-900 shadow-xs font-semibold"
+              ? "bg-[#6B1D2F] text-white font-semibold shadow-2xs"
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
@@ -168,7 +168,7 @@ export default function StitchingAndDryCleanPage() {
           onClick={() => setActiveTab("dryclean")}
           className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-colors ${
             activeTab === "dryclean"
-              ? "bg-white text-slate-900 shadow-xs font-semibold"
+              ? "bg-[#6B1D2F] text-white font-semibold shadow-2xs"
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
@@ -177,12 +177,12 @@ export default function StitchingAndDryCleanPage() {
       </div>
 
       {/* ========================================================= */}
-      {/* MOBILE CARE CARDS (< 768px): ZERO HORIZONTAL SCROLL       */}
+      {/* MOBILE CARE CARDS (< 768px): 4-ROW ZERO-SCROLL LAYOUT     */}
       {/* ========================================================= */}
-      <div className="block md:hidden space-y-2.5">
+      <div className="block md:hidden space-y-3">
         {activeTab === "stitching" ? (
           stitchingJobs.length === 0 ? (
-            <div className="bg-white p-8 rounded-xl border border-slate-200 text-center text-xs text-slate-500">
+            <div className="bg-white p-8 rounded-xl border border-[#E6E4DF] text-center text-xs text-slate-500 shadow-2xs">
               No tailoring jobs in register.
             </div>
           ) : (
@@ -191,57 +191,62 @@ export default function StitchingAndDryCleanPage() {
               return (
                 <div
                   key={job.id}
-                  className="bg-white rounded-xl border border-[#E2E8F0] p-3.5 shadow-2xs space-y-2.5"
+                  className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] space-y-2.5"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-bold text-[#6B1D2F]">
-                          {job.costumeId}
-                        </span>
-                        {isOut ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-                            With Tailor
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            Available
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs font-semibold text-slate-900 mt-1">
-                        {job.costumeName}
-                      </div>
-                      <div className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1">
-                        <Scissors className="w-3 h-3 text-slate-400" />
-                        <span>{job.tailorName}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200/60 text-[11px] space-y-1">
-                    <div className="flex justify-between text-slate-600">
-                      <span>Out Date: <strong>{job.outDate}</strong></span>
-                      <span>
-                        Rcv Date:{" "}
-                        {job.rcvDate ? (
-                          <strong className="text-emerald-700">{job.rcvDate}</strong>
-                        ) : (
-                          <span className="text-amber-700 font-medium">Pending</span>
-                        )}
+                  {/* Row 1: Header (Costume ID left, Status Badge right) */}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-xs font-bold text-[#6B1D2F] bg-rose-50/60 px-2 py-0.5 rounded border border-rose-200/60">
+                      {job.costumeId}
+                    </span>
+                    {isOut ? (
+                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-300">
+                        With Tailor
                       </span>
-                    </div>
-                    {job.notes && (
-                      <div className="text-slate-500 pt-0.5 italic border-t border-slate-200/40">
-                        &ldquo;{job.notes}&rdquo;
-                      </div>
+                    ) : (
+                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                        Available
+                      </span>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between pt-1 border-t border-slate-100 gap-2">
+                  {/* Row 2: Body Block (Title on own line, vendor below, Out/Rcv date pairs) */}
+                  <div className="space-y-1.5">
+                    <div className="text-xs font-semibold text-slate-900 leading-snug">
+                      {job.costumeName}
+                    </div>
+                    <div className="text-[11px] text-slate-600 flex items-center gap-1.5">
+                      <Scissors className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{job.tailorName}</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-xs mt-1">
+                      <div>
+                        <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Out Date</span>
+                        <span className="font-mono font-semibold text-slate-800">{job.outDate}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Rcv Date</span>
+                        {job.rcvDate ? (
+                          <span className="font-mono font-semibold text-emerald-800">{job.rcvDate}</span>
+                        ) : (
+                          <span className="font-medium text-amber-800">Pending</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Row 3: Notes Box */}
+                  {job.notes && (
+                    <div className="bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-[11px] text-slate-700 italic">
+                      &ldquo;{job.notes}&rdquo;
+                    </div>
+                  )}
+
+                  {/* Row 4: Footer (Details left, Primary Action right) */}
+                  <div className="flex items-center justify-between pt-2 border-t border-[#EFECE6] gap-2">
                     <button
                       onClick={() => setSelectedCareJob({ type: "stitching", job })}
-                      className="px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-100 rounded-lg transition-colors"
+                      className="h-8 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors"
                     >
                       Details
                     </button>
@@ -256,7 +261,7 @@ export default function StitchingAndDryCleanPage() {
                           });
                           setRcvDate("2026-11-08");
                         }}
-                        className="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-2xs transition-colors"
+                        className="h-8 px-3.5 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
                       >
                         Mark Received
                       </button>
@@ -267,7 +272,7 @@ export default function StitchingAndDryCleanPage() {
             })
           )
         ) : dryCleanJobs.length === 0 ? (
-          <div className="bg-white p-8 rounded-xl border border-slate-200 text-center text-xs text-slate-500">
+          <div className="bg-white p-8 rounded-xl border border-[#E6E4DF] text-center text-xs text-slate-500 shadow-2xs">
             No dry cleaning jobs in register.
           </div>
         ) : (
@@ -276,57 +281,62 @@ export default function StitchingAndDryCleanPage() {
             return (
               <div
                 key={job.id}
-                className="bg-white rounded-xl border border-[#E2E8F0] p-3.5 shadow-2xs space-y-2.5"
+                className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] space-y-2.5"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-bold text-[#6B1D2F]">
-                        {job.costumeId}
-                      </span>
-                      {isOut ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-                          At Cleaner
-                        </span>
-                      ) : (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          Available
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-xs font-semibold text-slate-900 mt-1">
-                      {job.costumeName}
-                    </div>
-                    <div className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-slate-400" />
-                      <span>{job.vendorName}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200/60 text-[11px] space-y-1">
-                  <div className="flex justify-between text-slate-600">
-                    <span>Out Date: <strong>{job.outDate}</strong></span>
-                    <span>
-                      Rcv Date:{" "}
-                      {job.rcvDate ? (
-                        <strong className="text-emerald-700">{job.rcvDate}</strong>
-                      ) : (
-                        <span className="text-amber-700 font-medium">Pending</span>
-                      )}
+                {/* Row 1: Header (Costume ID left, Status Badge right) */}
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-xs font-bold text-[#6B1D2F] bg-rose-50/60 px-2 py-0.5 rounded border border-rose-200/60">
+                    {job.costumeId}
+                  </span>
+                  {isOut ? (
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-800 border border-purple-300">
+                      At Cleaner
                     </span>
-                  </div>
-                  {job.notes && (
-                    <div className="text-slate-500 pt-0.5 italic border-t border-slate-200/40">
-                      &ldquo;{job.notes}&rdquo;
-                    </div>
+                  ) : (
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                      Available
+                    </span>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between pt-1 border-t border-slate-100 gap-2">
+                {/* Row 2: Body Block (Title on own line, vendor below, Out/Rcv date pairs) */}
+                <div className="space-y-1.5">
+                  <div className="text-xs font-semibold text-slate-900 leading-snug">
+                    {job.costumeName}
+                  </div>
+                  <div className="text-[11px] text-slate-600 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{job.vendorName}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-xs mt-1">
+                    <div>
+                      <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Out Date</span>
+                      <span className="font-mono font-semibold text-slate-800">{job.outDate}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Rcv Date</span>
+                      {job.rcvDate ? (
+                        <span className="font-mono font-semibold text-emerald-800">{job.rcvDate}</span>
+                      ) : (
+                        <span className="font-medium text-amber-800">Pending</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 3: Notes Box */}
+                {job.notes && (
+                  <div className="bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-[11px] text-slate-700 italic">
+                    &ldquo;{job.notes}&rdquo;
+                  </div>
+                )}
+
+                {/* Row 4: Footer (Details left, Primary Action right) */}
+                <div className="flex items-center justify-between pt-2 border-t border-[#EFECE6] gap-2">
                   <button
                     onClick={() => setSelectedCareJob({ type: "dryclean", job })}
-                    className="px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-100 rounded-lg transition-colors"
+                    className="h-8 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors"
                   >
                     Details
                   </button>
@@ -341,7 +351,7 @@ export default function StitchingAndDryCleanPage() {
                         });
                         setRcvDate("2026-11-08");
                       }}
-                      className="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-2xs transition-colors"
+                      className="h-8 px-3.5 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
                     >
                       Mark Received
                     </button>
@@ -358,10 +368,10 @@ export default function StitchingAndDryCleanPage() {
       {/* ========================================================= */}
       <div className="hidden md:block">
         {activeTab === "stitching" && (
-          <div className="bg-white rounded-xl border border-[#E2E8F0] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+          <div className="bg-white rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50/80 border-b border-[#E2E8F0] text-slate-500 uppercase text-[10px] tracking-wider font-semibold">
+                <thead className="bg-[#FAF9F6] border-b border-[#E6E4DF] text-slate-600 uppercase text-[10px] tracking-wider font-semibold">
                   <tr>
                     <th className="py-3 px-4">Costume</th>
                     <th className="py-3 px-3">Tailor</th>
@@ -372,28 +382,28 @@ export default function StitchingAndDryCleanPage() {
                     <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#EFECE6]">
                   {stitchingJobs.map((job) => {
                     const isOut = job.status === "OUT" || !job.rcvDate;
                     return (
                       <tr key={job.id} className="hover:bg-slate-50/60 transition-colors">
                         <td className="py-3.5 px-4">
-                          <span className="font-mono text-xs font-semibold text-slate-900">
+                          <span className="font-mono text-xs font-bold text-[#6B1D2F]">
                             {job.costumeId}
                           </span>
-                          <div className="font-medium text-slate-700 mt-0.5">{job.costumeName}</div>
+                          <div className="font-medium text-slate-900 mt-0.5">{job.costumeName}</div>
                         </td>
 
-                        <td className="py-3 px-3 text-slate-600 font-medium">{job.tailorName}</td>
+                        <td className="py-3 px-3 text-slate-700 font-medium">{job.tailorName}</td>
 
-                        <td className="py-3 px-3 font-mono text-slate-600 whitespace-nowrap">
+                        <td className="py-3 px-3 font-mono text-slate-700 whitespace-nowrap">
                           {job.outDate}
                         </td>
 
-                        <td className="py-3 px-3 font-mono text-slate-600 whitespace-nowrap">
+                        <td className="py-3 px-3 font-mono text-slate-700 whitespace-nowrap">
                           {job.rcvDate ? (
-                            <span className="flex items-center gap-1.5 text-emerald-700 font-medium">
-                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span className="flex items-center gap-1.5 text-emerald-800 font-semibold">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                               <span>{job.rcvDate}</span>
                             </span>
                           ) : (
@@ -401,17 +411,17 @@ export default function StitchingAndDryCleanPage() {
                           )}
                         </td>
 
-                        <td className="py-3 px-3 text-slate-500 max-w-xs">{job.notes || "—"}</td>
+                        <td className="py-3 px-3 text-slate-600 max-w-xs">{job.notes || "—"}</td>
 
                         <td className="py-3 px-3 whitespace-nowrap">
                           {isOut ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200">
-                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-300">
+                              <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
                               <span>With Tailor</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                               <span>Available</span>
                             </span>
                           )}
@@ -421,7 +431,7 @@ export default function StitchingAndDryCleanPage() {
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => setSelectedCareJob({ type: "stitching", job })}
-                              className="px-2 py-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-[11px] font-medium transition-colors"
+                              className="px-2.5 py-1 text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-[#E6E4DF] rounded-lg text-[11px] font-medium transition-colors"
                             >
                               Details
                             </button>
@@ -435,7 +445,7 @@ export default function StitchingAndDryCleanPage() {
                                   });
                                   setRcvDate("2026-11-08");
                                 }}
-                                className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg text-xs transition-colors"
+                                className="px-3 py-1 bg-[#6B1D2F] hover:bg-[#551624] text-white font-semibold rounded-lg text-xs transition-colors"
                               >
                                 Mark Received
                               </button>
@@ -454,10 +464,10 @@ export default function StitchingAndDryCleanPage() {
         )}
 
         {activeTab === "dryclean" && (
-          <div className="bg-white rounded-xl border border-[#E2E8F0] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+          <div className="bg-white rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50/80 border-b border-[#E2E8F0] text-slate-500 uppercase text-[10px] tracking-wider font-semibold">
+                <thead className="bg-[#FAF9F6] border-b border-[#E6E4DF] text-slate-600 uppercase text-[10px] tracking-wider font-semibold">
                   <tr>
                     <th className="py-3 px-4">Costume</th>
                     <th className="py-3 px-3">Dry Cleaner</th>
@@ -468,28 +478,28 @@ export default function StitchingAndDryCleanPage() {
                     <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#EFECE6]">
                   {dryCleanJobs.map((job) => {
                     const isOut = job.status === "OUT" || !job.rcvDate;
                     return (
                       <tr key={job.id} className="hover:bg-slate-50/60 transition-colors">
                         <td className="py-3.5 px-4">
-                          <span className="font-mono text-xs font-semibold text-slate-900">
+                          <span className="font-mono text-xs font-bold text-[#6B1D2F]">
                             {job.costumeId}
                           </span>
-                          <div className="font-medium text-slate-700 mt-0.5">{job.costumeName}</div>
+                          <div className="font-medium text-slate-900 mt-0.5">{job.costumeName}</div>
                         </td>
 
-                        <td className="py-3 px-3 text-slate-600 font-medium">{job.vendorName}</td>
+                        <td className="py-3 px-3 text-slate-700 font-medium">{job.vendorName}</td>
 
-                        <td className="py-3 px-3 font-mono text-slate-600 whitespace-nowrap">
+                        <td className="py-3 px-3 font-mono text-slate-700 whitespace-nowrap">
                           {job.outDate}
                         </td>
 
-                        <td className="py-3 px-3 font-mono text-slate-600 whitespace-nowrap">
+                        <td className="py-3 px-3 font-mono text-slate-700 whitespace-nowrap">
                           {job.rcvDate ? (
-                            <span className="flex items-center gap-1.5 text-emerald-700 font-medium">
-                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span className="flex items-center gap-1.5 text-emerald-800 font-semibold">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                               <span>{job.rcvDate}</span>
                             </span>
                           ) : (
@@ -497,17 +507,17 @@ export default function StitchingAndDryCleanPage() {
                           )}
                         </td>
 
-                        <td className="py-3 px-3 text-slate-500 max-w-xs">{job.notes || "—"}</td>
+                        <td className="py-3 px-3 text-slate-600 max-w-xs">{job.notes || "—"}</td>
 
                         <td className="py-3 px-3 whitespace-nowrap">
                           {isOut ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
-                              <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-800 border border-purple-300">
+                              <span className="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
                               <span>At Cleaner</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                               <span>Available</span>
                             </span>
                           )}
@@ -517,7 +527,7 @@ export default function StitchingAndDryCleanPage() {
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => setSelectedCareJob({ type: "dryclean", job })}
-                              className="px-2 py-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-[11px] font-medium transition-colors"
+                              className="px-2.5 py-1 text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-[#E6E4DF] rounded-lg text-[11px] font-medium transition-colors"
                             >
                               Details
                             </button>
@@ -531,7 +541,7 @@ export default function StitchingAndDryCleanPage() {
                                   });
                                   setRcvDate("2026-11-08");
                                 }}
-                                className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg text-xs transition-colors"
+                                className="px-3 py-1 bg-[#6B1D2F] hover:bg-[#551624] text-white font-semibold rounded-lg text-xs transition-colors"
                               >
                                 Mark Received
                               </button>

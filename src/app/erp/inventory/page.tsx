@@ -303,45 +303,82 @@ export default function InventoryPage() {
       </div>
 
       {/* ========================================================= */}
-      {/* MOBILE CARDS VIEW (< 768px): ZERO HORIZONTAL SCROLL       */}
+      {/* MOBILE CARDS VIEW (< 768px): 4-ROW ZERO-SCROLL LAYOUT     */}
       {/* ========================================================= */}
-      <div className="block md:hidden space-y-2.5">
+      <div className="block md:hidden space-y-3">
         {filteredGarments.length === 0 ? (
-          <div className="bg-white p-8 rounded-xl border border-slate-200 text-center text-xs text-slate-500">
+          <div className="bg-white p-8 rounded-xl border border-[#E6E4DF] text-center text-xs text-slate-500 shadow-2xs">
             No costumes found matching your filter.
           </div>
         ) : (
           filteredGarments.map((g) => (
             <div
               key={g.id}
-              onClick={() => setSelectedGarment(g)}
-              className="bg-white rounded-xl border border-[#E2E8F0] p-3 shadow-2xs active:bg-slate-50 transition-colors flex items-center justify-between gap-3"
+              className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] space-y-2.5"
             >
-              <div className="flex items-center gap-3 min-w-0">
-                <img
-                  src={g.image}
-                  alt={g.productName}
-                  className="w-14 h-14 rounded-lg object-cover border border-slate-200 shrink-0"
-                />
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="font-mono font-bold text-xs text-[#6B1D2F]">{g.id}</span>
-                    <StatusBadge status={g.status} />
+              {/* Row 1: Header (Costume ID on left, Status Badge on right) */}
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-mono text-xs font-bold text-[#6B1D2F] bg-rose-50/60 px-2 py-0.5 rounded border border-rose-200/60">
+                  {g.id}
+                </span>
+                <StatusBadge status={g.status} />
+              </div>
+
+              {/* Row 2: Body Block (Thumbnail + Name on own line, category/size/colour, and 2-col info strip) */}
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={g.image}
+                    alt={g.productName}
+                    className="w-12 h-12 rounded-lg object-cover border border-[#E6E4DF] shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <div className="text-xs font-semibold text-slate-900 leading-snug line-clamp-1">
+                      {g.productName}
+                    </div>
+                    <div className="text-[11px] text-slate-600 mt-0.5 truncate">
+                      {g.category} · {g.size} · {g.colour}
+                    </div>
                   </div>
-                  <div className="text-xs font-semibold text-slate-900 truncate mt-0.5">
-                    {g.productName}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-xs mt-1">
+                  <div>
+                    <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Rental Rate</span>
+                    <span className="font-semibold text-slate-900">{formatINR(g.rentalPrice)} <span className="text-[10px] text-slate-500 font-normal">/ 3d</span></span>
                   </div>
-                  <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
-                    <span>{g.size}</span>
-                    <span>·</span>
-                    <span className="font-semibold text-slate-900">{formatINR(g.rentalPrice)}</span>
-                    <span>·</span>
-                    <span className="text-slate-400 truncate">{g.location || g.storageLocation}</span>
+                  <div>
+                    <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Godown Rack</span>
+                    <span className="font-semibold text-slate-800">{g.location || g.storageLocation}</span>
                   </div>
                 </div>
               </div>
 
-              <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+              {/* Row 3: Footer (Details on left, Book Piece on right) */}
+              <div className="flex items-center justify-between pt-2 border-t border-[#EFECE6] gap-2">
+                <button
+                  onClick={() => setSelectedGarment(g)}
+                  className="h-8 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors"
+                >
+                  Details
+                </button>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setQrGarment(g)}
+                    title="Rack Tag"
+                    className="h-8 px-2 text-slate-500 hover:text-slate-800 bg-white border border-[#E6E4DF] rounded-lg text-xs transition-colors"
+                  >
+                    <QrCode className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => router.push(`/erp/bookings?new=true&sku=${g.id}`)}
+                    className="h-8 px-3.5 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
+                  >
+                    Book Piece
+                  </button>
+                </div>
+              </div>
             </div>
           ))
         )}
@@ -352,10 +389,10 @@ export default function InventoryPage() {
       {/* ========================================================= */}
       <div className="hidden md:block">
         {viewMode === "table" ? (
-          <div className="bg-white rounded-xl border border-[#E2E8F0] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+          <div className="bg-white rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50/80 border-b border-[#E2E8F0] text-slate-500 uppercase text-[10px] tracking-wider font-semibold">
+                <thead className="bg-[#FAF9F6] border-b border-[#E6E4DF] text-slate-600 uppercase text-[10px] tracking-wider font-semibold">
                   <tr>
                     <th className="py-3 px-4">Item</th>
                     <th className="py-3 px-3">Category</th>
@@ -367,7 +404,7 @@ export default function InventoryPage() {
                     <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#EFECE6]">
                   {filteredGarments.map((g) => (
                     <tr key={g.id} className="hover:bg-slate-50/60 transition-colors">
                       <td className="py-3.5 px-4">

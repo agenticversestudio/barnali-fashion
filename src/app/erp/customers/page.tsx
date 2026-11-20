@@ -105,7 +105,7 @@ export default function CustomersPage() {
       </div>
 
       {/* Search Bar */}
-      <div className="bg-white p-3 md:p-4 rounded-xl border border-[#E2E8F0] shadow-2xs">
+      <div className="bg-white p-3 md:p-4 rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <div className="relative">
           <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
           <input
@@ -121,16 +121,16 @@ export default function CustomersPage() {
       {/* ========================================================= */}
       {/* MOBILE CUSTOMER CARDS (< 768px): ZERO HORIZONTAL SCROLL   */}
       {/* ========================================================= */}
-      <div className="block md:hidden space-y-2.5">
+      <div className="block md:hidden space-y-3">
         {filteredCustomers.length === 0 ? (
-          <div className="bg-white p-8 rounded-xl border border-slate-200 text-center text-xs text-slate-500">
+          <div className="bg-white p-8 rounded-xl border border-[#E6E4DF] text-center text-xs text-slate-500 shadow-2xs">
             No customers found matching your search.
           </div>
         ) : (
           filteredCustomers.map((c) => (
             <div
               key={c.id}
-              className="bg-white rounded-xl border border-[#E2E8F0] p-3.5 shadow-2xs space-y-2.5"
+              className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] space-y-2.5"
             >
               {/* Top Row: Name + ID */}
               <div className="flex items-start justify-between">
@@ -143,18 +143,18 @@ export default function CustomersPage() {
                     </span>
                   </div>
                 </div>
-                <span className="font-mono text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-semibold">
+                <span className="font-mono text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-semibold border border-slate-200">
                   {c.id}
                 </span>
               </div>
 
               {/* Contact strip with 1-tap call & WhatsApp */}
-              <div className="p-2 bg-slate-50 rounded-lg border border-slate-200/60 flex items-center justify-between text-xs">
+              <div className="p-2.5 bg-[#FAF9F6] rounded-lg border border-[#EFECE6] flex items-center justify-between text-xs">
                 <span className="font-mono font-bold text-slate-800">+91 {c.phone}</span>
                 <div className="flex items-center gap-1.5">
                   <a
                     href={`tel:${c.phone}`}
-                    className="p-1.5 bg-white border border-slate-200 rounded-md text-slate-600 hover:text-slate-900"
+                    className="p-1.5 bg-white border border-[#E6E4DF] rounded-md text-slate-700 hover:text-slate-900"
                     title="Call"
                   >
                     <Phone className="w-3.5 h-3.5" />
@@ -163,7 +163,7 @@ export default function CustomersPage() {
                     href={`https://wa.me/91${c.whatsapp}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="p-1.5 bg-emerald-50 border border-emerald-200 rounded-md text-emerald-700 hover:text-emerald-900"
+                    className="p-1.5 bg-emerald-50 border border-emerald-300 rounded-md text-emerald-800 hover:text-emerald-950"
                     title="WhatsApp"
                   >
                     <MessageCircle className="w-3.5 h-3.5" />
@@ -172,18 +172,18 @@ export default function CustomersPage() {
               </div>
 
               {/* 3-Stat Metric Strip */}
-              <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1 border-t border-slate-100">
-                <div className="p-1.5 bg-slate-50/70 rounded-lg">
-                  <div className="text-[10px] text-slate-400">Orders</div>
+              <div className="grid grid-cols-3 gap-2 text-center text-xs p-2 bg-[#FAF9F6] border border-[#EFECE6] rounded-lg">
+                <div>
+                  <div className="text-[10px] text-slate-500 uppercase">Orders</div>
                   <div className="font-bold text-slate-900 mt-0.5">{c.totalBookings}</div>
                 </div>
-                <div className="p-1.5 bg-slate-50/70 rounded-lg">
-                  <div className="text-[10px] text-slate-400">Spent</div>
+                <div>
+                  <div className="text-[10px] text-slate-500 uppercase">Spent</div>
                   <div className="font-bold text-[#6B1D2F] mt-0.5">{formatINR(c.totalSpent)}</div>
                 </div>
-                <div className="p-1.5 bg-slate-50/70 rounded-lg">
-                  <div className="text-[10px] text-slate-400">Deposit Held</div>
-                  <div className="font-bold text-emerald-700 mt-0.5">
+                <div>
+                  <div className="text-[10px] text-slate-500 uppercase">Deposit Held</div>
+                  <div className="font-bold text-emerald-800 mt-0.5">
                     {formatINR(c.refundableDepositsHeld)}
                   </div>
                 </div>
@@ -192,9 +192,9 @@ export default function CustomersPage() {
               {/* Details Trigger */}
               <button
                 onClick={() => setSelectedCustomer(c)}
-                className="w-full py-1.5 text-center text-[11px] font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
+                className="w-full h-8 flex items-center justify-center text-center text-xs font-medium text-slate-700 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors"
               >
-                View Full Profile &amp; Rental History &rarr;
+                View Full Profile &amp; History &rarr;
               </button>
             </div>
           ))
@@ -208,7 +208,7 @@ export default function CustomersPage() {
         {filteredCustomers.map((c) => (
           <div
             key={c.id}
-            className="bg-white rounded-xl border border-[#E2E8F0] p-5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between"
+            className="bg-white rounded-xl border border-[#E6E4DF] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-xs transition-all flex flex-col justify-between"
           >
             <div>
               <div className="flex items-start justify-between">
