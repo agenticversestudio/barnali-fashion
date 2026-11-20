@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Shirt,
   Search,
@@ -12,6 +13,11 @@ import {
   MapPin,
   X,
   ChevronRight,
+  Sparkles,
+  ClipboardList,
+  CheckCircle2,
+  Calendar,
+  AlertCircle,
 } from "lucide-react";
 import { DataStore } from "@/lib/dataStore";
 import { formatINR } from "@/lib/utils";
@@ -19,14 +25,19 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { GarmentUnit, ProductCategory } from "@/types";
 
 export default function InventoryPage() {
+  const router = useRouter();
   const [garments, setGarments] = useState<GarmentUnit[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
-  // Add Costume Modal state
+  // Selected item for Mobile Full Details Bottom Sheet
+  const [selectedGarment, setSelectedGarment] = useState<GarmentUnit | null>(null);
+
+  // Add Costume Modal state (2-step Mobile Wizard)
   const [showAddModal, setShowAddModal] = useState(false);
+  const [addStep, setAddStep] = useState<1 | 2>(1);
   const [costumeId, setCostumeId] = useState("");
   const [category, setCategory] = useState<ProductCategory>("Bridal Lehenga");
   const [name, setName] = useState("");
@@ -37,7 +48,9 @@ export default function InventoryPage() {
   const [securityDeposit, setSecurityDeposit] = useState("3000");
   const [condition, setCondition] = useState("Excellent");
   const [location, setLocation] = useState("Godown Rack A-01");
-  const [photoUrl, setPhotoUrl] = useState("https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=600");
+  const [photoUrl, setPhotoUrl] = useState(
+    "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=600"
+  );
 
   const [qrGarment, setQrGarment] = useState<GarmentUnit | null>(null);
 
@@ -57,13 +70,49 @@ export default function InventoryPage() {
   ];
 
   const statuses = [
-    { label: "All", value: "ALL" },
-    { label: "Available", value: "AVAILABLE" },
-    { label: "Booked", value: "BOOKED" },
-    { label: "Out on rent", value: "OUT_ON_RENT" },
-    { label: "Cleaning", value: "RETURNED_CLEANING" },
-    { label: "In repair", value: "DAMAGED_REPAIR" },
-    { label: "Unavailable", value: "UNAVAILABLE" },
+    { label: "All", value: "ALL", count: garments.length },
+    {
+      label: "Available",
+      value: "AVAILABLE",
+      count: garments.filter((g) => g.status === "AVAILABLE").length,
+    },
+    {
+      label: "Booked",
+      value: "BOOKED",
+      count: garments.filter(
+        (g) => g.status === "BOOKED" || g.status === "RESERVED" || g.status === "PREPARING"
+      ).length,
+    },
+    {
+      label: "Out on rent",
+      value: "OUT_ON_RENT",
+      count: garments.filter((g) => g.status === "OUT_ON_RENT" || g.status === "RENTED").length,
+    },
+    {
+      label: "Cleaning",
+      value: "RETURNED_CLEANING",
+      count: garments.filter(
+        (g) =>
+          g.status === "RETURNED_CLEANING" ||
+          g.status === "RETURN_RECEIVED" ||
+          g.status === "IN_LAUNDRY"
+      ).length,
+    },
+    {
+      label: "In repair",
+      value: "DAMAGED_REPAIR",
+      count: garments.filter(
+        (g) =>
+          g.status === "DAMAGED_REPAIR" ||
+          g.status === "UNDER_REPAIR" ||
+          g.status === "REPAIR_PENDING"
+      ).length,
+    },
+    {
+      label: "Unavailable",
+      value: "UNAVAILABLE",
+      count: garments.filter((g) => g.status === "UNAVAILABLE" || g.status === "RETIRED").length,
+    },
   ];
 
   const filteredGarments = garments.filter((g) => {
@@ -79,11 +128,23 @@ export default function InventoryPage() {
 
     let matchesStatus = selectedStatus === "ALL";
     if (selectedStatus === "AVAILABLE") matchesStatus = g.status === "AVAILABLE";
-    if (selectedStatus === "BOOKED") matchesStatus = g.status === "BOOKED" || g.status === "RESERVED" || g.status === "PREPARING";
-    if (selectedStatus === "OUT_ON_RENT") matchesStatus = g.status === "OUT_ON_RENT" || g.status === "RENTED";
-    if (selectedStatus === "RETURNED_CLEANING") matchesStatus = g.status === "RETURNED_CLEANING" || g.status === "RETURN_RECEIVED" || g.status === "IN_LAUNDRY";
-    if (selectedStatus === "DAMAGED_REPAIR") matchesStatus = g.status === "DAMAGED_REPAIR" || g.status === "UNDER_REPAIR" || g.status === "REPAIR_PENDING";
-    if (selectedStatus === "UNAVAILABLE") matchesStatus = g.status === "UNAVAILABLE" || g.status === "RETIRED";
+    if (selectedStatus === "BOOKED")
+      matchesStatus =
+        g.status === "BOOKED" || g.status === "RESERVED" || g.status === "PREPARING";
+    if (selectedStatus === "OUT_ON_RENT")
+      matchesStatus = g.status === "OUT_ON_RENT" || g.status === "RENTED";
+    if (selectedStatus === "RETURNED_CLEANING")
+      matchesStatus =
+        g.status === "RETURNED_CLEANING" ||
+        g.status === "RETURN_RECEIVED" ||
+        g.status === "IN_LAUNDRY";
+    if (selectedStatus === "DAMAGED_REPAIR")
+      matchesStatus =
+        g.status === "DAMAGED_REPAIR" ||
+        g.status === "UNDER_REPAIR" ||
+        g.status === "REPAIR_PENDING";
+    if (selectedStatus === "UNAVAILABLE")
+      matchesStatus = g.status === "UNAVAILABLE" || g.status === "RETIRED";
 
     return matchesSearch && matchesCategory && matchesStatus;
   });
@@ -113,33 +174,42 @@ export default function InventoryPage() {
       storageLocation: location.trim(),
       status: "AVAILABLE",
       rentalCount: 0,
-      image: photoUrl || "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=600",
+      image:
+        photoUrl ||
+        "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=600",
       notes: "Newly entered piece",
     };
 
     DataStore.saveGarment(newUnit);
     setGarments(DataStore.getGarments());
     setShowAddModal(false);
+    setAddStep(1);
+    setCostumeId("");
+    setName("");
   };
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
+    <div className="space-y-3.5 md:space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Inventory</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Manage catalogue garments, rack assignments, and rental pricing.
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-slate-900">
+            Inventory
+          </h1>
+          <p className="text-[11px] md:text-xs text-slate-500 mt-0.5">
+            11 Exact costume fields &amp; 6 status states across Bargarh racks.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* View Mode Toggle */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
+          {/* View Mode Toggle (desktop) */}
+          <div className="hidden md:flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
             <button
               onClick={() => setViewMode("table")}
               className={`p-1.5 rounded-md text-xs transition-colors ${
-                viewMode === "table" ? "bg-white text-slate-900 shadow-xs font-semibold" : "text-slate-500"
+                viewMode === "table"
+                  ? "bg-white text-slate-900 shadow-xs font-semibold"
+                  : "text-slate-500"
               }`}
               title="Table View"
             >
@@ -148,7 +218,9 @@ export default function InventoryPage() {
             <button
               onClick={() => setViewMode("grid")}
               className={`p-1.5 rounded-md text-xs transition-colors ${
-                viewMode === "grid" ? "bg-white text-slate-900 shadow-xs font-semibold" : "text-slate-500"
+                viewMode === "grid"
+                  ? "bg-white text-slate-900 shadow-xs font-semibold"
+                  : "text-slate-500"
               }`}
               title="Grid View"
             >
@@ -157,8 +229,11 @@ export default function InventoryPage() {
           </div>
 
           <button
-            onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#6B1D2F] hover:bg-[#551624] text-white text-xs font-medium rounded-lg shadow-xs transition-colors"
+            onClick={() => {
+              setAddStep(1);
+              setShowAddModal(true);
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 md:px-3.5 md:py-2 bg-[#6B1D2F] hover:bg-[#551624] text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
           >
             <Plus className="w-4 h-4" />
             <span>Add Piece</span>
@@ -166,14 +241,14 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-[#E2E8F0] shadow-[0_1px_2px_rgba(0,0,0,0.03)] space-y-3">
-        <div className="flex flex-col sm:flex-row gap-3">
+      {/* COMPACT FILTER & SEARCH STRIP */}
+      <div className="bg-white p-3 md:p-4 rounded-xl border border-[#E2E8F0] shadow-2xs space-y-2.5">
+        <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
-              placeholder="Search by SKU, name, color, or rack..."
+              placeholder="Search SKU (LF-001), name, colour, or rack..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full text-xs pl-8 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-[#6B1D2F] text-slate-800"
@@ -183,7 +258,7 @@ export default function InventoryPage() {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="text-xs py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-hidden"
+            className="text-xs py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-hidden"
           >
             {categories.map((c) => (
               <option key={c} value={c}>
@@ -193,160 +268,355 @@ export default function InventoryPage() {
           </select>
         </div>
 
-        {/* Clean Status Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs border-t border-slate-100 pt-2.5">
-          <span className="text-[11px] font-medium text-slate-400 shrink-0 mr-1">Status:</span>
+        {/* Single-Row Horizontally Scrollable Status Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs border-t border-slate-100 pt-2 select-none no-scrollbar">
           {statuses.map((st) => (
             <button
               key={st.value}
               onClick={() => setSelectedStatus(st.value)}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-medium whitespace-nowrap transition-colors ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                 selectedStatus === st.value
-                  ? "bg-slate-900 text-white shadow-xs"
+                  ? "bg-slate-900 text-white shadow-xs font-semibold"
                   : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80"
               }`}
             >
-              {st.label}
+              <span>{st.label}</span>
+              <span
+                className={`text-[9px] px-1 py-0.2 rounded-full font-bold ${
+                  selectedStatus === st.value
+                    ? "bg-white/20 text-white"
+                    : "bg-slate-200 text-slate-600"
+                }`}
+              >
+                {st.count}
+              </span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Table Presentation */}
-      {viewMode === "table" ? (
-        <div className="bg-white rounded-xl border border-[#E2E8F0] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/80 border-b border-[#E2E8F0] text-slate-500 uppercase text-[10px] tracking-wider font-semibold">
-                <tr>
-                  <th className="py-3 px-4">Item</th>
-                  <th className="py-3 px-3">Category</th>
-                  <th className="py-3 px-3">Size &amp; Color</th>
-                  <th className="py-3 px-3">Location</th>
-                  <th className="py-3 px-3">Rental Rate</th>
-                  <th className="py-3 px-3">Security Deposit</th>
-                  <th className="py-3 px-3">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredGarments.map((g) => (
-                  <tr key={g.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={g.image}
-                          alt={g.productName}
-                          className="w-11 h-11 rounded-lg object-cover border border-slate-200 shrink-0"
-                        />
-                        <div>
-                          <span className="font-mono text-xs font-semibold text-slate-900">
-                            {g.id}
-                          </span>
-                          <div className="text-slate-700 font-medium line-clamp-1 max-w-[200px]">
-                            {g.productName}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-3 text-slate-500 font-medium whitespace-nowrap">{g.category}</td>
-                    <td className="py-3 px-3 whitespace-nowrap">
-                      <div className="font-medium text-slate-800">{g.size}</div>
-                      <div className="text-[11px] text-slate-400">{g.colour || "—"}</div>
-                    </td>
-                    <td className="py-3 px-3 whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1 text-slate-600 font-medium bg-slate-50 border border-slate-200 px-2 py-0.5 rounded text-[11px]">
-                        <MapPin className="w-3 h-3 text-slate-400" />
-                        <span>{g.location || g.storageLocation}</span>
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 font-semibold text-slate-900 whitespace-nowrap">
-                      {formatINR(g.rentalPrice)}
-                    </td>
-                    <td className="py-3 px-3 text-slate-500 font-medium whitespace-nowrap">
-                      {formatINR(g.securityDeposit)}
-                    </td>
-                    <td className="py-3 px-3 whitespace-nowrap">
-                      <StatusBadge status={g.status} />
-                    </td>
-                    <td className="py-3 px-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => setQrGarment(g)}
-                          title="View Rack Tag"
-                          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                        >
-                          <QrCode className="w-3.5 h-3.5" />
-                        </button>
-                        <Link
-                          href={`/erp/inventory/${g.id}`}
-                          className="px-2.5 py-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors text-[11px] font-medium"
-                        >
-                          Details
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* ========================================================= */}
+      {/* MOBILE CARDS VIEW (< 768px): ZERO HORIZONTAL SCROLL       */}
+      {/* ========================================================= */}
+      <div className="block md:hidden space-y-2.5">
+        {filteredGarments.length === 0 ? (
+          <div className="bg-white p-8 rounded-xl border border-slate-200 text-center text-xs text-slate-500">
+            No costumes found matching your filter.
           </div>
-        </div>
-      ) : (
-        /* Grid Presentation */
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredGarments.map((g) => (
+        ) : (
+          filteredGarments.map((g) => (
             <div
               key={g.id}
-              className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-slate-300 transition-colors flex flex-col justify-between"
+              onClick={() => setSelectedGarment(g)}
+              className="bg-white rounded-xl border border-[#E2E8F0] p-3 shadow-2xs active:bg-slate-50 transition-colors flex items-center justify-between gap-3"
             >
-              <div className="relative">
-                <img src={g.image} alt={g.productName} className="w-full h-44 object-cover" />
-                <div className="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur-xs text-slate-900 text-xs font-mono font-semibold px-2 py-0.5 rounded shadow-xs border border-slate-200">
-                  {g.id}
-                </div>
-                <div className="absolute top-2.5 right-2.5">
-                  <StatusBadge status={g.status} />
+              <div className="flex items-center gap-3 min-w-0">
+                <img
+                  src={g.image}
+                  alt={g.productName}
+                  className="w-14 h-14 rounded-lg object-cover border border-slate-200 shrink-0"
+                />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-mono font-bold text-xs text-[#6B1D2F]">{g.id}</span>
+                    <StatusBadge status={g.status} />
+                  </div>
+                  <div className="text-xs font-semibold text-slate-900 truncate mt-0.5">
+                    {g.productName}
+                  </div>
+                  <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
+                    <span>{g.size}</span>
+                    <span>·</span>
+                    <span className="font-semibold text-slate-900">{formatINR(g.rentalPrice)}</span>
+                    <span>·</span>
+                    <span className="text-slate-400 truncate">{g.location || g.storageLocation}</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="p-4 flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-[11px] text-slate-400">
-                    <span>{g.category}</span>
-                    <span>{g.size}</span>
+              <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* ========================================================= */}
+      {/* DESKTOP PRESENTATION (>= 768px): TABLE OR GRID            */}
+      {/* ========================================================= */}
+      <div className="hidden md:block">
+        {viewMode === "table" ? (
+          <div className="bg-white rounded-xl border border-[#E2E8F0] shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50/80 border-b border-[#E2E8F0] text-slate-500 uppercase text-[10px] tracking-wider font-semibold">
+                  <tr>
+                    <th className="py-3 px-4">Item</th>
+                    <th className="py-3 px-3">Category</th>
+                    <th className="py-3 px-3">Size &amp; Color</th>
+                    <th className="py-3 px-3">Godown Rack</th>
+                    <th className="py-3 px-3">Rental Rate</th>
+                    <th className="py-3 px-3">Deposit</th>
+                    <th className="py-3 px-3">Status</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredGarments.map((g) => (
+                    <tr key={g.id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={g.image}
+                            alt={g.productName}
+                            className="w-11 h-11 rounded-lg object-cover border border-slate-200 shrink-0"
+                          />
+                          <div>
+                            <span className="font-mono text-xs font-semibold text-slate-900">
+                              {g.id}
+                            </span>
+                            <div className="text-slate-700 font-medium line-clamp-1 max-w-[200px]">
+                              {g.productName}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-3 text-slate-500 font-medium whitespace-nowrap">
+                        {g.category}
+                      </td>
+                      <td className="py-3 px-3 whitespace-nowrap">
+                        <div className="font-medium text-slate-800">{g.size}</div>
+                        <div className="text-[11px] text-slate-400">{g.colour || "—"}</div>
+                      </td>
+                      <td className="py-3 px-3 whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1 text-slate-600 font-medium bg-slate-50 border border-slate-200 px-2 py-0.5 rounded text-[11px]">
+                          <MapPin className="w-3 h-3 text-slate-400" />
+                          <span>{g.location || g.storageLocation}</span>
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 font-semibold text-slate-900 whitespace-nowrap">
+                        {formatINR(g.rentalPrice)}
+                      </td>
+                      <td className="py-3 px-3 text-slate-500 font-medium whitespace-nowrap">
+                        {formatINR(g.securityDeposit)}
+                      </td>
+                      <td className="py-3 px-3 whitespace-nowrap">
+                        <StatusBadge status={g.status} />
+                      </td>
+                      <td className="py-3 px-4 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => setQrGarment(g)}
+                            title="View Rack Tag"
+                            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                          >
+                            <QrCode className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setSelectedGarment(g)}
+                            className="px-2.5 py-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors text-[11px] font-medium"
+                          >
+                            Details
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredGarments.map((g) => (
+              <div
+                key={g.id}
+                onClick={() => setSelectedGarment(g)}
+                className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-2xs hover:shadow-md transition-all flex flex-col justify-between cursor-pointer group"
+              >
+                <div className="relative">
+                  <img
+                    src={g.image}
+                    alt={g.productName}
+                    className="w-full h-44 object-cover group-hover:scale-102 transition-transform duration-200"
+                  />
+                  <div className="absolute top-2 left-2">
+                    <span className="font-mono text-[10px] bg-slate-900/90 text-white font-bold px-2 py-0.5 rounded shadow-xs">
+                      {g.id}
+                    </span>
                   </div>
-                  <h3 className="font-semibold text-slate-900 text-xs mt-1 line-clamp-2">
-                    {g.productName}
-                  </h3>
-                  <div className="text-[11px] text-slate-500 mt-2 flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-slate-400" />
-                    <span>{g.location || g.storageLocation}</span>
+                  <div className="absolute top-2 right-2">
+                    <StatusBadge status={g.status} />
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                <div className="p-3.5 flex-1 flex flex-col justify-between">
                   <div>
-                    <div className="text-[10px] text-slate-400">Rental</div>
-                    <div className="font-semibold text-slate-900">{formatINR(g.rentalPrice)}</div>
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase">
+                      {g.category}
+                    </span>
+                    <h3 className="font-medium text-slate-900 text-xs mt-0.5 line-clamp-1">
+                      {g.productName}
+                    </h3>
+                    <div className="text-[11px] text-slate-500 mt-1">
+                      Size: {g.size} · {g.colour}
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-[10px] text-slate-400">Deposit</div>
-                    <div className="text-slate-600 font-medium">{formatINR(g.securityDeposit)}</div>
+
+                  <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <div>
+                      <div className="text-[10px] text-slate-400">Rental / 3d</div>
+                      <div className="font-bold text-[#6B1D2F]">{formatINR(g.rentalPrice)}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[10px] text-slate-400">Rack</div>
+                      <div className="text-[11px] font-medium text-slate-700">
+                        {g.location || g.storageLocation}
+                      </div>
+                    </div>
                   </div>
                 </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ========================================================= */}
+      {/* FULL DETAILS BOTTOM SHEET (ALL 11 CLIENT FIELDS)          */}
+      {/* ========================================================= */}
+      {selectedGarment && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center z-50 animate-in fade-in">
+          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-2xl border border-slate-200 max-w-lg w-full p-4 sm:p-6 text-xs max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
+            {/* Grab handle for mobile */}
+            <div className="sm:hidden w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3" />
+
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-sm font-bold text-[#6B1D2F]">
+                  {selectedGarment.id}
+                </span>
+                <StatusBadge status={selectedGarment.status} />
+              </div>
+              <button
+                onClick={() => setSelectedGarment(null)}
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Content: Photo + 11 Fields */}
+            <div className="mt-3 space-y-3">
+              <div className="relative rounded-xl overflow-hidden border border-slate-200 h-48 sm:h-56 bg-slate-100">
+                <img
+                  src={selectedGarment.image}
+                  alt={selectedGarment.productName}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-2 left-2 bg-slate-900/80 text-white text-[10px] font-mono px-2 py-0.5 rounded">
+                  {selectedGarment.category}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">
+                  {selectedGarment.productName}
+                </h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Condition:{" "}
+                  <strong className="text-emerald-700">
+                    {selectedGarment.condition || selectedGarment.conditionRating}
+                  </strong>{" "}
+                  · Colour: <strong>{selectedGarment.colour || "Standard"}</strong> · Size:{" "}
+                  <strong>{selectedGarment.size}</strong>
+                </p>
+              </div>
+
+              {/* 11 Fields Details Grid */}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
+                  <span className="text-[10px] text-slate-400 font-medium block">
+                    Rental Price / 3 Days
+                  </span>
+                  <span className="text-sm font-bold text-[#6B1D2F]">
+                    {formatINR(selectedGarment.rentalPrice)}
+                  </span>
+                </div>
+
+                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
+                  <span className="text-[10px] text-slate-400 font-medium block">
+                    Security Deposit (Refundable)
+                  </span>
+                  <span className="text-sm font-bold text-slate-900">
+                    {formatINR(selectedGarment.securityDeposit)}
+                  </span>
+                </div>
+
+                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
+                  <span className="text-[10px] text-slate-400 font-medium block">
+                    Purchase Price / Asset Cost
+                  </span>
+                  <span className="font-semibold text-slate-700">
+                    {formatINR(selectedGarment.purchasePrice || 25000)}
+                  </span>
+                </div>
+
+                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
+                  <span className="text-[10px] text-slate-400 font-medium block">
+                    Storage Godown Rack
+                  </span>
+                  <span className="font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-3 h-3 text-[#6B1D2F]" />
+                    <span>{selectedGarment.location || selectedGarment.storageLocation}</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setSelectedGarment(null);
+                    router.push(`/erp/bookings?new=1&sku=${selectedGarment.id}`);
+                  }}
+                  className="flex-1 py-2.5 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                >
+                  <ClipboardList className="w-3.5 h-3.5" />
+                  <span>Book this Piece</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setQrGarment(selectedGarment);
+                    setSelectedGarment(null);
+                  }}
+                  className="px-3 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-medium text-xs transition-colors flex items-center gap-1"
+                >
+                  <QrCode className="w-3.5 h-3.5" />
+                  <span>Rack Tag</span>
+                </button>
               </div>
             </div>
-          ))}
+          </div>
         </div>
       )}
 
-      {/* Add Piece Modal */}
+      {/* ========================================================= */}
+      {/* ADD PIECE WIZARD (MOBILE STEP-BY-STEP & DESKTOP)          */}
+      {/* ========================================================= */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-lg w-full p-6 text-xs animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center z-50 animate-in fade-in">
+          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-2xl border border-slate-200 max-w-md w-full p-4 sm:p-6 text-xs max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
+            <div className="sm:hidden w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3" />
+
+            {/* Modal Header & Step Indicator */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <span className="font-semibold text-sm text-slate-900">Add Inventory Piece</span>
+              <div>
+                <span className="font-semibold text-sm text-slate-900">Add New Costume Piece</span>
+                <div className="text-[10px] text-slate-400 mt-0.5">
+                  Step {addStep} of 2: {addStep === 1 ? "Costume Identity" : "Pricing & Godown Rack"}
+                </div>
+              </div>
               <button
                 onClick={() => setShowAddModal(false)}
                 className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
@@ -355,170 +625,214 @@ export default function InventoryPage() {
               </button>
             </div>
 
-            <form onSubmit={handleAddCostume} className="mt-4 space-y-3.5">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-700 mb-1">
-                    Costume SKU *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. LF-010"
-                    value={costumeId}
-                    onChange={(e) => setCostumeId(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-mono font-semibold"
-                  />
-                </div>
+            <form onSubmit={handleAddCostume} className="mt-4 space-y-3">
+              {addStep === 1 ? (
+                <>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
+                        Costume ID *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. LF-005"
+                        value={costumeId}
+                        onChange={(e) => setCostumeId(e.target.value)}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-mono font-bold text-slate-900"
+                      />
+                    </div>
 
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-700 mb-1">
-                    Category *
-                  </label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value as ProductCategory)}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-medium"
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
+                        Category *
+                      </label>
+                      <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value as ProductCategory)}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-800"
+                      >
+                        {categories
+                          .filter((c) => c !== "ALL")
+                          .map((c) => (
+                            <option key={c} value={c}>
+                              {c}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
+                      Garment Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Red Royal Zardozi Bridal Lehenga"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-medium"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
+                        Size
+                      </label>
+                      <input
+                        type="text"
+                        value={size}
+                        onChange={(e) => setSize(e.target.value)}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
+                        Colour
+                      </label>
+                      <input
+                        type="text"
+                        value={colour}
+                        onChange={(e) => setColour(e.target.value)}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
+                      Photo URL
+                    </label>
+                    <input
+                      type="url"
+                      value={photoUrl}
+                      onChange={(e) => setPhotoUrl(e.target.value)}
+                      className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px]"
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
+                        Rental Rate (₹) *
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        value={rentalPrice}
+                        onChange={(e) => setRentalPrice(e.target.value)}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-bold text-[#6B1D2F]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
+                        Security Deposit (₹) *
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        value={securityDeposit}
+                        onChange={(e) => setSecurityDeposit(e.target.value)}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
+                        Purchase / Asset Cost (₹)
+                      </label>
+                      <input
+                        type="number"
+                        value={purchasePrice}
+                        onChange={(e) => setPurchasePrice(e.target.value)}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-mono"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
+                        Condition
+                      </label>
+                      <select
+                        value={condition}
+                        onChange={(e) => setCondition(e.target.value)}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-medium"
+                      >
+                        <option value="Excellent">Excellent</option>
+                        <option value="Good">Good</option>
+                        <option value="Minor Wear">Minor Wear</option>
+                        <option value="Repairs Needed">Repairs Needed</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
+                      Godown Rack Location *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Godown Rack A-01"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Sticky Bottom Actions */}
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                {addStep === 2 ? (
+                  <button
+                    type="button"
+                    onClick={() => setAddStep(1)}
+                    className="px-3.5 py-2 border border-slate-200 rounded-lg font-medium text-slate-700 hover:bg-slate-50"
                   >
-                    {categories.filter((c) => c !== "ALL").map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-medium text-slate-700 mb-1">
-                  Item Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Red Royal Velvet Bridal Lehenga"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-700 mb-1">
-                    Size *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="M / Adjustable"
-                    value={size}
-                    onChange={(e) => setSize(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-700 mb-1">
-                    Colour *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Red"
-                    value={colour}
-                    onChange={(e) => setColour(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-[10px] font-medium text-slate-700 mb-1">
-                    Purchase Price (₹)
-                  </label>
-                  <input
-                    type="number"
-                    value={purchasePrice}
-                    onChange={(e) => setPurchasePrice(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-medium text-slate-700 mb-1">
-                    Rental Rate (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={rentalPrice}
-                    onChange={(e) => setRentalPrice(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-medium text-slate-700 mb-1">
-                    Security Deposit (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={securityDeposit}
-                    onChange={(e) => setSecurityDeposit(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-700 mb-1">
-                    Condition
-                  </label>
-                  <select
-                    value={condition}
-                    onChange={(e) => setCondition(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
+                    Back
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
+                    className="px-3.5 py-2 border border-slate-200 rounded-lg font-medium text-slate-700 hover:bg-slate-50"
                   >
-                    <option value="Excellent">Excellent</option>
-                    <option value="Good">Good</option>
-                    <option value="Minor Wear">Minor Wear</option>
-                    <option value="Repairs Needed">Repairs Needed</option>
-                  </select>
-                </div>
+                    Cancel
+                  </button>
+                )}
 
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-700 mb-1">
-                    Godown Rack *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Godown Rack A-01"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="px-3.5 py-1.5 border border-slate-200 rounded-lg font-medium text-slate-700 hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-1.5 bg-[#6B1D2F] hover:bg-[#551624] text-white font-medium rounded-lg shadow-xs"
-                >
-                  Save Piece
-                </button>
+                {addStep === 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!costumeId || !name) {
+                        alert("Please fill Costume ID and Name");
+                        return;
+                      }
+                      setAddStep(2);
+                    }}
+                    className="px-4 py-2 bg-[#6B1D2F] hover:bg-[#551624] text-white font-semibold rounded-lg shadow-xs"
+                  >
+                    Next: Pricing &amp; Rack
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-[#6B1D2F] hover:bg-[#551624] text-white font-semibold rounded-lg shadow-xs"
+                  >
+                    Save Piece
+                  </button>
+                )}
               </div>
             </form>
           </div>
@@ -534,7 +848,9 @@ export default function InventoryPage() {
 
             <div className="my-4 p-4 border border-dashed border-slate-300 rounded-lg bg-slate-50 flex flex-col items-center">
               <div className="text-xl font-mono font-bold text-slate-900">{qrGarment.id}</div>
-              <div className="text-xs text-slate-600 mt-1">{qrGarment.category} · {qrGarment.size}</div>
+              <div className="text-xs text-slate-600 mt-1">
+                {qrGarment.category} · {qrGarment.size}
+              </div>
               <div className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 mt-2">
                 Rack: {qrGarment.location || qrGarment.storageLocation}
               </div>

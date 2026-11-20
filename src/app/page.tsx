@@ -107,20 +107,20 @@ export default function HomePage() {
                   Why spend ₹40,000+ on an outfit you will wear once? At <strong>Barnali Fashion</strong> in Bargarh, access handcrafted bridal lehengas, royal sherwanis, and luxury designer gowns at a fraction of the cost — steam-sanitized and custom-fitted for your special day.
                 </p>
 
-                <div className="flex flex-wrap items-center gap-3 pt-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-2 w-full">
                   <Link
                     href="/collections"
-                    className="bg-[#4B1835] hover:bg-[#320F23] text-white font-bold text-xs md:text-sm px-6 py-3.5 rounded-2xl shadow-lg transition-all flex items-center gap-2"
+                    className="bg-[#6B1D2F] hover:bg-[#551624] text-white font-bold text-xs md:text-sm px-6 py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
                   >
                     <span>Browse Rental Collections</span>
-                    <ArrowRight className="w-4 h-4 text-[#D4B67F]" />
+                    <ArrowRight className="w-4 h-4 text-amber-200" />
                   </Link>
 
                   <a
                     href="https://wa.me/917978256488?text=Namaste%20Barnali%20Fashion,%20I%20would%20like%20to%20book%20a%20bridal/wedding%20fitting%20appointment."
                     target="_blank"
                     rel="noreferrer"
-                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs md:text-sm px-6 py-3.5 rounded-2xl shadow-md transition-all flex items-center gap-2"
+                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs md:text-sm px-6 py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
                   >
                     <MessageSquare className="w-4 h-4 text-emerald-200" />
                     <span>WhatsApp Fitting Enquiry</span>
@@ -128,9 +128,9 @@ export default function HomePage() {
 
                   <Link
                     href="/erp/dashboard"
-                    className="bg-white hover:bg-[#FAF5EB] text-[#4B1835] border-2 border-[#4B1835] font-bold text-xs md:text-sm px-4 py-3 rounded-2xl shadow-xs transition-all flex items-center gap-1.5"
+                    className="bg-white hover:bg-slate-50 text-[#6B1D2F] border-2 border-[#6B1D2F] font-bold text-xs md:text-sm px-4 py-3 rounded-xl shadow-2xs transition-all flex items-center justify-center gap-1.5"
                   >
-                    <Lock className="w-3.5 h-3.5 text-[#B89558]" />
+                    <Lock className="w-3.5 h-3.5 text-amber-600" />
                     <span>Internal ERP Demo</span>
                   </Link>
                 </div>
@@ -428,7 +428,7 @@ export default function HomePage() {
               </div>
 
               {/* Right: Interactive Enquiry Form */}
-              <div className="bg-white rounded-3xl border border-[#EFE9DD] p-8 shadow-xl text-xs">
+              <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#EFE9DD] p-4 sm:p-8 shadow-xl text-xs">
                 <div className="font-serif font-bold text-lg text-[#27222A] mb-1">
                   Check Garment Availability &amp; Reserve
                 </div>
