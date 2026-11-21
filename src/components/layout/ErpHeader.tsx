@@ -1,27 +1,28 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
   Search,
-  Plus,
-  RefreshCw,
-  Globe,
-  UserCheck,
-  CheckCircle,
-  AlertTriangle,
-  Clock,
+  Menu,
   X,
   ExternalLink,
   User,
-  Shield,
+  ChevronDown,
   RotateCcw,
   Sparkles,
   Shirt,
   Users as UsersIcon,
   ClipboardList,
+  CalendarDays,
+  LayoutDashboard,
+  AlertTriangle,
+  Clock,
+  MapPin,
+  Phone,
+  Check,
 } from "lucide-react";
 import { DataStore } from "@/lib/dataStore";
 import { NotificationItem, UserRole } from "@/types";
@@ -32,21 +33,56 @@ export function ErpHeader() {
   const [role, setRole] = useState<UserRole>("owner");
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [showNotifMenu, setShowNotifMenu] = useState(false);
-  const [showShopSheet, setShowShopSheet] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileDrawer, setShowMobileDrawer] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const notifRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setRole(DataStore.getCurrentRole());
     setNotifications(DataStore.getNotifications());
   }, []);
 
+  // Keyboard shortcut for Cmd+K / Ctrl+K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setShowSearchModal((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Close popups on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifMenu(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Close mobile drawer when route changes
+  useEffect(() => {
+    setShowMobileDrawer(false);
+  }, [pathname]);
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleRoleChange = (newRole: UserRole) => {
     setRole(newRole);
     DataStore.setCurrentRole(newRole);
-    setShowShopSheet(false);
+    setShowUserMenu(false);
   };
 
   const handleResetData = () => {
@@ -60,44 +96,34 @@ export function ErpHeader() {
     }
   };
 
-  // Everyday shop titles for data entry operator
+  // Clean page titles for header
   const getPageTitle = () => {
     if (pathname.startsWith("/erp/dashboard")) return "Alerts & Today";
-    if (pathname.startsWith("/erp/bookings")) return "New Booking & Handover";
-    if (pathname.startsWith("/erp/inventory")) return "Costumes & Stock";
+    if (pathname.startsWith("/erp/bookings")) return "Orders";
+    if (pathname.startsWith("/erp/inventory")) return "Inventory";
     if (pathname.startsWith("/erp/operations/laundry")) return "Return & Care";
-    if (pathname.startsWith("/erp/calendar")) return "Costume Calendar";
-    if (pathname.startsWith("/erp/customers")) return "Customer Register";
+    if (pathname.startsWith("/erp/calendar")) return "Calendar";
+    if (pathname.startsWith("/erp/customers")) return "Customers";
     return "Barnali Fashion";
   };
 
-  // Contextual quick create button
-  const getQuickAction = () => {
-    if (pathname.startsWith("/erp/inventory")) {
-      return {
-        label: "+ Costume",
-        href: "/erp/inventory?action=new",
-      };
+  // Role display label
+  const getRoleLabel = (r: UserRole) => {
+    switch (r) {
+      case "owner":
+        return "Owner";
+      case "sales_staff":
+        return "Counter Operator";
+      case "admin":
+        return "Admin";
+      case "laundry_staff":
+        return "Care / Laundry";
+      case "viewer":
+        return "Viewer";
+      default:
+        return r;
     }
-    if (pathname.startsWith("/erp/operations/laundry")) {
-      return {
-        label: "+ Care",
-        href: "/erp/operations/laundry?action=new",
-      };
-    }
-    if (pathname.startsWith("/erp/customers")) {
-      return {
-        label: "+ Customer",
-        href: "/erp/customers?action=new",
-      };
-    }
-    return {
-      label: "+ Booking",
-      href: "/erp/bookings?new=1",
-    };
   };
-
-  const quickAction = getQuickAction();
 
   // Search filter
   const allGarments = DataStore.getGarments();
@@ -135,131 +161,112 @@ export function ErpHeader() {
     <>
       <header className="h-14 md:h-16 bg-white border-b border-[#E6E4DF] px-3.5 md:px-6 flex items-center justify-between sticky top-0 z-30 shadow-[0_1px_2px_rgba(0,0,0,0.03)] select-none">
         {/* ========================================================= */}
-        {/* MOBILE STICKY TOP BAR: EXACT 3 CONTROLS MAX (< 768px)     */}
+        {/* MOBILE COMPACT TOP BAR (< 768px): ZERO DUPLICATES         */}
         {/* ========================================================= */}
         <div className="flex md:hidden items-center justify-between w-full">
-          {/* Left: Studio Badge + Page Title */}
-          <div className="flex items-center gap-2.5 min-w-0">
+          {/* Left: Hamburger Menu Trigger + Brand Mark + Page Title */}
+          <div className="flex items-center gap-2 min-w-0">
+            <button
+              onClick={() => setShowMobileDrawer(true)}
+              className="w-8 h-8 rounded-lg text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors -ml-1"
+              aria-label="Open Navigation Menu"
+            >
+              <Menu className="w-5 h-5 text-slate-700" />
+            </button>
+
             <Link
               href="/erp/dashboard"
               className="w-7 h-7 rounded-lg bg-[#6B1D2F] flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-xs"
             >
               BF
             </Link>
-            <div className="min-w-0">
-              <h1 className="font-semibold text-sm text-slate-900 tracking-tight truncate leading-tight">
-                {getPageTitle()}
-              </h1>
-              <div className="text-[10px] text-slate-400 font-normal leading-none mt-0.5">
-                Bargarh Studio
-              </div>
-            </div>
+
+            <h1 className="font-semibold text-sm text-slate-900 tracking-tight truncate leading-none">
+              {getPageTitle()}
+            </h1>
           </div>
 
-          {/* Right Action Controls: EXACT 3 (Search, Quick Create, Shop/Account) */}
+          {/* Right Action Controls: Search Icon + Notification Bell (NO DUPLICATE '+') */}
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* 1. Quick Search Icon */}
+            {/* Search Icon Button */}
             <button
               onClick={() => setShowSearchModal(true)}
-              className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center transition-colors"
               aria-label="Search items"
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-4 h-4 text-slate-600" />
             </button>
 
-            {/* 2. Contextual Quick Action '+' Button */}
-            <Link
-              href={quickAction.href}
-              className="h-8 px-2.5 rounded-lg bg-[#6B1D2F] hover:bg-[#551624] text-white text-xs font-semibold flex items-center gap-1 transition-colors shadow-xs"
-            >
-              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span className="text-[11px]">{quickAction.label}</span>
-            </Link>
-
-            {/* 3. Shop & Role Avatar */}
+            {/* Notification Bell */}
             <button
-              onClick={() => setShowShopSheet(true)}
-              className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center transition-colors relative"
-              aria-label="Shop Menu"
+              onClick={() => setShowNotifMenu(!showNotifMenu)}
+              className="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center transition-colors relative"
+              aria-label="Notifications"
             >
-              <User className="w-4 h-4 text-slate-700" />
+              <Bell className="w-4 h-4 text-slate-600" />
               {unreadCount > 0 && (
-                <span className="absolute top-0 right-0 w-2 h-2 bg-rose-600 rounded-full ring-2 ring-white animate-pulse" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-rose-600 rounded-full ring-2 ring-white animate-pulse" />
               )}
             </button>
           </div>
         </div>
 
         {/* ========================================================= */}
-        {/* DESKTOP HEADER (>= 768px)                                 */}
+        {/* DESKTOP MINIMAL HEADER (>= 768px): SAAS STANDARD         */}
         {/* ========================================================= */}
         <div className="hidden md:flex items-center justify-between w-full">
-          {/* Left: Search Trigger */}
-          <div className="flex items-center gap-3">
+          {/* Left: Global Search Bar */}
+          <div className="flex items-center">
             <button
               onClick={() => setShowSearchModal(true)}
-              className="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs text-slate-500 px-3 py-1.5 rounded-lg transition-colors w-72 justify-between"
+              className="flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 border border-[#E6E4DF] text-xs text-slate-500 px-3.5 py-2 rounded-lg transition-colors w-80 lg:w-96 shadow-2xs"
             >
               <span className="flex items-center gap-2">
-                <Search className="w-3.5 h-3.5 text-slate-400" />
-                <span>Search Costume ID, Client, Order...</span>
+                <Search className="w-4 h-4 text-slate-400" />
+                <span className="font-normal text-slate-500">
+                  Search Costume ID, Client, Order...
+                </span>
               </span>
-              <kbd className="bg-white text-[10px] text-slate-400 font-mono px-1.5 py-0.5 rounded border border-slate-200">
+              <kbd className="bg-white text-[10px] text-slate-400 font-mono font-medium px-1.5 py-0.5 rounded border border-slate-200 shadow-2xs">
                 ⌘K
               </kbd>
             </button>
-
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-full text-[11px] font-medium text-slate-600">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span>Bargarh Studio (In front of LIC Office)</span>
-            </div>
           </div>
 
-          {/* Right Controls */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              target="_blank"
-              className="flex items-center gap-1.5 text-xs font-medium text-slate-700 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-2.5 py-1.5 rounded-lg transition-colors"
-            >
-              <span>Customer Storefront</span>
-              <ExternalLink className="w-3 h-3 text-slate-400" />
-            </Link>
-
-            <Link
-              href="/erp/bookings?new=1"
-              className="flex items-center gap-1.5 bg-[#6B1D2F] hover:bg-[#551624] text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-xs transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>New Booking</span>
-            </Link>
-
-            {/* Notification Bell */}
-            <div className="relative">
+          {/* Right Controls: Notification Bell + Minimal User/Studio Avatar Pill */}
+          <div className="flex items-center gap-2.5">
+            {/* Notification Bell with Clean Dropdown */}
+            <div className="relative" ref={notifRef}>
               <button
                 onClick={() => setShowNotifMenu(!showNotifMenu)}
-                className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors relative"
-                aria-label="Notifications"
+                className="w-9 h-9 text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-[#E6E4DF] rounded-lg transition-colors flex items-center justify-center relative"
+                aria-label="Delivery Alerts & Alarms"
               >
                 <Bell className="w-4 h-4 text-slate-700" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-rose-600 rounded-full ring-2 ring-white animate-pulse" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-600 rounded-full ring-2 ring-white animate-pulse" />
                 )}
               </button>
 
               {showNotifMenu && (
-                <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white border border-[#E2E8F0] rounded-xl shadow-2xl py-2 z-50 text-xs animate-in fade-in slide-in-from-top-1">
-                  <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between">
-                    <span className="font-semibold text-slate-900 text-sm">
-                      Delivery Alerts &amp; Alarms
-                    </span>
-                    <span className="text-[11px] bg-rose-50 text-rose-700 px-2 py-0.5 rounded-full font-semibold">
+                <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white border border-[#E6E4DF] rounded-xl shadow-2xl py-2 z-50 text-xs animate-in fade-in slide-in-from-top-1">
+                  <div className="px-3.5 py-2.5 border-b border-[#EFECE6] flex items-center justify-between">
+                    <div>
+                      <span className="font-semibold text-slate-900 text-sm">
+                        Delivery Alerts &amp; Alarms
+                      </span>
+                      <p className="text-[10px] text-slate-400 mt-0.5">
+                        4-day &amp; 3-day notifications
+                      </p>
+                    </div>
+                    <span className="text-[11px] bg-rose-50 text-rose-800 border border-rose-200 px-2 py-0.5 rounded-full font-semibold">
                       {unreadCount} Due
                     </span>
                   </div>
-                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
+
+                  <div className="max-h-80 overflow-y-auto divide-y divide-[#EFECE6]">
                     {notifications.length === 0 ? (
-                      <div className="p-4 text-center text-slate-400">No new alerts</div>
+                      <div className="p-6 text-center text-slate-400">No new alerts</div>
                     ) : (
                       notifications.map((n) => (
                         <div
@@ -274,18 +281,18 @@ export function ErpHeader() {
                             !n.read ? "bg-amber-50/40" : ""
                           }`}
                         >
-                          <div className="flex items-start gap-2">
+                          <div className="flex items-start gap-2.5">
                             {n.type === "RETURN_OVERDUE" ? (
                               <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                             ) : (
                               <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                             )}
-                            <div>
+                            <div className="min-w-0 flex-1">
                               <div className="font-semibold text-slate-900">{n.title}</div>
                               <p className="text-slate-600 text-[11px] mt-0.5 leading-snug">
                                 {n.message}
                               </p>
-                              <span className="text-[10px] text-slate-400 mt-1 block">
+                              <span className="text-[10px] text-slate-400 mt-1 block font-mono">
                                 {n.timestamp}
                               </span>
                             </div>
@@ -298,125 +305,231 @@ export function ErpHeader() {
               )}
             </div>
 
-            {/* Desktop Role Switcher */}
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg">
-              <span className="text-[10px] uppercase font-bold text-slate-400">Role:</span>
-              <select
-                value={role}
-                onChange={(e) => handleRoleChange(e.target.value as UserRole)}
-                className="bg-transparent text-xs font-semibold text-slate-800 focus:outline-hidden cursor-pointer"
+            {/* Minimal User / Studio Avatar Pill with Role Dropdown */}
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-2 p-1.5 pr-2.5 bg-white hover:bg-slate-50 border border-[#E6E4DF] rounded-lg transition-colors shadow-2xs"
+                aria-label="User Account & Role Menu"
               >
-                <option value="owner">Owner (Full Access)</option>
-                <option value="sales_staff">Counter Operator</option>
-                <option value="admin">Admin</option>
-                <option value="laundry_staff">Laundry / Care Staff</option>
-                <option value="viewer">Viewer</option>
-              </select>
+                <div className="w-7 h-7 rounded-lg bg-[#6B1D2F] text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
+                  BF
+                </div>
+                <div className="text-left hidden lg:block">
+                  <div className="text-xs font-semibold text-slate-900 leading-none">
+                    Barnali Studio
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-medium leading-none mt-1">
+                    {getRoleLabel(role)}
+                  </div>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
+
+              {showUserMenu && (
+                <div className="absolute right-0 mt-2 w-64 bg-white border border-[#E6E4DF] rounded-xl shadow-2xl p-2 z-50 text-xs animate-in fade-in slide-in-from-top-1 space-y-2">
+                  {/* Studio Info Header */}
+                  <div className="p-2.5 bg-[#FAF9F6] rounded-lg border border-[#EFECE6]">
+                    <div className="font-semibold text-slate-900 text-xs">
+                      Barnali Fashion Studio
+                    </div>
+                    <div className="text-[10px] text-slate-500 mt-0.5">
+                      Bargarh, Odisha · Demo Environment
+                    </div>
+                  </div>
+
+                  {/* Role Selector List */}
+                  <div>
+                    <div className="px-2 pb-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                      Switch Role
+                    </div>
+                    <div className="space-y-0.5">
+                      {(
+                        [
+                          { id: "owner", label: "Owner (Full Access)" },
+                          { id: "sales_staff", label: "Counter Operator" },
+                          { id: "admin", label: "Admin" },
+                          { id: "laundry_staff", label: "Care / Laundry Staff" },
+                          { id: "viewer", label: "Viewer" },
+                        ] as const
+                      ).map((r) => (
+                        <button
+                          key={r.id}
+                          onClick={() => handleRoleChange(r.id)}
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors ${
+                            role === r.id
+                              ? "bg-[#6B1D2F]/10 text-[#6B1D2F] font-semibold"
+                              : "text-slate-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          <span>{r.label}</span>
+                          {role === r.id && <Check className="w-3.5 h-3.5 text-[#6B1D2F]" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="pt-1.5 border-t border-[#EFECE6] space-y-1">
+                    <Link
+                      href="/"
+                      target="_blank"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
+                    >
+                      <span>Public Storefront</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                    </Link>
+
+                    <button
+                      onClick={handleResetData}
+                      className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-rose-700 hover:bg-rose-50 font-medium transition-colors"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Reset Demo Data</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </header>
 
       {/* ========================================================= */}
-      {/* SHOP / ROLE / RESET SHEET (MOBILE)                        */}
+      {/* MOBILE SLIDE-OVER NAVIGATION DRAWER                       */}
       {/* ========================================================= */}
-      {showShopSheet && (
-        <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end">
+      {showMobileDrawer && (
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          {/* Backdrop */}
           <div
-            onClick={() => setShowShopSheet(false)}
+            onClick={() => setShowMobileDrawer(false)}
             className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in"
           />
-          <div className="relative bg-white rounded-t-2xl shadow-2xl border-t border-[#E2E8F0] p-4 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200 text-xs">
-            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3" />
 
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-[#6B1D2F] text-white flex items-center justify-center font-bold text-xs">
-                  BF
-                </div>
-                <div>
-                  <div className="font-semibold text-slate-900 text-sm">
-                    Barnali Fashion, Bargarh
+          {/* Slide-over Drawer Content */}
+          <div className="relative bg-white w-4/5 max-w-xs h-full shadow-2xl flex flex-col justify-between p-4 z-10 animate-in slide-in-from-left duration-200">
+            <div>
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-[#EFECE6]">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-[#6B1D2F] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    BF
                   </div>
-                  <div className="text-[10px] text-slate-500">
-                    Boutique &amp; Rental Studio Operations
+                  <div>
+                    <div className="font-bold text-slate-900 text-sm leading-tight">
+                      Barnali Fashion
+                    </div>
+                    <div className="text-[10px] text-slate-500 leading-tight mt-0.5">
+                      Rental Studio · Bargarh
+                    </div>
                   </div>
                 </div>
+                <button
+                  onClick={() => setShowMobileDrawer(false)}
+                  className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg"
+                  aria-label="Close menu"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-              <button
-                onClick={() => setShowShopSheet(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
 
-            {/* Quick Links */}
-            <div className="py-3 space-y-1.5">
-              <Link
-                href="/erp/calendar"
-                onClick={() => setShowShopSheet(false)}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 font-medium text-slate-800"
-              >
-                <span>Costume Code Calendar View</span>
-                <span className="text-[10px] text-slate-400">Nov 2026 &rarr;</span>
-              </Link>
+              {/* Navigation Links */}
+              <div className="py-3 space-y-1 text-xs">
+                <div className="px-2 pb-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                  Navigation
+                </div>
 
-              <Link
-                href="/erp/customers"
-                onClick={() => setShowShopSheet(false)}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 font-medium text-slate-800"
-              >
-                <span>Customer Contacts &amp; Ledger</span>
-                <span className="text-[10px] text-slate-400">View Clients &rarr;</span>
-              </Link>
-
-              <Link
-                href="/"
-                target="_blank"
-                onClick={() => setShowShopSheet(false)}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 font-medium text-slate-800"
-              >
-                <span>Open Public Storefront</span>
-                <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-              </Link>
-            </div>
-
-            {/* Switch Mode */}
-            <div className="pt-2 border-t border-slate-100">
-              <div className="text-[10px] font-semibold uppercase text-slate-400 tracking-wider mb-2">
-                Operator Mode
-              </div>
-              <div className="grid grid-cols-2 gap-2">
                 {[
-                  { id: "owner", label: "Owner (Full)" },
-                  { id: "sales_staff", label: "Counter Operator" },
-                  { id: "admin", label: "Admin" },
-                  { id: "laundry_staff", label: "Laundry Ops" },
-                ].map((r) => (
-                  <button
-                    key={r.id}
-                    onClick={() => handleRoleChange(r.id as UserRole)}
-                    className={`py-2 px-2.5 rounded-xl border text-left font-medium transition-colors ${
-                      role === r.id
-                        ? "bg-[#6B1D2F] text-white border-[#6B1D2F]"
-                        : "bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200"
-                    }`}
-                  >
-                    {r.label}
-                  </button>
-                ))}
+                  { label: "Dashboard & Alerts", href: "/erp/dashboard", icon: LayoutDashboard },
+                  { label: "Orders & Counter", href: "/erp/bookings", icon: ClipboardList },
+                  { label: "Costumes & Stock", href: "/erp/inventory", icon: Shirt },
+                  { label: "Care & Laundry", href: "/erp/operations/laundry", icon: Sparkles },
+                  { label: "Calendar", href: "/erp/calendar", icon: CalendarDays },
+                  { label: "Customers", href: "/erp/customers", icon: UsersIcon },
+                ].map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== "/erp/dashboard" && pathname.startsWith(item.href));
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setShowMobileDrawer(false)}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-colors ${
+                        isActive
+                          ? "bg-[#6B1D2F]/10 text-[#6B1D2F] font-semibold"
+                          : "text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      <Icon
+                        className={`w-4 h-4 ${isActive ? "text-[#6B1D2F]" : "text-slate-400"}`}
+                      />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+
+                <Link
+                  href="/"
+                  target="_blank"
+                  onClick={() => setShowMobileDrawer(false)}
+                  className="flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-700 hover:bg-slate-50 font-medium"
+                >
+                  <span className="flex items-center gap-3">
+                    <ExternalLink className="w-4 h-4 text-slate-400" />
+                    <span>Storefront</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400">View &rarr;</span>
+                </Link>
+              </div>
+
+              {/* Switch Role on Mobile */}
+              <div className="pt-2 border-t border-[#EFECE6]">
+                <div className="px-2 pb-1.5 text-[10px] font-semibold uppercase text-slate-400 tracking-wider">
+                  Active Role
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 text-xs">
+                  {[
+                    { id: "owner", label: "Owner" },
+                    { id: "sales_staff", label: "Counter" },
+                    { id: "admin", label: "Admin" },
+                    { id: "laundry_staff", label: "Care Staff" },
+                  ].map((r) => (
+                    <button
+                      key={r.id}
+                      onClick={() => handleRoleChange(r.id as UserRole)}
+                      className={`py-1.5 px-2 rounded-lg border text-center font-medium transition-colors text-[11px] ${
+                        role === r.id
+                          ? "bg-[#6B1D2F] text-white border-[#6B1D2F] font-semibold"
+                          : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+                      }`}
+                    >
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Reset Prototype Data */}
-            <div className="pt-3 mt-3 border-t border-slate-100">
+            {/* Drawer Footer: Studio Address & Reset Demo Data */}
+            <div className="pt-3 border-t border-[#EFECE6] space-y-2 text-xs">
+              <div className="p-2.5 bg-[#FAF9F6] rounded-xl border border-[#EFECE6] text-[11px] text-slate-600 leading-snug">
+                <div className="font-semibold text-slate-800 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#6B1D2F]" />
+                  <span>Bargarh Studio</span>
+                </div>
+                <div className="text-[10px] text-slate-500 mt-0.5">LIC Office Rd, Bargarh</div>
+                <div className="text-[10px] text-slate-500 font-mono mt-0.5">+91 7978256488</div>
+              </div>
+
               <button
                 onClick={handleResetData}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-rose-50 text-rose-700 font-medium border border-rose-200 transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-rose-50 text-rose-800 font-medium border border-rose-200 text-xs transition-colors"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset Demo Shop Data</span>
+                <span>Reset Demo Data</span>
               </button>
             </div>
           </div>
@@ -424,12 +537,12 @@ export function ErpHeader() {
       )}
 
       {/* ========================================================= */}
-      {/* FAST OPERATOR SEARCH MODAL                                */}
+      {/* FAST OPERATOR SEARCH MODAL (CMD+K / SEARCH ICON)          */}
       {/* ========================================================= */}
       {showSearchModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-start justify-center pt-3 md:pt-20 px-3 z-50 animate-in fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl border border-[#E2E8F0] w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-150">
-            <div className="p-3.5 border-b border-slate-200 flex items-center gap-2.5">
+          <div className="bg-white rounded-2xl shadow-2xl border border-[#E6E4DF] w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+            <div className="p-3.5 border-b border-[#EFECE6] flex items-center gap-2.5">
               <Search className="w-4 h-4 text-slate-400 shrink-0" />
               <input
                 type="text"
@@ -437,7 +550,7 @@ export function ErpHeader() {
                 placeholder="Search Costume ID (LF-001, SH-001), Client, Phone, Order..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full text-xs md:text-sm text-slate-900 focus:outline-hidden placeholder:text-slate-400"
+                className="w-full text-xs md:text-sm text-slate-900 focus:outline-hidden placeholder:text-slate-400 bg-transparent"
               />
               <button
                 onClick={() => setShowSearchModal(false)}
@@ -471,7 +584,7 @@ export function ErpHeader() {
                               setShowSearchModal(false);
                               router.push(`/erp/inventory?sku=${g.id}`);
                             }}
-                            className="p-2.5 hover:bg-slate-50 rounded-xl cursor-pointer flex items-center justify-between border border-slate-100"
+                            className="p-2.5 hover:bg-slate-50 rounded-xl cursor-pointer flex items-center justify-between border border-[#EFECE6]"
                           >
                             <div>
                               <span className="font-mono font-bold text-[#6B1D2F] mr-2">
@@ -482,7 +595,7 @@ export function ErpHeader() {
                                 · Rack: {g.location || g.storageLocation}
                               </span>
                             </div>
-                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
                               {g.status}
                             </span>
                           </div>
@@ -505,7 +618,7 @@ export function ErpHeader() {
                               setShowSearchModal(false);
                               router.push(`/erp/bookings?orderId=${b.id}`);
                             }}
-                            className="p-2.5 hover:bg-slate-50 rounded-xl cursor-pointer flex items-center justify-between border border-slate-100"
+                            className="p-2.5 hover:bg-slate-50 rounded-xl cursor-pointer flex items-center justify-between border border-[#EFECE6]"
                           >
                             <div>
                               <span className="font-mono font-bold text-slate-900 mr-2">
@@ -516,7 +629,7 @@ export function ErpHeader() {
                                 {b.customerPhone}
                               </span>
                             </div>
-                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300">
                               {b.status}
                             </span>
                           </div>
@@ -539,7 +652,7 @@ export function ErpHeader() {
                               setShowSearchModal(false);
                               router.push(`/erp/customers?id=${c.id}`);
                             }}
-                            className="p-2.5 hover:bg-slate-50 rounded-xl cursor-pointer flex items-center justify-between border border-slate-100"
+                            className="p-2.5 hover:bg-slate-50 rounded-xl cursor-pointer flex items-center justify-between border border-[#EFECE6]"
                           >
                             <div>
                               <span className="font-semibold text-slate-900 mr-2">{c.name}</span>
@@ -547,7 +660,7 @@ export function ErpHeader() {
                                 {c.phone} · {c.city}
                               </span>
                             </div>
-                            <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                               {c.id}
                             </span>
                           </div>
