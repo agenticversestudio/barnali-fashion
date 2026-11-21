@@ -360,163 +360,165 @@ function BookingsContent() {
       </div>
 
       {/* ========================================================= */}
-      {/* MOBILE ORDER CARDS (< 768px): 4-ROW ZERO-SCROLL LAYOUT    */}
+      {/* MOBILE & TABLET ORDER CARDS (< 1024px): 2-COL ON TABLET   */}
       {/* ========================================================= */}
-      <div className="block md:hidden space-y-3">
+      <div className="block lg:hidden">
         {filteredBookings.length === 0 ? (
           <div className="bg-white p-8 rounded-xl border border-[#E6E4DF] text-center text-xs text-slate-500 shadow-2xs">
             No orders found matching your filter.
           </div>
         ) : (
-          filteredBookings.map((b) => {
-            const isOut = b.status === "OUT_ON_RENT";
-            const isConfirmed = b.status === "CONFIRMED" || b.status === "PICKUP_PENDING";
-            const isCompleted = b.status === "COMPLETED";
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {filteredBookings.map((b) => {
+              const isOut = b.status === "OUT_ON_RENT";
+              const isConfirmed = b.status === "CONFIRMED" || b.status === "PICKUP_PENDING";
+              const isCompleted = b.status === "COMPLETED";
 
-            return (
-              <div
-                key={b.id}
-                className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] space-y-2.5"
-              >
-                {/* Row 1: Header (Order ID on left, Status Badge on right) */}
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-xs font-bold text-slate-900 bg-slate-100/80 px-2 py-0.5 rounded border border-slate-200">
-                    {b.id}
-                  </span>
-                  <StatusBadge status={b.status} />
-                </div>
-
-                {/* Row 2: Body Block (Customer on top, SKU & Name, paired dates & amounts) */}
-                <div className="space-y-1.5">
+              return (
+                <div
+                  key={b.id}
+                  className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col justify-between gap-2.5 min-w-0"
+                >
+                  {/* Row 1: Header (Order ID on left, Status Badge on right) */}
                   <div className="flex items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="text-xs font-semibold text-slate-900 truncate">
-                        {b.customerName}
+                    <span className="font-mono text-xs font-bold text-slate-900 bg-slate-100/80 px-2 py-0.5 rounded border border-slate-200">
+                      {b.id}
+                    </span>
+                    <StatusBadge status={b.status} />
+                  </div>
+
+                  {/* Row 2: Body Block (Customer, SKU & Name, paired dates & amounts) */}
+                  <div className="space-y-1.5 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="text-xs font-semibold text-slate-900 truncate">
+                          {b.customerName}
+                        </div>
+                        <div className="text-[11px] text-slate-500 font-mono">
+                          +91 {b.customerPhone}
+                        </div>
                       </div>
-                      <div className="text-[11px] text-slate-500 font-mono">
-                        +91 {b.customerPhone}
-                      </div>
+
+                      <a
+                        href={`https://wa.me/91${b.customerPhone}?text=Namaste%20${encodeURIComponent(
+                          b.customerName
+                        )},%20Barnali%20Fashion%20se%20Order%20${b.id}%20ka%20update.`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="min-h-[36px] min-w-[36px] p-2 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition-colors flex items-center justify-center shrink-0"
+                        title="WhatsApp Customer"
+                      >
+                        <MessageCircle className="w-4 h-4 text-emerald-600" />
+                      </a>
                     </div>
 
-                    <a
-                      href={`https://wa.me/91${b.customerPhone}?text=Namaste%20${encodeURIComponent(
-                        b.customerName
-                      )},%20Barnali%20Fashion%20se%20Order%20${b.id}%20ka%20update.`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition-colors"
-                      title="WhatsApp Customer"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                    </a>
-                  </div>
+                    <div className="flex items-center gap-1.5 text-xs pt-0.5">
+                      <span className="font-mono font-bold text-[#6B1D2F] bg-rose-50/60 px-1.5 py-0.5 rounded border border-rose-200/60 shrink-0">
+                        {b.costumeCode || b.items[0]?.garmentUnitId}
+                      </span>
+                      <span className="text-slate-700 font-medium line-clamp-1">
+                        {b.items[0]?.productName}
+                      </span>
+                    </div>
 
-                  <div className="flex items-center gap-1.5 text-xs pt-0.5">
-                    <span className="font-mono font-bold text-[#6B1D2F] bg-rose-50/60 px-1.5 py-0.5 rounded border border-rose-200/60 shrink-0">
-                      {b.costumeCode || b.items[0]?.garmentUnitId}
-                    </span>
-                    <span className="text-slate-700 font-medium truncate">
-                      {b.items[0]?.productName}
-                    </span>
-                  </div>
-
-                  {/* Clean 2-Col Data Strip for Dates and Financials */}
-                  <div className="bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg space-y-1.5 text-xs mt-1">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Pickup Date</span>
-                        <span className="font-mono font-semibold text-slate-800">{b.pickupDate}</span>
+                    {/* Clean 2-Col Data Strip for Dates and Financials */}
+                    <div className="bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg space-y-1.5 text-xs mt-1">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Pickup Date</span>
+                          <span className="font-mono font-semibold text-slate-800">{b.pickupDate}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Return Due</span>
+                          <div className="flex items-center gap-1">
+                            <span className="font-mono font-semibold text-slate-800">{b.returnDueDate}</span>
+                            {b.lateDays && b.lateDays > 0 ? (
+                              <span className="text-[9px] font-bold text-rose-800 bg-rose-100 px-1 rounded border border-rose-300">
+                                {b.lateDays}d late
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Return Due</span>
-                        <div className="flex items-center gap-1">
-                          <span className="font-mono font-semibold text-slate-800">{b.returnDueDate}</span>
-                          {b.lateDays && b.lateDays > 0 ? (
-                            <span className="text-[9px] font-bold text-rose-800 bg-rose-100 px-1 rounded border border-rose-300">
-                              {b.lateDays}d late
-                            </span>
-                          ) : null}
+
+                      <div className="grid grid-cols-3 gap-1 pt-1.5 border-t border-[#EFECE6] text-[11px]">
+                        <div>
+                          <span className="text-[9px] text-slate-500 uppercase block">Adv Paid</span>
+                          <span className="font-semibold text-emerald-800">{formatINR(b.advancePaid)}</span>
+                        </div>
+                        <div>
+                          <span className="text-[9px] text-slate-500 uppercase block">Balance Due</span>
+                          <span className="font-semibold text-slate-900">{formatINR(b.remainingRentalDue || 0)}</span>
+                        </div>
+                        <div>
+                          <span className="text-[9px] text-slate-500 uppercase block">Deposit</span>
+                          <span className="font-semibold text-slate-700">{formatINR(b.securityDepositTotal)}</span>
                         </div>
                       </div>
                     </div>
+                  </div>
 
-                    <div className="grid grid-cols-3 gap-1 pt-1.5 border-t border-[#EFECE6] text-[11px]">
-                      <div>
-                        <span className="text-[9px] text-slate-500 uppercase block">Adv Paid</span>
-                        <span className="font-semibold text-emerald-800">{formatINR(b.advancePaid)}</span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] text-slate-500 uppercase block">Balance Due</span>
-                        <span className="font-semibold text-slate-900">{formatINR(b.remainingRentalDue || 0)}</span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] text-slate-500 uppercase block">Deposit</span>
-                        <span className="font-semibold text-slate-700">{formatINR(b.securityDepositTotal)}</span>
-                      </div>
+                  {/* Row 3: Notes if present */}
+                  {b.eventName && (
+                    <div className="bg-[#FAF9F6] border border-[#EFECE6] p-2 rounded-lg text-[11px] text-slate-700 italic">
+                      Event: {b.eventName}
+                    </div>
+                  )}
+
+                  {/* Row 4: Footer (Details on left, Primary Action on right) */}
+                  <div className="flex items-center justify-between pt-2 border-t border-[#EFECE6] gap-2 mt-auto">
+                    <button
+                      onClick={() => setSelectedOrder(b)}
+                      className="min-h-[40px] px-3.5 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors flex items-center justify-center"
+                    >
+                      Details
+                    </button>
+
+                    <div className="flex items-center gap-1.5">
+                      {isConfirmed && (
+                        <button
+                          onClick={() => {
+                            setHandoverBooking(b);
+                            setHandoverDate("2026-11-08");
+                          }}
+                          className="min-h-[40px] px-3.5 bg-[#6B1D2F] hover:bg-[#551624] text-white font-semibold rounded-lg text-xs transition-colors shadow-xs flex items-center justify-center"
+                        >
+                          Handover
+                        </button>
+                      )}
+
+                      {isOut && (
+                        <button
+                          onClick={() => {
+                            setReturnBooking(b);
+                            setActualReturnDate("2026-11-08");
+                            setDamageCharge(0);
+                            setCleaningCharge(0);
+                          }}
+                          className="min-h-[40px] px-3.5 bg-rose-700 hover:bg-rose-800 text-white font-semibold rounded-lg text-xs transition-colors shadow-xs flex items-center justify-center"
+                        >
+                          Return &amp; Inspect
+                        </button>
+                      )}
+
+                      {isCompleted && (
+                        <span className="min-h-[40px] px-3.5 inline-flex items-center text-xs text-emerald-800 font-semibold bg-emerald-50 rounded-lg border border-emerald-300">
+                          Settled
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
-
-                {/* Row 3: Notes if present */}
-                {b.eventName && (
-                  <div className="bg-[#FAF9F6] border border-[#EFECE6] p-2 rounded-lg text-[11px] text-slate-700 italic">
-                    Event: {b.eventName}
-                  </div>
-                )}
-
-                {/* Row 4: Footer (Details on left, Primary Action on right) */}
-                <div className="flex items-center justify-between pt-2 border-t border-[#EFECE6] gap-2">
-                  <button
-                    onClick={() => setSelectedOrder(b)}
-                    className="h-8 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors"
-                  >
-                    Details
-                  </button>
-
-                  <div className="flex items-center gap-1.5">
-                    {isConfirmed && (
-                      <button
-                        onClick={() => {
-                          setHandoverBooking(b);
-                          setHandoverDate("2026-11-08");
-                        }}
-                        className="h-8 px-3.5 bg-[#6B1D2F] hover:bg-[#551624] text-white font-semibold rounded-lg text-xs transition-colors shadow-xs"
-                      >
-                        Handover
-                      </button>
-                    )}
-
-                    {isOut && (
-                      <button
-                        onClick={() => {
-                          setReturnBooking(b);
-                          setActualReturnDate("2026-11-08");
-                          setDamageCharge(0);
-                          setCleaningCharge(0);
-                        }}
-                        className="h-8 px-3.5 bg-rose-700 hover:bg-rose-800 text-white font-semibold rounded-lg text-xs transition-colors shadow-xs"
-                      >
-                        Return &amp; Inspect
-                      </button>
-                    )}
-
-                    {isCompleted && (
-                      <span className="h-8 px-3 inline-flex items-center text-xs text-emerald-800 font-semibold bg-emerald-50 rounded-lg border border-emerald-300">
-                        Settled
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })
+              );
+            })}
+          </div>
         )}
       </div>
 
       {/* ========================================================= */}
-      {/* DESKTOP ORDERS TABLE (>= 768px)                           */}
+      {/* DESKTOP ORDERS TABLE (>= 1024px)                          */}
       {/* ========================================================= */}
-      <div className="hidden md:block bg-white rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+      <div className="hidden lg:block bg-white rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-[#FAF9F6] border-b border-[#E6E4DF] text-slate-600 uppercase text-[10px] tracking-wider font-semibold">

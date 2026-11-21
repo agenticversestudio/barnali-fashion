@@ -212,14 +212,22 @@ export function ErpHeader() {
         </div>
 
         {/* ========================================================= */}
-        {/* DESKTOP MINIMAL HEADER (>= 768px): SAAS STANDARD         */}
+        {/* DESKTOP & TABLET MINIMAL HEADER (>= 768px)                */}
         {/* ========================================================= */}
         <div className="hidden md:flex items-center justify-between w-full">
-          {/* Left: Global Search Bar */}
-          <div className="flex items-center">
+          {/* Left: Tablet Hamburger (lg:hidden) + Global Search Bar */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowMobileDrawer(true)}
+              className="lg:hidden w-10 h-10 rounded-lg text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors border border-[#E6E4DF] bg-white shrink-0 shadow-2xs active:bg-slate-100"
+              aria-label="Open Navigation Menu"
+            >
+              <Menu className="w-5 h-5 text-slate-700" />
+            </button>
+
             <button
               onClick={() => setShowSearchModal(true)}
-              className="flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 border border-[#E6E4DF] text-xs text-slate-500 px-3.5 py-2 rounded-lg transition-colors w-80 lg:w-96 shadow-2xs"
+              className="flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 border border-[#E6E4DF] text-xs text-slate-500 px-3.5 py-2.5 rounded-lg transition-colors w-72 md:w-80 lg:w-96 shadow-2xs"
             >
               <span className="flex items-center gap-2">
                 <Search className="w-4 h-4 text-slate-400" />
@@ -397,10 +405,10 @@ export function ErpHeader() {
       </header>
 
       {/* ========================================================= */}
-      {/* MOBILE SLIDE-OVER NAVIGATION DRAWER                       */}
+      {/* MOBILE & TABLET SLIDE-OVER NAVIGATION DRAWER (< 1024px)   */}
       {/* ========================================================= */}
       {showMobileDrawer && (
-        <div className="md:hidden fixed inset-0 z-50 flex">
+        <div className="lg:hidden fixed inset-0 z-50 flex">
           {/* Backdrop */}
           <div
             onClick={() => setShowMobileDrawer(false)}

@@ -177,21 +177,114 @@ export default function StitchingAndDryCleanPage() {
       </div>
 
       {/* ========================================================= */}
-      {/* MOBILE CARE CARDS (< 768px): 4-ROW ZERO-SCROLL LAYOUT     */}
+      {/* MOBILE & TABLET CARE CARDS (< 1024px): 2-COL ON TABLET     */}
       {/* ========================================================= */}
-      <div className="block md:hidden space-y-3">
+      <div className="block lg:hidden">
         {activeTab === "stitching" ? (
           stitchingJobs.length === 0 ? (
             <div className="bg-white p-8 rounded-xl border border-[#E6E4DF] text-center text-xs text-slate-500 shadow-2xs">
               No tailoring jobs in register.
             </div>
           ) : (
-            stitchingJobs.map((job) => {
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              {stitchingJobs.map((job) => {
+                const isOut = job.status === "OUT" || !job.rcvDate;
+                return (
+                  <div
+                    key={job.id}
+                    className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col justify-between gap-3 min-w-0"
+                  >
+                    {/* Row 1: Header (Costume ID left, Status Badge right) */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-xs font-bold text-[#6B1D2F] bg-rose-50/60 px-2 py-0.5 rounded border border-rose-200/60">
+                        {job.costumeId}
+                      </span>
+                      {isOut ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-300">
+                          With Tailor
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                          Available
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Row 2: Body Block (Title on own line, vendor below, Out/Rcv date pairs) */}
+                    <div className="space-y-1.5 min-w-0">
+                      <div className="text-xs font-semibold text-slate-900 leading-snug line-clamp-2">
+                        {job.costumeName}
+                      </div>
+                      <div className="text-[11px] text-slate-600 flex items-center gap-1.5">
+                        <Scissors className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{job.tailorName}</span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-xs mt-1">
+                        <div>
+                          <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Out Date</span>
+                          <span className="font-mono font-semibold text-slate-800">{job.outDate}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Rcv Date</span>
+                          {job.rcvDate ? (
+                            <span className="font-mono font-semibold text-emerald-800">{job.rcvDate}</span>
+                          ) : (
+                            <span className="font-medium text-amber-800">Pending</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Row 3: Notes Box */}
+                    {job.notes && (
+                      <div className="bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-[11px] text-slate-700 italic">
+                        &ldquo;{job.notes}&rdquo;
+                      </div>
+                    )}
+
+                    {/* Row 4: Footer (Details left, Primary Action right) */}
+                    <div className="flex items-center justify-between pt-2.5 border-t border-[#EFECE6] gap-2 mt-auto">
+                      <button
+                        onClick={() => setSelectedCareJob({ type: "stitching", job })}
+                        className="min-h-[40px] px-3.5 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors flex items-center justify-center"
+                      >
+                        Details
+                      </button>
+
+                      {isOut && (
+                        <button
+                          onClick={() => {
+                            setRcvItem({
+                              type: "stitching",
+                              id: job.id,
+                              costumeId: job.costumeId,
+                            });
+                            setRcvDate("2026-11-08");
+                          }}
+                          className="min-h-[40px] px-4 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors flex items-center justify-center"
+                        >
+                          Mark Received
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )
+        ) : dryCleanJobs.length === 0 ? (
+          <div className="bg-white p-8 rounded-xl border border-[#E6E4DF] text-center text-xs text-slate-500 shadow-2xs">
+            No dry cleaning jobs in register.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {dryCleanJobs.map((job) => {
               const isOut = job.status === "OUT" || !job.rcvDate;
               return (
                 <div
                   key={job.id}
-                  className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] space-y-2.5"
+                  className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col justify-between gap-3 min-w-0"
                 >
                   {/* Row 1: Header (Costume ID left, Status Badge right) */}
                   <div className="flex items-center justify-between gap-2">
@@ -199,8 +292,8 @@ export default function StitchingAndDryCleanPage() {
                       {job.costumeId}
                     </span>
                     {isOut ? (
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-300">
-                        With Tailor
+                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-800 border border-purple-300">
+                        At Cleaner
                       </span>
                     ) : (
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
@@ -210,13 +303,13 @@ export default function StitchingAndDryCleanPage() {
                   </div>
 
                   {/* Row 2: Body Block (Title on own line, vendor below, Out/Rcv date pairs) */}
-                  <div className="space-y-1.5">
-                    <div className="text-xs font-semibold text-slate-900 leading-snug">
+                  <div className="space-y-1.5 min-w-0">
+                    <div className="text-xs font-semibold text-slate-900 leading-snug line-clamp-2">
                       {job.costumeName}
                     </div>
                     <div className="text-[11px] text-slate-600 flex items-center gap-1.5">
-                      <Scissors className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{job.tailorName}</span>
+                      <Sparkles className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{job.vendorName}</span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-xs mt-1">
@@ -243,10 +336,10 @@ export default function StitchingAndDryCleanPage() {
                   )}
 
                   {/* Row 4: Footer (Details left, Primary Action right) */}
-                  <div className="flex items-center justify-between pt-2 border-t border-[#EFECE6] gap-2">
+                  <div className="flex items-center justify-between pt-2.5 border-t border-[#EFECE6] gap-2 mt-auto">
                     <button
-                      onClick={() => setSelectedCareJob({ type: "stitching", job })}
-                      className="h-8 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors"
+                      onClick={() => setSelectedCareJob({ type: "dryclean", job })}
+                      className="min-h-[40px] px-3.5 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors flex items-center justify-center"
                     >
                       Details
                     </button>
@@ -255,13 +348,13 @@ export default function StitchingAndDryCleanPage() {
                       <button
                         onClick={() => {
                           setRcvItem({
-                            type: "stitching",
+                            type: "dryclean",
                             id: job.id,
                             costumeId: job.costumeId,
                           });
                           setRcvDate("2026-11-08");
                         }}
-                        className="h-8 px-3.5 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
+                        className="min-h-[40px] px-4 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors flex items-center justify-center"
                       >
                         Mark Received
                       </button>
@@ -269,104 +362,15 @@ export default function StitchingAndDryCleanPage() {
                   </div>
                 </div>
               );
-            })
-          )
-        ) : dryCleanJobs.length === 0 ? (
-          <div className="bg-white p-8 rounded-xl border border-[#E6E4DF] text-center text-xs text-slate-500 shadow-2xs">
-            No dry cleaning jobs in register.
+            })}
           </div>
-        ) : (
-          dryCleanJobs.map((job) => {
-            const isOut = job.status === "OUT" || !job.rcvDate;
-            return (
-              <div
-                key={job.id}
-                className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] space-y-2.5"
-              >
-                {/* Row 1: Header (Costume ID left, Status Badge right) */}
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-xs font-bold text-[#6B1D2F] bg-rose-50/60 px-2 py-0.5 rounded border border-rose-200/60">
-                    {job.costumeId}
-                  </span>
-                  {isOut ? (
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-800 border border-purple-300">
-                      At Cleaner
-                    </span>
-                  ) : (
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
-                      Available
-                    </span>
-                  )}
-                </div>
-
-                {/* Row 2: Body Block (Title on own line, vendor below, Out/Rcv date pairs) */}
-                <div className="space-y-1.5">
-                  <div className="text-xs font-semibold text-slate-900 leading-snug">
-                    {job.costumeName}
-                  </div>
-                  <div className="text-[11px] text-slate-600 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{job.vendorName}</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-xs mt-1">
-                    <div>
-                      <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Out Date</span>
-                      <span className="font-mono font-semibold text-slate-800">{job.outDate}</span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Rcv Date</span>
-                      {job.rcvDate ? (
-                        <span className="font-mono font-semibold text-emerald-800">{job.rcvDate}</span>
-                      ) : (
-                        <span className="font-medium text-amber-800">Pending</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Row 3: Notes Box */}
-                {job.notes && (
-                  <div className="bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-[11px] text-slate-700 italic">
-                    &ldquo;{job.notes}&rdquo;
-                  </div>
-                )}
-
-                {/* Row 4: Footer (Details left, Primary Action right) */}
-                <div className="flex items-center justify-between pt-2 border-t border-[#EFECE6] gap-2">
-                  <button
-                    onClick={() => setSelectedCareJob({ type: "dryclean", job })}
-                    className="h-8 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors"
-                  >
-                    Details
-                  </button>
-
-                  {isOut && (
-                    <button
-                      onClick={() => {
-                        setRcvItem({
-                          type: "dryclean",
-                          id: job.id,
-                          costumeId: job.costumeId,
-                        });
-                        setRcvDate("2026-11-08");
-                      }}
-                      className="h-8 px-3.5 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
-                    >
-                      Mark Received
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })
         )}
       </div>
 
       {/* ========================================================= */}
-      {/* DESKTOP PRESENTATION (>= 768px): FULL TABLES              */}
+      {/* DESKTOP PRESENTATION (>= 1024px): FULL TABLES             */}
       {/* ========================================================= */}
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         {activeTab === "stitching" && (
           <div className="bg-white rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
             <div className="overflow-x-auto">

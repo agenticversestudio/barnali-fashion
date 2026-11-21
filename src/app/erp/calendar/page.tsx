@@ -209,84 +209,88 @@ export default function AvailabilityCalendarPage() {
       </div>
 
       {/* ========================================================= */}
-      {/* DESKTOP 30-DAY TIMELINE MATRIX (>= 768px)                 */}
+      {/* 30-DAY TIMELINE MATRIX (MD+ & DESKTOP WITH STICKY SKU)     */}
       {/* ========================================================= */}
       <div className="hidden md:block bg-white rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <div className="overflow-x-auto">
-          <div className="min-w-[900px]">
-            {/* Days Header */}
-            <div className="grid grid-cols-31 bg-slate-50 border-b border-slate-200 text-[10px] font-semibold text-slate-500">
-              <div className="p-2.5 border-r border-slate-200 w-48 shrink-0 font-semibold text-slate-800">
-                Piece SKU
+          <div className="min-w-[1400px]">
+            {/* Days Header with Sticky Left Column */}
+            <div className="flex bg-[#FAF9F6] border-b border-[#E6E4DF] text-[10px] font-semibold text-slate-600">
+              <div className="sticky left-0 z-20 bg-[#FAF9F6] p-2.5 border-r border-[#E6E4DF] w-52 shrink-0 font-semibold text-slate-800 shadow-[2px_0_4px_rgba(0,0,0,0.03)]">
+                Piece SKU &amp; Garment
               </div>
-              {daysInMonth.map((d) => (
-                <div
-                  key={d}
-                  className={`p-2 text-center border-r border-slate-200 ${
-                    d === 8 ? "bg-slate-900 text-white font-bold" : ""
-                  }`}
-                >
-                  {d}
-                  {d === 8 && <div className="text-[8px] uppercase tracking-tighter">Today</div>}
-                </div>
-              ))}
+              <div className="flex flex-1">
+                {daysInMonth.map((d) => (
+                  <div
+                    key={d}
+                    className={`min-w-[40px] flex-1 p-2 text-center border-r border-[#EFECE6] ${
+                      d === 8 ? "bg-slate-900 text-white font-bold" : ""
+                    }`}
+                  >
+                    {d}
+                    {d === 8 && <div className="text-[8px] uppercase tracking-tighter">Today</div>}
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Garment Rows */}
-            <div className="divide-y divide-slate-100 text-xs">
-              {garments.slice(0, 10).map((g) => {
+            {/* Garment Rows with Sticky SKU Column */}
+            <div className="divide-y divide-[#EFECE6] text-xs">
+              {garments.slice(0, 12).map((g) => {
                 const gBookings = bookings.filter(
                   (b) =>
                     b.items.some((item) => item.garmentUnitId === g.id) && b.status !== "CANCELLED"
                 );
 
                 return (
-                  <div key={g.id} className="grid grid-cols-31 items-center hover:bg-slate-50/60">
-                    {/* SKU Label */}
-                    <div className="p-2.5 border-r border-slate-200 w-48 shrink-0">
+                  <div key={g.id} className="flex items-center hover:bg-slate-50/60 transition-colors">
+                    {/* Sticky SKU Label */}
+                    <div className="sticky left-0 z-10 bg-white p-2.5 border-r border-[#E6E4DF] w-52 shrink-0 shadow-[2px_0_4px_rgba(0,0,0,0.03)]">
                       <Link
                         href={`/erp/inventory?sku=${g.id}`}
-                        className="font-mono font-bold text-[#6B1D2F] hover:underline"
+                        className="font-mono font-bold text-xs text-[#6B1D2F] hover:underline"
                       >
                         {g.id}
                       </Link>
-                      <div className="text-[10px] text-slate-500 truncate">{g.productName}</div>
+                      <div className="text-[11px] text-slate-700 font-medium line-clamp-1 mt-0.5">{g.productName}</div>
                     </div>
 
-                    {/* Day cells */}
-                    {daysInMonth.map((d) => {
-                      const dayDateStr = `2026-11-${String(d).padStart(2, "0")}`;
-                      const matchBooking = gBookings.find(
-                        (b) => dayDateStr >= b.pickupDate && dayDateStr <= b.returnDueDate
-                      );
+                    {/* Day cells with min-w-[40px] */}
+                    <div className="flex flex-1">
+                      {daysInMonth.map((d) => {
+                        const dayDateStr = `2026-11-${String(d).padStart(2, "0")}`;
+                        const matchBooking = gBookings.find(
+                          (b) => dayDateStr >= b.pickupDate && dayDateStr <= b.returnDueDate
+                        );
 
-                      return (
-                        <div
-                          key={d}
-                          className={`h-12 border-r border-slate-100 relative flex items-center justify-center ${
-                            d === 8 ? "bg-amber-50/40" : ""
-                          }`}
-                        >
-                          {matchBooking && (
-                            <div
-                              onClick={() => setSelectedBookingDetails(matchBooking)}
-                              title={`${matchBooking.customerName} (${matchBooking.pickupDate} to ${matchBooking.returnDueDate})`}
-                              className={`w-full h-7 mx-0.5 rounded text-[9px] font-semibold text-white flex items-center justify-center shadow-2xs overflow-hidden cursor-pointer ${
-                                matchBooking.status === "OUT_ON_RENT"
-                                  ? "bg-blue-600 hover:bg-blue-700"
-                                  : "bg-amber-600 hover:bg-amber-700"
-                              }`}
-                            >
-                              {d === parseInt(matchBooking.pickupDate.split("-")[2]) ? (
-                                <span className="truncate px-1">{matchBooking.customerName}</span>
-                              ) : (
-                                "•"
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                        return (
+                          <div
+                            key={d}
+                            className={`min-w-[40px] flex-1 h-12 border-r border-[#EFECE6] relative flex items-center justify-center ${
+                              d === 8 ? "bg-amber-50/40" : ""
+                            }`}
+                          >
+                            {matchBooking && (
+                              <div
+                                onClick={() => setSelectedBookingDetails(matchBooking)}
+                                title={`${matchBooking.customerName} (${matchBooking.pickupDate} to ${matchBooking.returnDueDate})`}
+                                className={`w-full h-7 mx-0.5 rounded text-[9px] font-semibold text-white flex items-center justify-center shadow-2xs overflow-hidden cursor-pointer transition-transform hover:scale-102 ${
+                                  matchBooking.status === "OUT_ON_RENT"
+                                    ? "bg-blue-600 hover:bg-blue-700"
+                                    : "bg-amber-600 hover:bg-amber-700"
+                                }`}
+                              >
+                                {d === parseInt(matchBooking.pickupDate.split("-")[2]) ? (
+                                  <span className="truncate px-1 font-bold">{matchBooking.customerName}</span>
+                                ) : (
+                                  "•"
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 );
               })}

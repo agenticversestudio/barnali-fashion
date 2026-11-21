@@ -147,75 +147,75 @@ export default function DashboardPage() {
           {alerts.alerts4Days.map((alert) => (
             <div
               key={alert.id}
-              className="bg-white border-2 border-amber-300 rounded-xl p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-colors flex flex-col justify-between gap-2.5"
+              className="bg-white border-2 border-amber-300 rounded-xl p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-colors flex flex-col justify-between gap-3 min-w-0"
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="w-7 h-7 rounded-lg bg-amber-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
-                      4D
-                    </span>
-                    <span className="font-mono font-bold text-xs bg-slate-900 text-white px-2 py-0.5 rounded">
-                      {alert.costumeCode}
-                    </span>
-                    <span className="text-[10px] font-bold text-amber-900 bg-amber-50 border border-amber-300 px-1.5 py-0.2 rounded">
-                      Trial Due: 4 Days Before
-                    </span>
-                  </div>
+              <div className="space-y-2 min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="w-7 h-7 rounded-lg bg-amber-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                    4D
+                  </span>
+                  <span className="font-mono font-bold text-xs bg-slate-900 text-white px-2 py-0.5 rounded">
+                    {alert.costumeCode}
+                  </span>
+                  <span className="text-[10px] font-bold text-amber-900 bg-amber-50 border border-amber-300 px-1.5 py-0.2 rounded">
+                    Trial Due: 4 Days Before
+                  </span>
+                </div>
 
-                  <div className="text-sm font-bold text-slate-900 mt-1.5">
+                <div>
+                  <div className="text-sm font-bold text-slate-900">
                     {alert.customerName}
                   </div>
-                  <div className="text-xs text-slate-600 font-medium truncate mt-0.5">
+                  <div className="text-xs text-slate-700 font-medium line-clamp-2 mt-0.5 leading-snug">
                     {alert.items[0]?.productName} ({alert.items[0]?.size || "Standard"})
                   </div>
+                </div>
 
-                  {/* Customer Address & Delivery Date */}
-                  <div className="mt-2 space-y-1 text-[11px] text-slate-700 bg-[#FAF9F6] p-2.5 rounded-lg border border-[#EFECE6]">
-                    <div className="flex items-center gap-1.5">
-                      <CalendarDays className="w-3.5 h-3.5 text-[#6B1D2F] shrink-0" />
-                      <span>
-                        Delivery Date:{" "}
-                        <strong className="text-slate-900 font-semibold">{alert.pickupDate}</strong>
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                      <span className="truncate">
-                        {alert.customerAddress || "Near LIC Office Road, Bargarh"}
-                      </span>
-                    </div>
+                {/* Customer Address & Delivery Date */}
+                <div className="space-y-1.5 text-[11px] text-slate-700 bg-[#FAF9F6] p-2.5 rounded-lg border border-[#EFECE6]">
+                  <div className="flex items-center gap-1.5">
+                    <CalendarDays className="w-3.5 h-3.5 text-[#6B1D2F] shrink-0" />
+                    <span>
+                      Delivery Date:{" "}
+                      <strong className="text-slate-900 font-semibold">{alert.pickupDate}</strong>
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                    <span className="line-clamp-2">
+                      {alert.customerAddress || "Near LIC Office Road, Bargarh"}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center justify-between pt-2 border-t border-[#EFECE6] gap-2">
+              {/* Action Buttons with mt-auto for alignment and >=40px touch target */}
+              <div className="flex items-center justify-between pt-2.5 border-t border-[#EFECE6] gap-2 mt-auto">
                 <button
                   onClick={() => setSelectedAlert(alert)}
-                  className="h-8 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors"
+                  className="min-h-[40px] px-3.5 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors flex items-center justify-center"
                 >
                   Full Details
                 </button>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <a
                     href={`https://wa.me/91${alert.customerPhone}?text=Namaste%20${encodeURIComponent(
                       alert.customerName
                     )},%20Barnali%20Fashion%20Bargarh%20se%20aapka%20costume%20${alert.costumeCode}%20trial%20ready%20hai.%20Delivery%20date:%20${alert.pickupDate}.`}
                     target="_blank"
                     rel="noreferrer"
-                    className="h-8 px-3 rounded-lg bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                    className="min-h-[40px] px-3.5 rounded-lg bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                   >
-                    <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                    <MessageCircle className="w-4 h-4 text-emerald-600" />
                     <span>WhatsApp</span>
                   </a>
                   <a
                     href={`tel:+91${alert.customerPhone}`}
-                    className="h-8 w-8 rounded-lg bg-white hover:bg-slate-50 border border-[#E6E4DF] text-slate-700 flex items-center justify-center transition-colors"
+                    className="min-h-[40px] min-w-[40px] rounded-lg bg-white hover:bg-slate-50 border border-[#E6E4DF] text-slate-700 flex items-center justify-center transition-colors shadow-2xs"
                     title="Call Customer"
                   >
-                    <Phone className="w-3.5 h-3.5" />
+                    <Phone className="w-4 h-4" />
                   </a>
                 </div>
               </div>
@@ -226,75 +226,75 @@ export default function DashboardPage() {
           {alerts.alerts3Days.map((alert) => (
             <div
               key={alert.id}
-              className="bg-white border-2 border-blue-300 rounded-xl p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-colors flex flex-col justify-between gap-2.5"
+              className="bg-white border-2 border-blue-300 rounded-xl p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-colors flex flex-col justify-between gap-3 min-w-0"
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="w-7 h-7 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
-                      3D
-                    </span>
-                    <span className="font-mono font-bold text-xs bg-slate-900 text-white px-2 py-0.5 rounded">
-                      {alert.costumeCode}
-                    </span>
-                    <span className="text-[10px] font-bold text-blue-900 bg-blue-50 border border-blue-300 px-1.5 py-0.2 rounded">
-                      Packing Ready: 3 Days Before
-                    </span>
-                  </div>
+              <div className="space-y-2 min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="w-7 h-7 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                    3D
+                  </span>
+                  <span className="font-mono font-bold text-xs bg-slate-900 text-white px-2 py-0.5 rounded">
+                    {alert.costumeCode}
+                  </span>
+                  <span className="text-[10px] font-bold text-blue-900 bg-blue-50 border border-blue-300 px-1.5 py-0.2 rounded">
+                    Packing Ready: 3 Days Before
+                  </span>
+                </div>
 
-                  <div className="text-sm font-bold text-slate-900 mt-1.5">
+                <div>
+                  <div className="text-sm font-bold text-slate-900">
                     {alert.customerName}
                   </div>
-                  <div className="text-xs text-slate-600 font-medium truncate mt-0.5">
+                  <div className="text-xs text-slate-700 font-medium line-clamp-2 mt-0.5 leading-snug">
                     {alert.items[0]?.productName} ({alert.items[0]?.size || "Standard"})
                   </div>
+                </div>
 
-                  {/* Customer Address & Delivery Date */}
-                  <div className="mt-2 space-y-1 text-[11px] text-slate-700 bg-[#FAF9F6] p-2.5 rounded-lg border border-[#EFECE6]">
-                    <div className="flex items-center gap-1.5">
-                      <CalendarDays className="w-3.5 h-3.5 text-[#6B1D2F] shrink-0" />
-                      <span>
-                        Delivery Date:{" "}
-                        <strong className="text-slate-900 font-semibold">{alert.pickupDate}</strong>
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                      <span className="truncate">
-                        {alert.customerAddress || "Bargarh Road, Bargarh"}
-                      </span>
-                    </div>
+                {/* Customer Address & Delivery Date */}
+                <div className="space-y-1.5 text-[11px] text-slate-700 bg-[#FAF9F6] p-2.5 rounded-lg border border-[#EFECE6]">
+                  <div className="flex items-center gap-1.5">
+                    <CalendarDays className="w-3.5 h-3.5 text-[#6B1D2F] shrink-0" />
+                    <span>
+                      Delivery Date:{" "}
+                      <strong className="text-slate-900 font-semibold">{alert.pickupDate}</strong>
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                    <span className="line-clamp-2">
+                      {alert.customerAddress || "Bargarh Road, Bargarh"}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center justify-between pt-2 border-t border-[#EFECE6] gap-2">
+              {/* Action Buttons with mt-auto for alignment and >=40px touch target */}
+              <div className="flex items-center justify-between pt-2.5 border-t border-[#EFECE6] gap-2 mt-auto">
                 <button
                   onClick={() => setSelectedAlert(alert)}
-                  className="h-8 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors"
+                  className="min-h-[40px] px-3.5 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors flex items-center justify-center"
                 >
                   Full Details
                 </button>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <a
                     href={`https://wa.me/91${alert.customerPhone}?text=Namaste%20${encodeURIComponent(
                       alert.customerName
                     )},%20Barnali%20Fashion%20se%20aapka%20costume%20${alert.costumeCode}%20packing%20ready%20hai.%20Delivery%20date:%20${alert.pickupDate}.`}
                     target="_blank"
                     rel="noreferrer"
-                    className="h-8 px-3 rounded-lg bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                    className="min-h-[40px] px-3.5 rounded-lg bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                   >
-                    <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                    <MessageCircle className="w-4 h-4 text-emerald-600" />
                     <span>WhatsApp</span>
                   </a>
                   <a
                     href={`tel:+91${alert.customerPhone}`}
-                    className="h-8 w-8 rounded-lg bg-white hover:bg-slate-50 border border-[#E6E4DF] text-slate-700 flex items-center justify-center transition-colors"
+                    className="min-h-[40px] min-w-[40px] rounded-lg bg-white hover:bg-slate-50 border border-[#E6E4DF] text-slate-700 flex items-center justify-center transition-colors shadow-2xs"
                     title="Call Customer"
                   >
-                    <Phone className="w-3.5 h-3.5" />
+                    <Phone className="w-4 h-4" />
                   </a>
                 </div>
               </div>
@@ -317,84 +317,102 @@ export default function DashboardPage() {
           <span className="text-[10px] text-slate-500 font-medium">Sun, 08 Nov</span>
         </div>
 
-        <div className="space-y-2">
-          {/* Overdue Return Action Row */}
+        <div className="space-y-2.5">
+          {/* Overdue Return Action Card */}
           {alerts.overdueReturns.length > 0 && (
-            <div className="p-3 bg-rose-50/70 border border-rose-200 rounded-xl flex items-center justify-between gap-3 text-xs">
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="font-bold text-slate-900">
+            <div className="p-3.5 bg-rose-50/70 border border-rose-200 rounded-xl space-y-2 text-xs">
+              {/* Row 1: Customer Name + Status Badge + Date */}
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-slate-900 text-sm">
                     {alerts.overdueReturns[0].customerName}
                   </span>
-                  <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.2 rounded border border-rose-300">
+                  <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full border border-rose-300">
                     {alerts.overdueReturns[0].calculatedLateDays}d overdue
                   </span>
                 </div>
-                <div className="text-[11px] text-slate-600 truncate mt-0.5">
+                <span className="text-[11px] text-slate-500 font-medium">Return Due: 06 Nov</span>
+              </div>
+
+              {/* Row 2: Details on Left, Action on Right */}
+              <div className="flex items-center justify-between gap-3 pt-1 border-t border-rose-200/60 flex-wrap sm:flex-nowrap">
+                <div className="text-[11px] text-slate-700 min-w-0">
                   Costume ID:{" "}
                   <strong className="font-mono text-[#6B1D2F]">
                     {alerts.overdueReturns[0].costumeCode}
                   </strong>{" "}
                   · 15% Late Fee:{" "}
-                  <strong className="text-rose-800">
+                  <strong className="text-rose-800 font-semibold">
                     {formatINR(alerts.overdueReturns[0].calculatedLateFee)}
                   </strong>
                 </div>
-              </div>
 
-              <button
-                onClick={() => handleAction("return", alerts.overdueReturns[0].id)}
-                className="shrink-0 px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white font-bold rounded-lg shadow-2xs text-[11px] transition-colors"
-              >
-                Return &amp; Refund
-              </button>
+                <button
+                  onClick={() => handleAction("return", alerts.overdueReturns[0].id)}
+                  className="shrink-0 min-h-[40px] px-4 py-2 bg-rose-700 hover:bg-rose-800 text-white font-bold rounded-lg shadow-2xs text-xs transition-colors flex items-center justify-center"
+                >
+                  Return &amp; Refund
+                </button>
+              </div>
             </div>
           )}
 
-          {/* Handover Ready Action Row */}
-          <div className="p-3 bg-[#FAF9F6] border border-[#EFECE6] rounded-xl flex items-center justify-between gap-3 text-xs">
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-bold text-slate-900">Amit Patel</span>
-                <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-300 px-1.5 py-0.2 rounded">
-                  Handover Due
+          {/* Handover Ready Action Card */}
+          <div className="p-3.5 bg-[#FAF9F6] border border-[#EFECE6] rounded-xl space-y-2 text-xs">
+            {/* Row 1: Customer Name + Status Badge + Date */}
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-900 text-sm">Amit Patel</span>
+                <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded-full">
+                  Handover Due Today
                 </span>
               </div>
-              <div className="text-[11px] text-slate-600 truncate mt-0.5">
-                Costume ID: <strong className="font-mono text-[#6B1D2F]">IW-001</strong> ·
-                Indo-Western Royal Navy · Balance to Collect: <strong>₹2,500</strong>
-              </div>
+              <span className="text-[11px] text-slate-500 font-medium">Event: 10 Nov</span>
             </div>
 
-            <button
-              onClick={() => handleAction("handover", "BF-BK-2026-084")}
-              className="shrink-0 px-3.5 py-1.5 bg-[#6B1D2F] hover:bg-[#551624] text-white font-bold rounded-lg shadow-xs text-[11px] transition-colors"
-            >
-              Handover
-            </button>
+            {/* Row 2: Details on Left, Action on Right */}
+            <div className="flex items-center justify-between gap-3 pt-1 border-t border-[#EFECE6] flex-wrap sm:flex-nowrap">
+              <div className="text-[11px] text-slate-700 min-w-0">
+                Costume ID: <strong className="font-mono text-[#6B1D2F]">IW-001</strong> ·
+                Indo-Western Royal Navy · Balance to Collect: <strong className="text-slate-900 font-semibold">₹2,500</strong>
+              </div>
+
+              <button
+                onClick={() => handleAction("handover", "BF-BK-2026-084")}
+                className="shrink-0 min-h-[40px] px-4 py-2 bg-[#6B1D2F] hover:bg-[#551624] text-white font-bold rounded-lg shadow-xs text-xs transition-colors flex items-center justify-center"
+              >
+                Handover
+              </button>
+            </div>
           </div>
 
-          {/* Care / Tailoring Follow-up Action Row */}
-          <div className="p-3 bg-[#FAF9F6] border border-[#EFECE6] rounded-xl flex items-center justify-between gap-3 text-xs">
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-bold text-slate-900">Master Salim (Tailor)</span>
-                <span className="text-[10px] font-semibold text-purple-800 bg-purple-50 border border-purple-300 px-1.5 py-0.2 rounded">
+          {/* Care / Tailoring Follow-up Action Card */}
+          <div className="p-3.5 bg-[#FAF9F6] border border-[#EFECE6] rounded-xl space-y-2 text-xs">
+            {/* Row 1: Tailor Name + Status Badge */}
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-900 text-sm">Master Salim (Tailor)</span>
+                <span className="text-[10px] font-semibold text-purple-800 bg-purple-50 border border-purple-300 px-2 py-0.5 rounded-full">
                   Fitting Ready
                 </span>
               </div>
-              <div className="text-[11px] text-slate-600 truncate mt-0.5">
-                Costume ID: <strong className="font-mono text-[#6B1D2F]">SH-001</strong> · Groom
-                Sherwani Chest Alteration · Out: 08 Nov
-              </div>
+              <span className="text-[11px] text-slate-500 font-medium">Dispatched: 08 Nov</span>
             </div>
 
-            <button
-              onClick={() => handleAction("care")}
-              className="shrink-0 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-800 border border-[#E6E4DF] font-semibold rounded-lg text-[11px] transition-colors shadow-2xs"
-            >
-              Mark Rcv
-            </button>
+            {/* Row 2: Details on Left, Action on Right */}
+            <div className="flex items-center justify-between gap-3 pt-1 border-t border-[#EFECE6] flex-wrap sm:flex-nowrap">
+              <div className="text-[11px] text-slate-700 min-w-0">
+                Costume ID: <strong className="font-mono text-[#6B1D2F]">SH-001</strong> · Groom
+                Sherwani Chest Alteration · Trial Due: 10 Nov
+              </div>
+
+              <button
+                onClick={() => handleAction("care")}
+                className="shrink-0 min-h-[40px] px-4 py-2 bg-white hover:bg-slate-50 text-slate-800 border border-[#E6E4DF] font-semibold rounded-lg text-xs transition-colors shadow-2xs flex items-center justify-center"
+              >
+                Mark Rcv
+              </button>
+            </div>
           </div>
         </div>
       </div>
