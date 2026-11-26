@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -14,555 +14,834 @@ import {
   Plus,
   ShieldCheck,
   Trash2,
+  Search,
+  Loader2,
+  MapPin,
+  Clock,
+  Sparkles,
+  MessageCircle,
 } from "lucide-react";
-import { DataStore } from "@/lib/dataStore";
+import { bookingsApi, customersApi, garmentsApi } from "@/lib/api";
 import { formatINR } from "@/lib/utils";
-import { Customer, GarmentUnit } from "@/types";
+import type { CustomerDto, GarmentDto, QuoteResponse, PayMode, ConflictInfo } from "@/types/api";
 
 export default function NewBookingWizardPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
+  // Wizard Step: 1 = Customer, 2 = Dates & Event, 3 = Garments, 4 = Financial Quote, 5 = Confirmation
   const [step, setStep] = useState<number>(1);
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [allGarments, setAllGarments] = useState<GarmentUnit[]>([]);
 
-  // Form State
+  // Data
+  const [customers, setCustomers] = useState<CustomerDto[]>([]);
+  const [garments, setGarments] = useState<GarmentDto[]>([]);
+  const [garmentSearch, setGarmentSearch] = useState("");
+  const [customerSearch, setCustomerSearch] = useState("");
+
+  // Customer State
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerWhatsapp, setCustomerWhatsapp] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
   const [customerCity, setCustomerCity] = useState("Bargarh");
 
-  const [eventName, setEventName] = useState("Wedding Reception");
-  const [eventDate, setEventDate] = useState("2026-11-20");
-  const [pickupDate, setPickupDate] = useState("2026-11-19");
-  const [returnDueDate, setReturnDueDate] = useState("2026-11-22");
+  // Dates & Event State (Default: Pickup tomorrow, event in 2 days, return in 4 days)
+  const today = new Date().toISOString().split("T")[0];
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+  const inTwoDays = new Date(Date.now() + 86400000 * 2).toISOString().split("T")[0];
+  const inFourDays = new Date(Date.now() + 86400000 * 4).toISOString().split("T")[0];
 
+  const [eventName, setEventName] = useState("Wedding Reception");
+  const [eventDate, setEventDate] = useState(inTwoDays);
+  const [pickupDate, setPickupDate] = useState(tomorrow);
+  const [returnDueDate, setReturnDueDate] = useState(inFourDays);
+
+  // Garments & Line Items
   const [selectedGarmentIds, setSelectedGarmentIds] = useState<string[]>([]);
-  const [advancePaid, setAdvancePaid] = useState<number>(2000);
-  const [paymentMethod, setPaymentMethod] = useState<"CASH" | "UPI" | "CARD">("UPI");
+
+  // Charges & Payments
+  const [dryCleanCharge, setDryCleanCharge] = useState<number>(0);
+  const [transitCharge, setTransitCharge] = useState<number>(0);
+  const [advanceAmount, setAdvanceAmount] = useState<number>(2000);
+  const [paymentMode, setPaymentMode] = useState<PayMode>("UPI");
   const [bookingNotes, setBookingNotes] = useState("");
 
-  const [conflictError, setConflictError] = useState<string | null>(null);
+  // Server Quote & Conflicts
+  const [quote, setQuote] = useState<QuoteResponse | null>(null);
+  const [quoting, setQuoting] = useState(false);
+  const [conflicts, setConflicts] = useState<ConflictInfo[]>([]);
 
+  // Submission State
+  const [submitting, setSubmitting] = useState(false);
+  const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Pre-fill from query params if available
   useEffect(() => {
-    const custs = DataStore.getCustomers();
-    const garms = DataStore.getGarments();
-    setCustomers(custs);
-    setAllGarments(garms);
+    const qSku = searchParams.get("sku");
+    const qCustId = searchParams.get("customerId");
+    const qName = searchParams.get("name");
+    const qPhone = searchParams.get("phone");
 
-    if (custs.length > 0) {
-      setSelectedCustomerId(custs[0].id);
-      setCustomerName(custs[0].name);
-      setCustomerPhone(custs[0].phone);
-      setCustomerCity(custs[0].city);
+    if (qSku) {
+      setSelectedGarmentIds([qSku]);
     }
-  }, []);
+    if (qCustId) {
+      setSelectedCustomerId(qCustId);
+    }
+    if (qName) {
+      setCustomerName(qName);
+    }
+    if (qPhone) {
+      setCustomerPhone(qPhone);
+      setCustomerWhatsapp(qPhone);
+    }
 
-  const handleSelectCustomer = (id: string) => {
-    setSelectedCustomerId(id);
-    const c = customers.find((cust) => cust.id === id);
-    if (c) {
-      setCustomerName(c.name);
-      setCustomerPhone(c.phone);
-      setCustomerCity(c.city);
-    }
+    // Load available garments and customers
+    garmentsApi.list({ limit: 100 }).then((res) => setGarments(res.items || []));
+    customersApi.list().then((res) => setCustomers(res.items || []));
+  }, [searchParams]);
+
+  // Handle selecting an existing customer
+  const handleSelectCustomer = (c: CustomerDto) => {
+    setSelectedCustomerId(c.id);
+    setCustomerName(c.name);
+    setCustomerPhone(c.phone);
+    setCustomerWhatsapp(c.whatsapp || c.phone);
+    setCustomerAddress(c.address || "");
+    setCustomerCity(c.city || "Bargarh");
   };
 
-  const toggleGarmentSelection = (garmentId: string) => {
-    setConflictError(null);
-    if (selectedGarmentIds.includes(garmentId)) {
-      setSelectedGarmentIds(selectedGarmentIds.filter((id) => id !== garmentId));
+  // Toggle Garment Selection
+  const toggleGarment = (id: string) => {
+    if (selectedGarmentIds.includes(id)) {
+      setSelectedGarmentIds(selectedGarmentIds.filter((gId) => gId !== id));
     } else {
-      // Validate conflict for this garment
-      const conflict = DataStore.checkConflict(garmentId, pickupDate, returnDueDate);
-      if (conflict.hasConflict) {
-        setConflictError(conflict.message || `Garment ${garmentId} is unavailable for selected dates.`);
-        return;
-      }
-      setSelectedGarmentIds([...selectedGarmentIds, garmentId]);
+      setSelectedGarmentIds([...selectedGarmentIds, id]);
     }
   };
 
-  // Selected items calculation
-  const selectedGarments = allGarments.filter((g) => selectedGarmentIds.includes(g.id));
-  const rentalTotal = selectedGarments.reduce((acc, g) => acc + g.rentalPrice, 0);
-  const securityDepositTotal = selectedGarments.reduce((acc, g) => acc + g.securityDeposit, 0);
-  const remainingRentalDue = Math.max(0, rentalTotal - advancePaid);
-
-  const handleSubmitBooking = () => {
-    if (selectedGarmentIds.length === 0) {
-      alert("Please select at least one garment unit for this booking.");
+  // Fetch Live Server Quote whenever garments, dates or charges change
+  const fetchQuote = useCallback(async () => {
+    if (selectedGarmentIds.length === 0 || !pickupDate || !returnDueDate) {
+      setQuote(null);
+      setConflicts([]);
       return;
     }
 
-    const items = selectedGarments.map((g) => ({
-      garmentUnitId: g.id,
-      productName: g.productName,
-      size: g.size,
-      rentalPrice: g.rentalPrice,
-      securityDeposit: g.securityDeposit,
-    }));
+    setQuoting(true);
+    try {
+      const q = await bookingsApi.quote({
+        garmentIds: selectedGarmentIds,
+        pickupDate,
+        returnDueDate,
+        dryCleanCharge: Number(dryCleanCharge) || 0,
+        transitCharge: Number(transitCharge) || 0,
+        advance: Number(advanceAmount) || 0,
+      });
+      setQuote(q);
+      setConflicts(q.conflicts || []);
+    } catch (err) {
+      console.error("Quote calculation error:", err);
+    } finally {
+      setQuoting(false);
+    }
+  }, [selectedGarmentIds, pickupDate, returnDueDate, dryCleanCharge, transitCharge, advanceAmount]);
 
-    const result = DataStore.createBooking({
-      customerId: selectedCustomerId,
-      customerName,
-      customerPhone,
-      customerWhatsApp: customerPhone,
-      customerCity,
-      eventName,
-      eventDate,
-      pickupDate,
-      returnDueDate,
-      items,
-      rentalTotal,
-      securityDepositTotal,
-      advancePaid,
-      remainingRentalDue,
-      paymentMethod,
-      notes: bookingNotes,
-    });
+  useEffect(() => {
+    fetchQuote();
+  }, [fetchQuote]);
 
-    if (result.success && result.booking) {
-      alert(`Booking ${result.booking.id} created successfully! Redirecting to printable invoice...`);
-      router.push(`/erp/billing/invoices?bookingId=${result.booking.id}`);
-    } else {
-      alert(`Booking failed: ${result.error}`);
+  // Submit Booking to Live Database
+  const handleSubmitBooking = async () => {
+    if (selectedGarmentIds.length === 0) {
+      alert("Please select at least one costume.");
+      return;
+    }
+    if (!customerName.trim() || !customerPhone.trim()) {
+      alert("Customer Name and Phone number are required.");
+      return;
+    }
+    if (conflicts.length > 0) {
+      alert("Cannot create booking due to scheduling conflict. Please resolve conflicting dates or garments.");
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const res = await bookingsApi.create({
+        customer: {
+          id: selectedCustomerId || undefined,
+          name: customerName.trim(),
+          phone: customerPhone.trim(),
+          whatsapp: customerWhatsapp.trim() || customerPhone.trim(),
+          address: customerAddress.trim() || undefined,
+          city: customerCity.trim() || "Bargarh",
+        },
+        eventName: eventName.trim() || "Rental Booking",
+        eventDate,
+        pickupDate,
+        returnDueDate,
+        garmentIds: selectedGarmentIds,
+        dryCleanCharge: Number(dryCleanCharge) || 0,
+        transitCharge: Number(transitCharge) || 0,
+        advance: {
+          amount: Number(advanceAmount) || 0,
+          mode: paymentMode,
+        },
+        notes: bookingNotes.trim() || undefined,
+      });
+
+      setCreatedBookingId(res.id);
+      setStep(5);
+    } catch (err: any) {
+      setSubmitError(err?.message || "Failed to create booking.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  const selectedCostumes = garments.filter((g) => selectedGarmentIds.includes(g.id));
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <Link
-          href="/erp/bookings"
-          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#4B1835] font-semibold"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Bookings</span>
-        </Link>
-        <span className="text-xs text-[#8C6F3B] font-bold uppercase tracking-wider">
-          Step {step} of 4
-        </span>
-      </div>
-
-      {/* Wizard Progress Bar */}
-      <div className="grid grid-cols-4 gap-2 text-xs font-semibold">
-        <div
-          className={`p-2.5 rounded-xl border text-center transition-all ${
-            step >= 1
-              ? "bg-[#4B1835] text-white border-[#4B1835]"
-              : "bg-white text-gray-400 border-gray-200"
-          }`}
-        >
-          1. Customer
-        </div>
-        <div
-          className={`p-2.5 rounded-xl border text-center transition-all ${
-            step >= 2
-              ? "bg-[#4B1835] text-white border-[#4B1835]"
-              : "bg-white text-gray-400 border-gray-200"
-          }`}
-        >
-          2. Rental Dates
-        </div>
-        <div
-          className={`p-2.5 rounded-xl border text-center transition-all ${
-            step >= 3
-              ? "bg-[#4B1835] text-white border-[#4B1835]"
-              : "bg-white text-gray-400 border-gray-200"
-          }`}
-        >
-          3. Garments
-        </div>
-        <div
-          className={`p-2.5 rounded-xl border text-center transition-all ${
-            step >= 4
-              ? "bg-[#4B1835] text-white border-[#4B1835]"
-              : "bg-white text-gray-400 border-gray-200"
-          }`}
-        >
-          4. Advance &amp; Confirm
-        </div>
-      </div>
-
-      {/* STEP 1: Customer Selection */}
-      {step === 1 && (
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-4 text-xs">
-          <div className="flex items-center gap-2 font-bold text-sm text-[#4B1835]">
-            <UserCheck className="w-5 h-5 text-[#B89558]" />
-            <span>Select or Enter Customer Details</span>
+      {/* Top Header */}
+      <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/erp/bookings"
+            className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Link>
+          <div>
+            <h1 className="font-serif font-bold text-lg md:text-xl text-slate-900">
+              5-Step Counter Booking Wizard
+            </h1>
+            <p className="text-xs text-slate-500">
+              Transactional booking with automated quote and double-booking conflict check.
+            </p>
           </div>
+        </div>
 
-          <div className="space-y-3">
-            <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                Choose Existing Client
-              </label>
-              <select
-                value={selectedCustomerId}
-                onChange={(e) => handleSelectCustomer(e.target.value)}
-                className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-bold text-gray-800"
+        {step < 5 && (
+          <div className="text-xs font-semibold text-[#6B1D2F] bg-[#6B1D2F]/10 px-3 py-1.5 rounded-full font-mono">
+            Step {step} of 4
+          </div>
+        )}
+      </div>
+
+      {/* Wizard Progress Steps Indicator */}
+      {step < 5 && (
+        <div className="grid grid-cols-4 gap-2 text-center text-xs">
+          {[
+            { s: 1, title: "1. Customer", icon: UserCheck },
+            { s: 2, title: "2. Dates", icon: Calendar },
+            { s: 3, title: "3. Costumes", icon: Shirt },
+            { s: 4, title: "4. Quote", icon: Wallet },
+          ].map((item) => {
+            const Icon = item.icon;
+            const isDone = step > item.s;
+            const isCurrent = step === item.s;
+            return (
+              <button
+                key={item.s}
+                onClick={() => setStep(item.s)}
+                className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-colors ${
+                  isCurrent
+                    ? "bg-[#6B1D2F] text-white border-[#6B1D2F] font-bold shadow-xs"
+                    : isDone
+                    ? "bg-emerald-50 text-emerald-800 border-emerald-200 font-semibold"
+                    : "bg-white text-slate-500 border-slate-200"
+                }`}
               >
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} — {c.phone} ({c.city})
-                  </option>
-                ))}
-              </select>
-            </div>
+                <Icon className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{item.title}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                  Customer Name *
-                </label>
-                <input
-                  type="text"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold"
-                />
+      {/* Conflicts Alert Banner */}
+      {conflicts.length > 0 && (
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-900 space-y-2">
+          <div className="flex items-center gap-2 font-bold text-sm text-rose-800">
+            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>Schedule Conflict Detected (Double-Booking Prevented)</span>
+          </div>
+          <div className="space-y-1">
+            {conflicts.map((c, i) => (
+              <div key={i} className="pl-6 text-[11px]">
+                • <strong className="font-mono">{c.garmentId}</strong> ({c.garmentName || "Costume"}) is already reserved by booking{" "}
+                <strong className="font-mono">{c.heldBy}</strong> for{" "}
+                <span className="font-semibold">{c.from} to {c.to}</span>.
               </div>
-              <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                  Phone (WhatsApp) *
-                </label>
-                <input
-                  type="tel"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold"
-                />
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                  City / Town *
-                </label>
-                <input
-                  type="text"
-                  value={customerCity}
-                  onChange={(e) => setCustomerCity(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold"
-                />
-              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* STEP 1: Customer Details */}
+      {step === 1 && (
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-6 shadow-2xs space-y-5">
+          <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <div>
+              <h2 className="font-bold text-slate-900 text-sm">Step 1: Client Information</h2>
+              <p className="text-xs text-slate-500">Search existing customer or enter new profile</p>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-[#EFE9DD] flex justify-end">
+          {/* Quick Search Existing Customers */}
+          <div className="space-y-2">
+            <label className="block text-[11px] font-bold text-slate-600 uppercase">
+              Quick Search Existing Customers
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={customerSearch}
+                onChange={(e) => setCustomerSearch(e.target.value)}
+                placeholder="Type name or phone number..."
+                className="w-full pl-9 pr-4 py-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl text-xs"
+              />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            </div>
+
+            {customerSearch && (
+              <div className="max-h-40 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-xl bg-white shadow-lg">
+                {customers
+                  .filter(
+                    (c) =>
+                      c.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
+                      c.phone.includes(customerSearch)
+                  )
+                  .map((c) => (
+                    <div
+                      key={c.id}
+                      onClick={() => {
+                        handleSelectCustomer(c);
+                        setCustomerSearch("");
+                      }}
+                      className="p-2.5 hover:bg-slate-50 cursor-pointer flex items-center justify-between text-xs"
+                    >
+                      <div>
+                        <span className="font-bold text-slate-800">{c.name}</span>
+                        <span className="text-[11px] text-slate-500 ml-2 font-mono">+91 {c.phone}</span>
+                      </div>
+                      <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-600">
+                        Select
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-2">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Customer Name *
+              </label>
+              <input
+                type="text"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="e.g. Smt. Sunita Sahu"
+                className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Phone Number (10 digits) *
+              </label>
+              <input
+                type="tel"
+                value={customerPhone}
+                onChange={(e) => {
+                  setCustomerPhone(e.target.value);
+                  if (!customerWhatsapp) setCustomerWhatsapp(e.target.value);
+                }}
+                placeholder="9876543210"
+                maxLength={10}
+                className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-bold"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                WhatsApp Number
+              </label>
+              <input
+                type="tel"
+                value={customerWhatsapp}
+                onChange={(e) => setCustomerWhatsapp(e.target.value)}
+                placeholder="9876543210"
+                maxLength={10}
+                className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Town / City
+              </label>
+              <input
+                type="text"
+                value={customerCity}
+                onChange={(e) => setCustomerCity(e.target.value)}
+                placeholder="Bargarh"
+                className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Local Address / Landmark
+              </label>
+              <input
+                type="text"
+                value={customerAddress}
+                onChange={(e) => setCustomerAddress(e.target.value)}
+                placeholder="e.g. Near Bhatli Chowk, Ward 4"
+                className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-3">
             <button
-              onClick={() => setStep(2)}
-              className="bg-[#4B1835] hover:bg-[#320F23] text-white font-bold px-6 py-2.5 rounded-xl shadow-xs transition-colors"
+              onClick={() => {
+                if (!customerName.trim() || !customerPhone.trim()) {
+                  alert("Customer Name and Phone are required.");
+                  return;
+                }
+                setStep(2);
+              }}
+              className="px-6 py-2.5 bg-[#6B1D2F] text-white font-semibold rounded-xl text-xs shadow-xs hover:bg-[#521624]"
             >
-              Continue to Event Dates →
+              Next: Event &amp; Dates &rarr;
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 2: Event Details & Rental Dates */}
+      {/* STEP 2: Event & Dates */}
       {step === 2 && (
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-4 text-xs">
-          <div className="flex items-center gap-2 font-bold text-sm text-[#4B1835]">
-            <Calendar className="w-5 h-5 text-[#B89558]" />
-            <span>Event Details &amp; Rental Dates</span>
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-6 shadow-2xs space-y-5">
+          <div className="border-b border-slate-100 pb-3">
+            <h2 className="font-bold text-slate-900 text-sm">Step 2: Event &amp; Rental Schedule</h2>
+            <p className="text-xs text-slate-500">Pick-up, wedding/function date, and expected return deadline</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                Event Occasion / Name *
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div className="sm:col-span-2">
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Event / Occasion Name
               </label>
               <input
                 type="text"
-                placeholder="e.g. Wedding Barat / Sangeet Night"
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
-                className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold"
+                placeholder="e.g. Sangeet & Reception, Bridal Photoshoot"
+                className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                required
               />
             </div>
+
             <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
                 Event Date *
               </label>
               <input
                 type="date"
                 value={eventDate}
                 onChange={(e) => setEventDate(e.target.value)}
-                className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold"
+                className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-medium"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Store Pickup Date *
+              </label>
+              <input
+                type="date"
+                value={pickupDate}
+                min={today}
+                onChange={(e) => setPickupDate(e.target.value)}
+                className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-semibold text-[#6B1D2F]"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Return Due Date *
+              </label>
+              <input
+                type="date"
+                value={returnDueDate}
+                min={pickupDate}
+                onChange={(e) => setReturnDueDate(e.target.value)}
+                className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-semibold text-rose-800"
+                required
               />
             </div>
           </div>
 
-          <div className="p-4 bg-[#FAF5EB] rounded-xl border border-[#E8DFD1] space-y-3">
-            <div className="font-bold text-gray-900">
-              Rental Handover Period (Asia/Kolkata Business Calendar)
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[10px] font-bold text-[#8C6F3B] uppercase mb-1">
-                  Pickup / Handover Date *
-                </label>
-                <input
-                  type="date"
-                  value={pickupDate}
-                  onChange={(e) => setPickupDate(e.target.value)}
-                  className="w-full p-2 bg-white border border-[#E8DFD1] rounded-lg font-bold text-[#4B1835]"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-[#8C6F3B] uppercase mb-1">
-                  Return Due Date (Before 7:00 PM) *
-                </label>
-                <input
-                  type="date"
-                  value={returnDueDate}
-                  onChange={(e) => setReturnDueDate(e.target.value)}
-                  className="w-full p-2 bg-white border border-[#E8DFD1] rounded-lg font-bold text-[#4B1835]"
-                />
-              </div>
-            </div>
-            <p className="text-[11px] text-gray-500">
-              Note: System automatically enforces a 24-hour cleaning and quality inspection buffer before releasing garments to next customers.
-            </p>
-          </div>
-
-          <div className="pt-4 border-t border-[#EFE9DD] flex justify-between">
+          <div className="flex justify-between pt-3">
             <button
               onClick={() => setStep(1)}
-              className="px-4 py-2 border border-gray-300 rounded-xl font-semibold text-gray-700"
+              className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold"
             >
-              ← Back
+              &larr; Back
             </button>
             <button
               onClick={() => setStep(3)}
-              className="bg-[#4B1835] hover:bg-[#320F23] text-white font-bold px-6 py-2.5 rounded-xl shadow-xs transition-colors"
+              className="px-6 py-2.5 bg-[#6B1D2F] text-white font-semibold rounded-xl text-xs shadow-xs hover:bg-[#521624]"
             >
-              Select Garment Inventory →
+              Next: Select Costumes &rarr;
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 3: Garment Selection with Conflict Checking */}
+      {/* STEP 3: Costume Selection */}
       {step === 3 && (
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-4 text-xs">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 font-bold text-sm text-[#4B1835]">
-              <Shirt className="w-5 h-5 text-[#B89558]" />
-              <span>Select Garments for Booking ({selectedGarmentIds.length} Selected)</span>
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-6 shadow-2xs space-y-5">
+          <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <div>
+              <h2 className="font-bold text-slate-900 text-sm">Step 3: Select Rental Pieces</h2>
+              <p className="text-xs text-slate-500">Pick costumes from inventory for these dates</p>
             </div>
-            <span className="text-[11px] text-gray-500">
-              Dates: <strong>{pickupDate}</strong> to <strong>{returnDueDate}</strong>
-            </span>
+            <div className="text-xs font-mono font-bold text-[#6B1D2F]">
+              {selectedGarmentIds.length} Selected
+            </div>
           </div>
 
-          {/* Conflict Banner if encountered */}
-          {conflictError && (
-            <div className="p-3 bg-rose-50 border border-rose-300 rounded-xl text-rose-800 flex items-center gap-2 font-semibold">
-              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>{conflictError}</span>
-            </div>
-          )}
+          {/* Search Box */}
+          <div className="relative">
+            <input
+              type="text"
+              value={garmentSearch}
+              onChange={(e) => setGarmentSearch(e.target.value)}
+              placeholder="Filter costumes by SKU, name, or category..."
+              className="w-full pl-9 pr-4 py-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl text-xs"
+            />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+          </div>
 
-          <div className="max-h-96 overflow-y-auto space-y-2 pr-1 divide-y divide-[#F1ECE3]">
-            {allGarments.map((g) => {
-              const isSelected = selectedGarmentIds.includes(g.id);
-              const conflict = DataStore.checkConflict(g.id, pickupDate, returnDueDate);
-
-              return (
-                <div
-                  key={g.id}
-                  onClick={() => toggleGarmentSelection(g.id)}
-                  className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                    isSelected
-                      ? "bg-[#FAF5EB] border-[#B89558] shadow-xs"
-                      : conflict.hasConflict
-                      ? "bg-gray-50/60 border-gray-200 opacity-60 cursor-not-allowed"
-                      : "bg-[#FBF9F5] border-[#E8DFD1] hover:border-[#B89558]"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-5 h-5 rounded-md border flex items-center justify-center ${
-                        isSelected
-                          ? "bg-[#4B1835] border-[#4B1835] text-white"
-                          : "border-gray-300 bg-white"
-                      }`}
-                    >
-                      {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#D4B67F]" />}
-                    </div>
-
-                    <img
-                      src={g.image}
-                      alt={g.productName}
-                      className="w-12 h-12 rounded-lg object-cover border border-[#EFE9DD]"
+          {/* Garments Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[480px] overflow-y-auto pr-1">
+            {garments
+              .filter(
+                (g) =>
+                  g.name.toLowerCase().includes(garmentSearch.toLowerCase()) ||
+                  g.id.toLowerCase().includes(garmentSearch.toLowerCase()) ||
+                  g.category.toLowerCase().includes(garmentSearch.toLowerCase())
+              )
+              .map((g) => {
+                const isSelected = selectedGarmentIds.includes(g.id);
+                return (
+                  <div
+                    key={g.id}
+                    onClick={() => toggleGarment(g.id)}
+                    className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
+                      isSelected
+                        ? "bg-[#6B1D2F]/5 border-[#6B1D2F] shadow-xs ring-1 ring-[#6B1D2F]"
+                        : "bg-white border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => {}}
+                      className="mt-1 h-4 w-4 text-[#6B1D2F] rounded border-slate-300 pointer-events-none"
                     />
-
-                    <div>
-                      <div className="font-bold text-gray-900 flex items-center gap-2">
-                        <span className="font-mono text-[#4B1835]">{g.id}</span>
-                        <span>{g.productName}</span>
-                        <span className="bg-gray-100 text-gray-700 px-1.5 py-0.2 rounded text-[10px]">
-                          {g.size}
-                        </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] font-bold text-[#6B1D2F]">{g.id}</span>
+                        <span className="text-[10px] text-slate-400">{g.rack}</span>
                       </div>
-                      <div className="text-gray-500 text-[11px] mt-0.5">
-                        {g.category} • Rack: {g.storageLocation}
+                      <div className="font-bold text-xs text-slate-900 truncate mt-0.5">{g.name}</div>
+                      <div className="text-[11px] text-slate-500 mt-1">
+                        Rent: <span className="font-mono font-bold text-slate-800">{formatINR(g.rentalPrice)}</span> · Dep: {formatINR(g.securityDeposit)}
                       </div>
-                      {conflict.hasConflict && (
-                        <div className="text-[10px] text-rose-600 font-bold mt-1">
-                          Conflict: Already reserved/rented for overlapping dates
-                        </div>
-                      )}
                     </div>
                   </div>
-
-                  <div className="text-right">
-                    <div className="font-bold text-gray-900 text-xs">
-                      {formatINR(g.rentalPrice)}
-                    </div>
-                    <div className="text-[10px] text-[#B89558] font-semibold">
-                      Dep: {formatINR(g.securityDeposit)}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
 
-          <div className="pt-4 border-t border-[#EFE9DD] flex justify-between">
+          <div className="flex justify-between pt-3 border-t border-slate-100">
             <button
               onClick={() => setStep(2)}
-              className="px-4 py-2 border border-gray-300 rounded-xl font-semibold text-gray-700"
+              className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold"
             >
-              ← Back
+              &larr; Back
             </button>
             <button
-              disabled={selectedGarmentIds.length === 0}
-              onClick={() => setStep(4)}
-              className={`font-bold px-6 py-2.5 rounded-xl shadow-xs transition-colors ${
-                selectedGarmentIds.length > 0
-                  ? "bg-[#4B1835] hover:bg-[#320F23] text-white"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
+              onClick={() => {
+                if (selectedGarmentIds.length === 0) {
+                  alert("Please select at least one garment.");
+                  return;
+                }
+                setStep(4);
+              }}
+              className="px-6 py-2.5 bg-[#6B1D2F] text-white font-semibold rounded-xl text-xs shadow-xs hover:bg-[#521624]"
             >
-              Continue to Billing Calculation →
+              Next: Financial Quote &rarr;
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 4: Financial Calculation & Settlement */}
+      {/* STEP 4: Financial Quote & Settlement */}
       {step === 4 && (
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-5 text-xs">
-          <div className="flex items-center gap-2 font-bold text-sm text-[#4B1835]">
-            <Wallet className="w-5 h-5 text-[#B89558]" />
-            <span>Financial Segregation &amp; Advance Confirmation</span>
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-6 shadow-2xs space-y-5">
+          <div className="border-b border-slate-100 pb-3">
+            <h2 className="font-bold text-slate-900 text-sm">Step 4: Real-time Tariff &amp; Deposit Quote</h2>
+            <p className="text-xs text-slate-500">Live computation from server-side pricing engine</p>
           </div>
 
-          {/* Breakdown Card */}
-          <div className="p-4 bg-[#FAF5EB] rounded-xl border border-[#E8DFD1] space-y-3">
-            <div className="font-bold text-gray-900 uppercase text-[11px] tracking-wider">
-              Selected Garment Items ({selectedGarments.length})
-            </div>
-            <div className="space-y-1 divide-y divide-[#E8DFD1]">
-              {selectedGarments.map((g) => (
-                <div key={g.id} className="pt-1.5 flex justify-between">
-                  <span>
-                    <strong>{g.id}</strong> — {g.productName} ({g.size})
-                  </span>
-                  <span>
-                    Rental: {formatINR(g.rentalPrice)} | Dep: {formatINR(g.securityDeposit)}
-                  </span>
+          {/* Selected Items summary */}
+          <div className="space-y-2">
+            <span className="text-[11px] font-bold text-slate-600 uppercase block">
+              Selected Costumes ({selectedCostumes.length})
+            </span>
+            <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50">
+              {selectedCostumes.map((g) => (
+                <div key={g.id} className="p-3 flex items-center justify-between text-xs">
+                  <div>
+                    <span className="font-mono font-bold text-[#6B1D2F] mr-2">{g.id}</span>
+                    <span className="font-semibold text-slate-800">{g.name}</span>
+                    <span className="text-slate-400 text-[11px] ml-2 font-mono">({g.rack})</span>
+                  </div>
+                  <div className="text-right font-mono">
+                    <span className="font-bold text-slate-800">{formatINR(g.rentalPrice)}</span>
+                    <span className="text-[10px] text-slate-500 block">Dep: {formatINR(g.securityDeposit)}</span>
+                  </div>
                 </div>
               ))}
             </div>
-
-            <div className="pt-3 border-t-2 border-[#E8DFD1] grid grid-cols-2 gap-4">
-              <div className="p-3 bg-white rounded-lg border border-[#E8DFD1]">
-                <div className="text-[10px] text-gray-500 font-bold uppercase">
-                  Rental Service Total (Revenue)
-                </div>
-                <div className="text-lg font-bold text-gray-900 mt-1">
-                  {formatINR(rentalTotal)}
-                </div>
-              </div>
-
-              <div className="p-3 bg-white rounded-lg border border-[#B89558]">
-                <div className="text-[10px] text-[#8C6F3B] font-bold uppercase">
-                  Refundable Security Deposit (Liability)
-                </div>
-                <div className="text-lg font-bold text-[#B89558] mt-1">
-                  {formatINR(securityDepositTotal)}
-                </div>
-                <div className="text-[10px] text-gray-400 mt-0.5">
-                  Refundable at return inspection
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* Payment inputs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Optional Charges & Advance Inputs */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
             <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                Advance Payment Received Now (₹) *
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Dry Clean Charge (₹)
               </label>
               <input
                 type="number"
-                value={advancePaid}
-                onChange={(e) => setAdvancePaid(Number(e.target.value) || 0)}
-                className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-bold text-gray-900 text-sm"
+                value={dryCleanCharge}
+                onChange={(e) => setDryCleanCharge(Number(e.target.value) || 0)}
+                className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono text-slate-800"
               />
-              <div className="text-[11px] text-gray-500 mt-1">
-                Remaining Rental Balance at Pickup: <strong>{formatINR(remainingRentalDue)}</strong>
-              </div>
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                Payment Mode *
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Transit / Delivery (₹)
               </label>
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value as any)}
-                className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-bold text-gray-800"
-              >
-                <option value="UPI">UPI (PhonePe / GPay / Paytm)</option>
-                <option value="CASH">Cash in Drawer</option>
-                <option value="CARD">Debit / Credit Card</option>
-              </select>
+              <input
+                type="number"
+                value={transitCharge}
+                onChange={(e) => setTransitCharge(Number(e.target.value) || 0)}
+                className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono text-slate-800"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Advance Paid Now (₹) *
+              </label>
+              <input
+                type="number"
+                value={advanceAmount}
+                onChange={(e) => setAdvanceAmount(Number(e.target.value) || 0)}
+                className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-bold text-[#6B1D2F]"
+                required
+              />
             </div>
           </div>
 
-          <div>
-            <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-              Internal Booking Notes / Fitting Alterations
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. Blouse alteration required by Master Salim on 18 Nov morning"
-              value={bookingNotes}
-              onChange={(e) => setBookingNotes(e.target.value)}
-              className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Advance Payment Mode
+              </label>
+              <select
+                value={paymentMode}
+                onChange={(e) => setPaymentMode(e.target.value as PayMode)}
+                className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+              >
+                <option value="UPI">UPI / GPay / PhonePe</option>
+                <option value="CASH">Cash at Counter</option>
+                <option value="CARD">Debit / Credit Card</option>
+                <option value="BANK_TRANSFER">Bank Transfer / IMPS</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Booking Remarks / Fitting Notes
+              </label>
+              <input
+                type="text"
+                value={bookingNotes}
+                onChange={(e) => setBookingNotes(e.target.value)}
+                placeholder="e.g. Alter blouse waist by 1 inch"
+                className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl text-xs"
+              />
+            </div>
           </div>
 
-          <div className="pt-4 border-t border-[#EFE9DD] flex justify-between">
+          {/* Live Quote Breakdown Card */}
+          {quoting ? (
+            <div className="p-4 bg-slate-50 rounded-xl text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin text-[#6B1D2F]" />
+              <span>Fetching server-side quote...</span>
+            </div>
+          ) : quote ? (
+            <div className="p-4 bg-[#FAF9F6] border border-[#E6E4DF] rounded-xl space-y-2 text-xs">
+              <div className="flex justify-between text-slate-600">
+                <span>Rental Service Tariff:</span>
+                <span className="font-mono font-semibold">{formatINR(quote.rentalTotal)}</span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Refundable Security Deposit:</span>
+                <span className="font-mono font-semibold">{formatINR(quote.depositTotal)}</span>
+              </div>
+              {quote.dryCleanCharge > 0 && (
+                <div className="flex justify-between text-slate-600">
+                  <span>Dry Clean Charge:</span>
+                  <span className="font-mono">{formatINR(quote.dryCleanCharge)}</span>
+                </div>
+              )}
+              {quote.transitCharge > 0 && (
+                <div className="flex justify-between text-slate-600">
+                  <span>Transit / Delivery:</span>
+                  <span className="font-mono">{formatINR(quote.transitCharge)}</span>
+                </div>
+              )}
+              <div className="pt-2 border-t border-slate-200 flex justify-between font-bold text-sm text-slate-900">
+                <span>Grand Total:</span>
+                <span className="font-mono text-[#6B1D2F]">{formatINR(quote.grandTotal)}</span>
+              </div>
+              <div className="flex justify-between text-emerald-800 font-semibold pt-1">
+                <span>Advance Receipt:</span>
+                <span className="font-mono">− {formatINR(quote.advance)}</span>
+              </div>
+              <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between font-bold text-amber-950 mt-2">
+                <span>Balance Due at Pickup:</span>
+                <span className="font-mono text-sm">{formatINR(quote.balanceDue)}</span>
+              </div>
+            </div>
+          ) : null}
+
+          {submitError && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 text-xs flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+              <span>{submitError}</span>
+            </div>
+          )}
+
+          <div className="flex justify-between pt-3 border-t border-slate-100">
             <button
               onClick={() => setStep(3)}
-              className="px-4 py-2 border border-gray-300 rounded-xl font-semibold text-gray-700"
+              className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold"
             >
-              ← Back
+              &larr; Back
             </button>
             <button
               onClick={handleSubmitBooking}
-              className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-8 py-3 rounded-xl shadow-md transition-colors flex items-center gap-2 text-xs"
+              disabled={submitting || conflicts.length > 0}
+              className="px-6 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-xs flex items-center gap-2"
             >
-              <ShieldCheck className="w-4 h-4 text-emerald-200" />
-              <span>Confirm &amp; Generate Booking Invoice</span>
+              {submitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" />
+                  <span>Locking in Turso DB...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Confirm &amp; Create Booking</span>
+                </>
+              )}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* STEP 5: Success & WhatsApp Slip */}
+      {step === 5 && createdBookingId && (
+        <div className="bg-white rounded-3xl border border-[#E6E4DF] p-8 shadow-xl text-center space-y-6">
+          <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200">
+            <CheckCircle2 className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-1">
+            <span className="text-xs font-mono font-bold text-[#6B1D2F] uppercase tracking-wider">
+              Booking Created Successfully
+            </span>
+            <h2 className="font-serif font-bold text-2xl text-slate-900">
+              {createdBookingId}
+            </h2>
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
+              Garments locked in database for dates {pickupDate} to {returnDueDate}. Advance of{" "}
+              <strong>{formatINR(advanceAmount)}</strong> recorded in payment ledger.
+            </p>
+          </div>
+
+          {/* Quick WhatsApp Share Button */}
+          <div className="pt-2">
+            <a
+              href={`https://wa.me/91${customerPhone.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
+                `*BARNALI FASHION — BOOKING CONFIRMATION*\n` +
+                `Order ID: ${createdBookingId}\n` +
+                `Client: ${customerName}\n` +
+                `Pickup Date: ${pickupDate}\n` +
+                `Return Due Date: ${returnDueDate}\n` +
+                `-------------------------\n` +
+                `Costumes: ${selectedCostumes.map((g) => `${g.name} (${g.id})`).join(", ")}\n` +
+                `Grand Total: ₹${quote?.grandTotal || 0}\n` +
+                `Advance Received: ₹${advanceAmount} (${paymentMode})\n` +
+                `*Balance Due at Handover: ₹${quote?.balanceDue || 0}*\n` +
+                `-------------------------\n` +
+                `Terms: Security deposit is refundable upon undamaged return. Thank you!`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>Send WhatsApp Confirmation Slip</span>
+            </a>
+          </div>
+
+          <div className="flex items-center justify-center gap-3 pt-4 border-t border-slate-100">
+            <Link
+              href={`/erp/billing/invoices?orderId=${createdBookingId}`}
+              className="px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs"
+            >
+              Print Receipt / Invoice
+            </Link>
+            <Link
+              href="/erp/bookings"
+              className="px-5 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-semibold rounded-xl text-xs shadow-xs"
+            >
+              Go to Orders List
+            </Link>
           </div>
         </div>
       )}
