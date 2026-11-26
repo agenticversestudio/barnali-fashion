@@ -2,12 +2,12 @@ import type { Row } from "@tursodatabase/serverless/compat";
 import type {
   BookingDto, BookingItemDto, BookingListQuery, BookingStatus, ConflictInfo, DepositStatus, PayMode, PaymentDto, PaymentKind,
 } from "@/types/api";
-import { db, type Exec } from "../db";
+import { db, readAll, type Exec } from "../db";
 import { ApiError, fail } from "../http";
 import { todayIST } from "../ids";
 import { likeArg } from "../query";
 import { BUFFER_DAYS } from "./garments";
-import { mainPhotoUrls } from "./photos";
+import { mainPhotosForBookingsStmt, signMains } from "./photos";
 
 const opt = (v: unknown) => (v === null || v === undefined || v === "" ? undefined : String(v));
 
@@ -62,22 +62,26 @@ const MONEY_IN: PaymentKind[] = ["ADVANCE", "BALANCE", "DEPOSIT", "EXTRA"];
 export async function bookingDtos(ids: string[], x: Exec = db()): Promise<BookingDto[]> {
   if (!ids.length) return [];
   const ph = ids.map(() => "?").join(",");
-  const b = await x.execute({
-    sql: `SELECT b.*, c.name AS c_name, c.phone AS c_phone, c.whatsapp AS c_wa, c.city AS c_city
-          FROM bookings b JOIN customers c ON c.id = b.customer_id WHERE b.id IN (${ph})`,
-    args: ids,
-  });
-  const it = await x.execute({
-    sql: `SELECT bi.booking_id, bi.garment_id, bi.rental_price, bi.security_deposit, g.name, g.size, g.rack
-          FROM booking_items bi JOIN garments g ON g.id = bi.garment_id WHERE bi.booking_id IN (${ph}) ORDER BY bi.id`,
-    args: ids,
-  });
-  const pay = await x.execute({
-    sql: `SELECT p.id, p.booking_id, p.kind, p.amount, p.mode, p.paid_on, p.note, COALESCE(u.name, p.recorded_by) AS by_name
-          FROM payments p LEFT JOIN users u ON u.id = p.recorded_by WHERE p.booking_id IN (${ph}) ORDER BY p.id`,
-    args: ids,
-  });
-  const mains = await mainPhotoUrls([...new Set(it.rows.map((r) => String(r.garment_id)))]);
+  // four independent reads in ONE round trip
+  const [b, it, pay, ph2] = await readAll(x, [
+    {
+      sql: `SELECT b.*, c.name AS c_name, c.phone AS c_phone, c.whatsapp AS c_wa, c.city AS c_city
+            FROM bookings b JOIN customers c ON c.id = b.customer_id WHERE b.id IN (${ph})`,
+      args: ids,
+    },
+    {
+      sql: `SELECT bi.booking_id, bi.garment_id, bi.rental_price, bi.security_deposit, g.name, g.size, g.rack
+            FROM booking_items bi JOIN garments g ON g.id = bi.garment_id WHERE bi.booking_id IN (${ph}) ORDER BY bi.id`,
+      args: ids,
+    },
+    {
+      sql: `SELECT p.id, p.booking_id, p.kind, p.amount, p.mode, p.paid_on, p.note, COALESCE(u.name, p.recorded_by) AS by_name
+            FROM payments p LEFT JOIN users u ON u.id = p.recorded_by WHERE p.booking_id IN (${ph}) ORDER BY p.id`,
+      args: ids,
+    },
+    mainPhotosForBookingsStmt(ids),
+  ]);
+  const mains = await signMains(ph2.rows);
   const items = new Map<string, BookingItemDto[]>();
   for (const r of it.rows) {
     const k = String(r.booking_id);
@@ -162,7 +166,7 @@ export async function listBookings(q: BookingListQuery & { limit: number }): Pro
     args.push(ca, ca, cid);
   }
   const r = await db().execute({
-    sql: `SELECT b.id, b.created_at FROM bookings b JOIN customers c ON c.id = b.customer_id
+    sql: `SELECT b.id, b.created_at FROM bookings b ${q.q ? "JOIN customers c ON c.id = b.customer_id" : ""}
           WHERE ${where.join(" AND ")} ORDER BY b.created_at DESC, b.id DESC LIMIT ?`,
     args: [...args, q.limit + 1],
   });

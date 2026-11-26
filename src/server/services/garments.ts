@@ -1,10 +1,11 @@
 import type { Row } from "@tursodatabase/serverless/compat";
 import type { AvailabilityRow, BookingStatus, GarmentDetailDto, GarmentDto, GarmentStatus, Role } from "@/types/api";
-import { db, type Exec } from "../db";
+import type { InStatement } from "@tursodatabase/serverless/compat";
+import { db, readAll, type Exec } from "../db";
 import { fail } from "../http";
 import { likeArg } from "../query";
 import { todayIST } from "../ids";
-import { garmentPhotos, mainPhotoUrls } from "./photos";
+import { garmentPhotosStmt, mainPhotosStmt, signMains, signPhotos } from "./photos";
 
 export const BUFFER_DAYS = 1; // must match the trigger in db/migrations/001_init.sql
 
@@ -55,22 +56,24 @@ export interface GarmentFilter {
 }
 
 /** Next upcoming/current booking per garment id (earliest active item whose return is today or later). */
-export async function nextBookings(ids: string[], x: Exec = db()): Promise<Map<string, NonNullable<GarmentDto["nextBooking"]>>> {
+export const nextBookingsStmt = (ids: string[]): InStatement => ({
+  sql: `SELECT bi.garment_id, bi.booking_id, bi.pickup_date, bi.return_due_date, c.name AS customer
+        FROM booking_items bi JOIN bookings b ON b.id = bi.booking_id JOIN customers c ON c.id = b.customer_id
+        WHERE bi.active = 1 AND bi.return_due_date >= ? AND bi.garment_id IN (${ids.map(() => "?").join(",")})
+        ORDER BY bi.pickup_date`,
+  args: [todayIST(), ...ids],
+});
+export function parseNextBookings(rows: Row[]): Map<string, NonNullable<GarmentDto["nextBooking"]>> {
   const out = new Map<string, NonNullable<GarmentDto["nextBooking"]>>();
-  if (!ids.length) return out;
-  const r = await x.execute({
-    sql: `SELECT bi.garment_id, bi.booking_id, bi.pickup_date, bi.return_due_date, c.name AS customer
-          FROM booking_items bi JOIN bookings b ON b.id = bi.booking_id JOIN customers c ON c.id = b.customer_id
-          WHERE bi.active = 1 AND bi.return_due_date >= ? AND bi.garment_id IN (${ids.map(() => "?").join(",")})
-          ORDER BY bi.pickup_date`,
-    args: [todayIST(), ...ids],
-  });
-  for (const row of r.rows) {
+  for (const row of rows) {
     const gid = String(row.garment_id);
     if (!out.has(gid))
       out.set(gid, { bookingId: String(row.booking_id), from: String(row.pickup_date), to: String(row.return_due_date), customerName: String(row.customer) });
   }
   return out;
+}
+export async function nextBookings(ids: string[], x: Exec = db()): Promise<Map<string, NonNullable<GarmentDto["nextBooking"]>>> {
+  return ids.length ? parseNextBookings((await x.execute(nextBookingsStmt(ids))).rows) : new Map();
 }
 
 export async function listGarments(f: GarmentFilter, role: Role): Promise<{ garments: GarmentDto[]; nextCursor?: string }> {
@@ -101,8 +104,11 @@ export async function listGarments(f: GarmentFilter, role: Role): Promise<{ garm
     args: [...args, f.limit + 1],
   });
   const rows = r.rows.slice(0, f.limit);
-  const next = await nextBookings(rows.map((x) => String(x.id)));
-  const mains = await mainPhotoUrls(rows.map((x) => String(x.id)));
+  const ids = rows.map((x) => String(x.id));
+  // next booking + main photos: independent, one round trip
+  const [nbR, phR] = ids.length ? await readAll(db(), [nextBookingsStmt(ids), mainPhotosStmt(ids)]) : [undefined, undefined];
+  const next = nbR ? parseNextBookings(nbR.rows) : new Map<string, NonNullable<GarmentDto["nextBooking"]>>();
+  const mains = phR ? await signMains(phR.rows) : new Map<string, string>();
   const garments = rows.map((row) => {
     const dto = garmentDto(row, role);
     const nb = next.get(dto.id);
@@ -121,19 +127,32 @@ export async function getGarmentRow(id: string, x: Exec = db()): Promise<Row> {
 }
 
 export async function getGarmentDetail(id: string, role: Role): Promise<GarmentDetailDto> {
-  const row = await getGarmentRow(id);
+  // everything the page needs in ONE round trip (missing garment -> NOT_FOUND below)
+  const [rowR, nbR, phR, h, s] = await readAll(db(), [
+    { sql: `SELECT ${GARMENT_COLS} FROM garments WHERE id = ?`, args: [id] },
+    nextBookingsStmt([id]),
+    garmentPhotosStmt(id),
+    {
+      sql: `SELECT bi.booking_id, bi.pickup_date, bi.return_due_date, b.status, c.name AS customer, bi.rental_price
+            FROM booking_items bi JOIN bookings b ON b.id = bi.booking_id JOIN customers c ON c.id = b.customer_id
+            WHERE bi.garment_id = ? ORDER BY bi.pickup_date DESC LIMIT 20`,
+      args: [id],
+    },
+    {
+      sql: `SELECT COUNT(*) n, COALESCE(SUM(bi.rental_price),0) rev FROM booking_items bi JOIN bookings b ON b.id = bi.booking_id
+            WHERE bi.garment_id = ? AND b.status IN ('OUT_ON_RENT','COMPLETED')`,
+      args: [id],
+    },
+  ]);
+  const row = rowR.rows[0];
+  if (!row) return fail("NOT_FOUND", "Garment not found");
+  const photos = await signPhotos(phR.rows);
+  const nbs = parseNextBookings(nbR.rows);
   const base = garmentDto(row, role);
-  const nb = (await nextBookings([id])).get(id);
+  const nb = nbs.get(id);
   if (nb) base.nextBooking = nb;
-  const photos = await garmentPhotos(id);
   const main = photos.find((p) => p.kind === "MAIN" || p.kind === "FRONT");
   if (main) base.mainPhotoUrl = main.url;
-  const h = await db().execute({
-    sql: `SELECT bi.booking_id, bi.pickup_date, bi.return_due_date, b.status, c.name AS customer, bi.rental_price
-          FROM booking_items bi JOIN bookings b ON b.id = bi.booking_id JOIN customers c ON c.id = b.customer_id
-          WHERE bi.garment_id = ? ORDER BY bi.pickup_date DESC LIMIT 20`,
-    args: [id],
-  });
   const detail: GarmentDetailDto = {
     ...base,
     photos,
@@ -146,11 +165,6 @@ export async function getGarmentDetail(id: string, role: Role): Promise<GarmentD
     })),
   };
   if (role === "admin") {
-    const s = await db().execute({
-      sql: `SELECT COUNT(*) n, COALESCE(SUM(bi.rental_price),0) rev FROM booking_items bi JOIN bookings b ON b.id = bi.booking_id
-            WHERE bi.garment_id = ? AND b.status IN ('OUT_ON_RENT','COMPLETED')`,
-      args: [id],
-    });
     const revenue = Number(s.rows[0].rev);
     detail.stats = { timesRented: Number(s.rows[0].n), revenue, profit: revenue - Number(row.purchase_cost) };
   }

@@ -1,7 +1,8 @@
 import type { Row } from "@tursodatabase/serverless/compat";
 import type { CashClosingDto, CashTodayDto, SessionUser } from "@/types/api";
 import { audit } from "../audit";
-import { db, tx, type Exec } from "../db";
+import type { InStatement } from "@tursodatabase/serverless/compat";
+import { db, readAll, tx, type Exec } from "../db";
 import { fail } from "../http";
 import { todayIST } from "../ids";
 import { int, reqInt, str } from "../validate";
@@ -13,21 +14,26 @@ const closingDto = (r: Row): CashClosingDto => ({
   ...(r.notes ? { notes: String(r.notes) } : {}), verifiedBy: String(r.by_name), createdAt: String(r.created_at),
 });
 
-/** expected_cash = opening + cash received − cash refunds − cash expenses, all from the ledgers (PRD §4.9). */
-export async function computeCash(x: Exec, date: string, openingOverride?: number) {
-  let opening = openingOverride;
-  if (opening === undefined) {
-    const prev = await x.execute({ sql: "SELECT actual_cash FROM cash_closings WHERE date < ? ORDER BY date DESC LIMIT 1", args: [date] });
-    opening = prev.rows[0] ? Number(prev.rows[0].actual_cash) : 0;
-  }
-  const p = await x.execute({
+const closingStmt = (date: string): InStatement => ({ sql: `SELECT ${CL_COLS} FROM cash_closings c LEFT JOIN users u ON u.id=c.verified_by WHERE c.date=?`, args: [date] });
+const cashStmts = (date: string, needPrev: boolean): InStatement[] => [
+  {
     sql: `SELECT COALESCE(SUM(CASE WHEN kind <> 'REFUND' THEN amount END),0) cin, COALESCE(SUM(CASE WHEN kind = 'REFUND' THEN amount END),0) cout
           FROM payments WHERE mode='CASH' AND paid_on=?`,
     args: [date],
-  });
-  const e = await x.execute({ sql: "SELECT COALESCE(SUM(amount),0) s FROM expenses WHERE mode='CASH' AND date=?", args: [date] });
+  },
+  { sql: "SELECT COALESCE(SUM(amount),0) s FROM expenses WHERE mode='CASH' AND date=?", args: [date] },
+  ...(needPrev ? [{ sql: "SELECT actual_cash FROM cash_closings WHERE date < ? ORDER BY date DESC LIMIT 1", args: [date] }] : []),
+];
+function cashFrom(rs: { rows: Row[] }[], openingOverride?: number) {
+  const [p, e, prev] = rs;
+  const opening = openingOverride ?? (prev?.rows[0] ? Number(prev.rows[0].actual_cash) : 0);
   const cashIn = Number(p.rows[0].cin), cashRefunds = Number(p.rows[0].cout), cashExpenses = Number(e.rows[0].s);
   return { openingCash: opening, cashIn, cashRefunds, cashExpenses, expectedCash: opening + cashIn - cashRefunds - cashExpenses };
+}
+
+/** expected_cash = opening + cash received − cash refunds − cash expenses, all from the ledgers (PRD §4.9). */
+export async function computeCash(x: Exec, date: string, openingOverride?: number) {
+  return cashFrom(await readAll(x, cashStmts(date, openingOverride === undefined)), openingOverride);
 }
 
 async function closingOn(x: Exec, date: string): Promise<CashClosingDto | undefined> {
@@ -36,11 +42,12 @@ async function closingOn(x: Exec, date: string): Promise<CashClosingDto | undefi
 }
 
 export async function cashToday(date = todayIST()): Promise<CashTodayDto> {
-  const closing = await closingOn(db(), date);
-  // a closed day shows its frozen snapshot, an open day is live from the ledgers
+  // closing row + live ledger totals in one round trip; a closed day shows its frozen snapshot, an open day is live
+  const [cl, ...ledger] = await readAll(db(), [closingStmt(date), ...cashStmts(date, true)]);
+  const closing = cl.rows[0] ? closingDto(cl.rows[0]) : undefined;
   const c = closing
     ? { openingCash: closing.openingCash, cashIn: closing.cashIn, cashRefunds: closing.cashRefunds, cashExpenses: closing.cashExpenses, expectedCash: closing.expectedCash }
-    : await computeCash(db(), date);
+    : cashFrom(ledger);
   return { date, ...c, closed: !!closing, ...(closing ? { closing } : {}) };
 }
 

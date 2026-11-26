@@ -32,3 +32,14 @@ export async function tx<T>(fn: (t: Transaction) => Promise<T>): Promise<T> {
     t.close();
   }
 }
+
+/**
+ * Run several independent reads in ONE network round trip (the Turso client serialises separate requests, so
+ * Promise.all does not help). Inside a transaction the statements share a connection and run one after another.
+ */
+export async function readAll(x: Exec, stmts: InStatement[]): Promise<ResultSet[]> {
+  if (x === client) return client.batch(stmts, "read");
+  const out: ResultSet[] = [];
+  for (const s of stmts) out.push(await x.execute(s));
+  return out;
+}

@@ -6,6 +6,7 @@ export default defineConfig({
   resolve: { alias: { "@": path.resolve(__dirname, "src") } },
   test: {
     include: ["tests/**/*.test.ts"],
+    setupFiles: process.env.SQL_CAPTURE ? ["tests/capture-setup.ts"] : [],
     testTimeout: 60000,
     hookTimeout: 60000,
     fileParallelism: false,

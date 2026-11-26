@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { PhotoDto, PresignRequest, PresignResponse, RegisterPhotoRequest, SessionUser } from "@/types/api";
+import type { InStatement, Row } from "@tursodatabase/serverless/compat";
 import { db } from "../db";
 import { audit } from "../audit";
 import { fail } from "../http";
@@ -85,23 +86,36 @@ export async function deletePhoto(user: SessionUser, id: string): Promise<void> 
   await storage().remove(String(r.object_key)).catch(() => undefined);
 }
 
+export const garmentPhotosStmt = (garmentId: string): InStatement => ({
+  sql: "SELECT id,kind,object_key,note FROM photos WHERE garment_id=? ORDER BY (kind='MAIN') DESC, sort, created_at",
+  args: [garmentId],
+});
+export const signPhotos = (rows: Row[]): Promise<PhotoDto[]> => Promise.all(rows.map((r) => photoDto({ id: r.id, kind: r.kind, object_key: r.object_key, note: r.note })));
 export async function garmentPhotos(garmentId: string): Promise<PhotoDto[]> {
-  const rows = (await db().execute({ sql: "SELECT id,kind,object_key,note FROM photos WHERE garment_id=? ORDER BY (kind='MAIN') DESC, sort, created_at", args: [garmentId] })).rows;
-  return Promise.all(rows.map((r) => photoDto({ id: r.id, kind: r.kind, object_key: r.object_key, note: r.note })));
+  return signPhotos((await db().execute(garmentPhotosStmt(garmentId))).rows);
 }
 
 /** garmentId → signed URL of its MAIN (else FRONT) photo, newest wins. One query for a whole list. */
-export async function mainPhotoUrls(garmentIds: string[]): Promise<Map<string, string>> {
+export const mainPhotosStmt = (garmentIds: string[]): InStatement => ({
+  sql: `SELECT garment_id, object_key FROM photos WHERE garment_id IN (${garmentIds.map(() => "?").join(",")}) AND kind IN ('MAIN','FRONT')
+        ORDER BY (kind='MAIN') DESC, created_at DESC`,
+  args: garmentIds,
+});
+/** Same, for every garment on the given bookings (subquery, so no prior round trip is needed). */
+export const mainPhotosForBookingsStmt = (bookingIds: string[]): InStatement => ({
+  sql: `SELECT garment_id, object_key FROM photos WHERE kind IN ('MAIN','FRONT')
+        AND garment_id IN (SELECT garment_id FROM booking_items WHERE booking_id IN (${bookingIds.map(() => "?").join(",")}))
+        ORDER BY (kind='MAIN') DESC, created_at DESC`,
+  args: bookingIds,
+});
+export async function signMains(rows: Row[]): Promise<Map<string, string>> {
   const out = new Map<string, string>();
-  if (!garmentIds.length) return out;
-  const rows = (await db().execute({
-    sql: `SELECT garment_id, object_key FROM photos WHERE garment_id IN (${garmentIds.map(() => "?").join(",")}) AND kind IN ('MAIN','FRONT')
-          ORDER BY (kind='MAIN') DESC, created_at DESC`,
-    args: garmentIds,
-  })).rows;
   for (const r of rows) {
     const g = String(r.garment_id);
     if (!out.has(g)) out.set(g, await storage().presignGet(String(r.object_key), GET_TTL));
   }
   return out;
+}
+export async function mainPhotoUrls(garmentIds: string[]): Promise<Map<string, string>> {
+  return garmentIds.length ? signMains((await db().execute(mainPhotosStmt(garmentIds))).rows) : new Map();
 }
