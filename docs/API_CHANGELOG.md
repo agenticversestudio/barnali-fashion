@@ -37,10 +37,31 @@ Legend: ✅ live · ⏳ planned (phase). Staff = `S`, admin = `A`.
 | `GET /health` | public | ✅ |
 | `POST /auth/login`, `POST /auth/logout`, `GET /auth/me` | public/S | ✅ |
 | `GET/POST /users`, `PATCH /users/:id`, `POST /users/:id/reset-password`, `DELETE /users/:id/sessions` | A | ✅ |
-| garments (list/detail/create/edit/location/status/availability) | S/A | ⏳ P3 |
-| customers | S | ⏳ P3 |
-| `POST /bookings/quote`, `POST /bookings`, list/detail, `pickup`, `return`, `payments`, `cancel`, `PATCH` | S/A | ⏳ P3 |
+| garments: `GET /garments` (q, category, status, rack, availableFrom/To, limit, cursor), `GET /garments/:id`, `GET /garments/availability?from&to`, `PATCH /garments/:id/location`, `PATCH /garments/:id/status` (S); `POST /garments`, `PATCH /garments/:id` (A) | S/A | ✅ |
+| customers: `GET /customers?q`, `POST /customers` (upsert by phone), `GET/PATCH /customers/:id` | S | ✅ |
+| `POST /bookings/quote`, `POST /bookings`, `GET /bookings`, `GET/PATCH /bookings/:id`, `POST /bookings/:id/pickup`, `/return`, `/payments` (S); `POST /bookings/:id/cancel` (A) | S/A | ✅ |
 | care, alerts, expenses, cash, reports | S/A | ⏳ P4 |
 | photos | S | ⏳ P5 |
 
 This file is updated whenever an endpoint goes live or a DTO changes. Check the top entry before each integration session.
+
+## 2026-11-26 — Phase 3 live: rental core (what the UI must know)
+
+**Booking wizard**
+- Step 4 live totals: `POST /bookings/quote` (body: `garmentIds, pickupDate, returnDueDate, dryCleanCharge?, transitCharge?, advance?`). Show `conflicts[]` inline (`garmentName`, `heldBy`, `from`, `to`) and block Save while non-empty.
+- Save: `POST /bookings`. `409 GARMENT_CONFLICT` has a ready-to-show `error.message` ("Zt Red Lehenga (LF-001) is already reserved by BF-BK-2026-081 for 10 Jun 2027 – 12 Jun 2027") and `error.details.conflicts[]`. Phone is normalised to 10 digits (accepts `+91`, spaces). Same phone = same customer (updated, not duplicated).
+- Rules (422 `RULE` / 400 `VALIDATION`, messages are user-readable): pickup not in the past, max 30-day rental, advance ≤ grand total, garment not `DAMAGED_REPAIR`/`UNAVAILABLE`.
+
+**Pickup** `POST /bookings/:id/pickup` — body `{ handoverCondition?, payments?: [{kind:"BALANCE"|"DEPOSIT", amount, mode}], photoIds? }`. Whole balance + deposit must be collected in this call or earlier, else `422` "Collect ₹X more…" with `details.balanceDue`. Garment must be physically `AVAILABLE`.
+
+**Extra payment** `POST /bookings/:id/payments` — `BALANCE`/`DEPOSIT` before return (≤ still due); `EXTRA` only after return, ≤ `additionalDue`.
+
+**Return** `POST /bookings/:id/return` → `{ booking, settlement }`. Send only inputs: `actualReturnDate` (≤ today), `damageCharge`, `cleaningCharge`, `items[]` (every garment once, `nextAction` = `AVAILABLE|DRY_CLEAN|REPAIR|DAMAGED`; DRY_CLEAN/REPAIR need `vendorName`), `refund?: {pay, mode}`. **Any `lateFee`/`refund` number you send is ignored.** Display `settlement` as-is; do not recalculate. `settlement.additionalDue > 0` → show "Customer owes ₹X" and offer `POST /payments {kind:"EXTRA"}`. `refund > 0` with `depositStatus:"HELD"` → refund still owed to the customer.
+
+**Cancel** `POST /bookings/:id/cancel` (admin): only `CONFIRMED`; optional `{reason, refundAdvance:{amount,mode}}`; frees the dates.
+**Edit** `PATCH /bookings/:id`: staff may change `eventName`, `eventDate`, `notes`; money fields (`dryCleanCharge`, `transitCharge`, `damageCharge`, `cleaningCharge`) admin only, audited.
+
+**Derived fields on `BookingDto`** (never compute client-side): `grandTotal`, `amountPaid` (money in, refunds excluded), `balanceDue` (0 once COMPLETED/CANCELLED), `additionalDue` (owed minus EXTRA already paid), `isOverdue`.
+**Garment list** also returns `nextBooking` (for the BOOKED badge) and, for admin only, `purchaseCost`; `GET /garments/:id` adds `history[]` and (admin) `stats`.
+**Pagination**: lists return `nextCursor`; pass it back as `?cursor=`.
+**Error codes → HTTP**: VALIDATION 400 · UNAUTHENTICATED 401 · FORBIDDEN 403 · NOT_FOUND 404 · GARMENT_CONFLICT 409 · RULE 422 · LOCKED 423.
