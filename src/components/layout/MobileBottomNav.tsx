@@ -17,17 +17,19 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DataStore } from "@/lib/dataStore";
+import { alertsApi } from "@/lib/api";
 
 export function MobileBottomNav() {
   const pathname = usePathname();
   const [alertCount, setAlertCount] = useState<number>(0);
 
   useEffect(() => {
-    const alerts = DataStore.getDeliveryAlerts();
-    const count =
-      alerts.alerts4Days.length + alerts.alerts3Days.length + alerts.overdueReturns.length;
-    setAlertCount(count);
+    alertsApi
+      .list()
+      .then((res) => {
+        setAlertCount(res.alerts?.length || 0);
+      })
+      .catch(() => setAlertCount(0));
   }, [pathname]);
 
   // Exact 4 Shop Operator Tabs

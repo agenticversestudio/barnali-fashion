@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import {
   ShieldCheck,
@@ -11,17 +11,31 @@ import {
   Sparkles,
   Wrench,
   Camera,
+  Loader2,
 } from "lucide-react";
-import { DataStore } from "@/lib/dataStore";
+import { bookingsApi } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
-import { InspectionRecord } from "@/types";
+import type { BookingDto } from "@/types/api";
 
-export default function InspectionBayPage() {
-  const [inspections, setInspections] = useState<InspectionRecord[]>([]);
+function InspectionBayContent() {
+  const [completedBookings, setCompletedBookings] = useState<BookingDto[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadInspections = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await bookingsApi.list({ status: "COMPLETED", limit: 30 });
+      setCompletedBookings(res.items || []);
+    } catch (err) {
+      console.error("Failed to load completed return inspections:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    setInspections(DataStore.getInspections());
-  }, []);
+    loadInspections();
+  }, [loadInspections]);
 
   return (
     <div className="space-y-6">
@@ -37,55 +51,83 @@ export default function InspectionBayPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-[#EFE9DD] p-5 shadow-xs space-y-4">
-        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD]">
-          Inspection Records ({inspections.length})
+        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD] flex items-center justify-between">
+          <span>Inspection &amp; Return Logs ({completedBookings.length})</span>
+          <span className="text-xs text-gray-400 font-normal">Recent Settled Orders</span>
         </div>
 
-        <div className="space-y-3">
-          {inspections.map((insp) => (
-            <div
-              key={insp.id}
-              className="p-4 bg-[#FBF9F5] rounded-xl border border-[#E8DFD1] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs"
-            >
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-[#4B1835] bg-white px-2 py-0.5 rounded border border-[#E8DFD1]">
-                    {insp.garmentUnitId}
-                  </span>
-                  <span className="font-bold text-gray-900 text-sm">
-                    {insp.customerName} ({insp.bookingId})
-                  </span>
-                </div>
-                <div className="text-gray-600 mt-1 flex flex-wrap items-center gap-4 text-[11px]">
-                  <span>Inspected By: <strong>{insp.inspectedBy}</strong></span>
-                  <span>Date: {formatDate(insp.returnDate)}</span>
-                  <span>
-                    Status: <strong className="text-[#4B1835]">{insp.status}</strong>
-                  </span>
-                </div>
-                <div className="text-[11px] text-gray-700 mt-1.5 p-2 bg-white rounded-lg border border-[#EFE9DD]">
-                  &ldquo;{insp.conditionNotes}&rdquo;
-                </div>
-              </div>
+        {loading ? (
+          <div className="py-12 text-center text-xs text-gray-500">
+            <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+            Loading inspection history...
+          </div>
+        ) : completedBookings.length === 0 ? (
+          <div className="py-12 text-center text-xs text-gray-400">
+            No completed return inspections on record yet.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {completedBookings.map((b) => {
+              const totalDeductions = (b.damageCharge || 0) + (b.cleaningCharge || 0);
+              const hasDefects = totalDeductions > 0;
 
-              <div className="shrink-0 text-right space-y-1">
-                {insp.assessedDamageCharge > 0 ? (
-                  <div className="font-bold text-rose-700">
-                    Penalty: {formatINR(insp.assessedDamageCharge)}
+              return (
+                <div
+                  key={b.id}
+                  className="p-4 bg-[#FBF9F5] rounded-xl border border-[#E8DFD1] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-[#4B1835] text-sm">{b.id}</span>
+                      <span className="font-bold text-gray-900">{b.customer?.name}</span>
+                      <span className="text-gray-400 text-[11px] font-mono">{b.customer?.phone}</span>
+                    </div>
+
+                    <div className="text-gray-600">
+                      Returned: <strong>{b.actualReturnDate ? formatDate(b.actualReturnDate) : "Returned"}</strong> •{" "}
+                      Items: {b.items.map((i) => `${i.name} (${i.garmentId})`).join(", ")}
+                    </div>
+
+                    {b.returnNotes && (
+                      <div className="text-[11px] text-gray-500 italic mt-1">
+                        &quot;{b.returnNotes}&quot;
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <span className="bg-emerald-50 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
-                    No Damage Penalty
-                  </span>
-                )}
-                <div className="text-[10px] text-gray-400">
-                  Special Wash: {insp.requiresSpecialDryClean ? "Yes" : "No"}
+
+                  <div className="flex items-center gap-4 text-right shrink-0">
+                    <div>
+                      <div className="text-[10px] text-gray-400">Deposit Settlement</div>
+                      <div
+                        className={`font-mono font-bold ${
+                          hasDefects ? "text-rose-700" : "text-emerald-700"
+                        }`}
+                      >
+                        {hasDefects ? `Deducted: ${formatINR(totalDeductions)}` : "Refunded in Full"}
+                      </div>
+                    </div>
+
+                    <Link
+                      href={`/erp/billing/invoices?bookingId=${b.id}`}
+                      className="px-3 py-1.5 bg-white border border-[#E8DFD1] rounded-lg font-bold text-[#4B1835] hover:bg-[#FAF5EB]"
+                    >
+                      Receipt →
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+export default function InspectionBayPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-gray-400">Loading inspection bay...</div>}>
+      <InspectionBayContent />
+    </Suspense>
   );
 }

@@ -4,7 +4,6 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { useRouter } from "next/navigation";
 import { authApi } from "@/lib/api";
 import type { SessionUser, Role } from "@/types/api";
-import { DataStore } from "@/lib/dataStore";
 
 interface AuthContextType {
   user: SessionUser | null;
@@ -35,12 +34,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const res = await authApi.getMe();
       setUser(res.user);
-      // Synchronize with legacy DataStore role for backwards compatibility during Phase 6
-      if (res.user.role === "admin") {
-        DataStore.setCurrentRole("owner");
-      } else {
-        DataStore.setCurrentRole("sales_staff");
-      }
     } catch {
       setUser(null);
       if (typeof window !== "undefined") {

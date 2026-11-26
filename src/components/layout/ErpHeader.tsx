@@ -25,12 +25,9 @@ import {
   Check,
   LogOut,
 } from "lucide-react";
-import { DataStore } from "@/lib/dataStore";
-import { NotificationItem, UserRole } from "@/types";
-
 import { useAuth } from "@/context/AuthContext";
-import { alertsApi } from "@/lib/api";
-import type { AlertDto } from "@/types/api";
+import { alertsApi, garmentsApi, bookingsApi, customersApi } from "@/lib/api";
+import type { AlertDto, GarmentDto, BookingDto, CustomerDto, Role } from "@/types/api";
 
 export function ErpHeader() {
   const router = useRouter();
@@ -102,54 +99,54 @@ export function ErpHeader() {
   };
 
   // Role display label
-  const getRoleLabel = (r: UserRole) => {
+  const getRoleLabel = (r?: Role | string) => {
     switch (r) {
+      case "admin":
       case "owner":
-        return "Owner";
+        return "Admin (Owner)";
+      case "staff":
       case "sales_staff":
         return "Counter Operator";
-      case "admin":
-        return "Admin";
-      case "laundry_staff":
-        return "Care / Laundry";
-      case "viewer":
-        return "Viewer";
       default:
-        return r;
+        return r || "Operator";
     }
   };
 
-  // Search filter
-  const allGarments = DataStore.getGarments();
-  const allBookings = DataStore.getBookings();
-  const allCustomers = DataStore.getCustomers();
+  // Search filter via live APIs
+  const [filteredGarments, setFilteredGarments] = useState<GarmentDto[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<BookingDto[]>([]);
+  const [filteredCustomers, setFilteredCustomers] = useState<CustomerDto[]>([]);
+  const [searching, setSearching] = useState(false);
 
-  const filteredGarments = searchQuery.trim()
-    ? allGarments.filter(
-        (g) =>
-          g.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          g.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          g.barcode.includes(searchQuery)
-      )
-    : [];
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setFilteredGarments([]);
+      setFilteredBookings([]);
+      setFilteredCustomers([]);
+      return;
+    }
 
-  const filteredBookings = searchQuery.trim()
-    ? allBookings.filter(
-        (b) =>
-          b.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          b.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          b.customerPhone.includes(searchQuery)
-      )
-    : [];
+    const timer = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const [gRes, bRes, cRes] = await Promise.all([
+          garmentsApi.list({ q, limit: 5 }),
+          bookingsApi.list({ q, limit: 5 }),
+          customersApi.list(q),
+        ]);
+        setFilteredGarments(gRes.items || []);
+        setFilteredBookings(bRes.items || []);
+        setFilteredCustomers(cRes.items || []);
+      } catch (err) {
+        console.error("Search failed:", err);
+      } finally {
+        setSearching(false);
+      }
+    }, 250);
 
-  const filteredCustomers = searchQuery.trim()
-    ? allCustomers.filter(
-        (c) =>
-          c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          c.phone.includes(searchQuery) ||
-          c.city.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : [];
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   return (
     <>
@@ -565,9 +562,9 @@ export function ErpHeader() {
                               <span className="font-mono font-bold text-[#6B1D2F] mr-2">
                                 {g.id}
                               </span>
-                              <span className="font-medium text-slate-900">{g.productName}</span>
+                              <span className="font-medium text-slate-900">{g.name}</span>
                               <span className="text-slate-400 text-[11px] ml-1.5">
-                                · Rack: {g.location || g.storageLocation}
+                                · Rack: {g.rack || "Unassigned"}
                               </span>
                             </div>
                             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
@@ -599,9 +596,9 @@ export function ErpHeader() {
                               <span className="font-mono font-bold text-slate-900 mr-2">
                                 {b.id}
                               </span>
-                              <span className="font-medium text-slate-800">{b.customerName}</span>
+                              <span className="font-medium text-slate-800">{b.customer?.name}</span>
                               <span className="text-slate-400 text-[11px] ml-1.5 font-mono">
-                                {b.customerPhone}
+                                {b.customer?.phone}
                               </span>
                             </div>
                             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300">
@@ -632,7 +629,7 @@ export function ErpHeader() {
                             <div>
                               <span className="font-semibold text-slate-900 mr-2">{c.name}</span>
                               <span className="text-slate-400 text-[11px] font-mono">
-                                {c.phone} · {c.city}
+                                {c.phone} · {c.city || "Bargarh"}
                               </span>
                             </div>
                             <span className="text-[10px] font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
