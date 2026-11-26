@@ -71,3 +71,23 @@ Environment: real Turso (Mumbai), handlers called directly, ZT-prefixed data cle
 ## Findings for frontend (Gemini)
 - T8.5 NOT done: `DataStore` still used in `erp/operations/{pickup,returns,inspection,maintenance}`, `ErpHeader`, `MobileBottomNav`, `AuthContext` (role sync). These screens still read localStorage, not the API.
 - `scripts/set-dev-passwords.ts` added by frontend: dev only; must not run against prod.
+
+---
+
+# T8.5 / T8.1 re-verification (2026-11-26, after frontend commit bbadb71)
+
+| Item | Result | Evidence |
+|------|--------|----------|
+| T8.5 DataStore removed from `/erp/**` | PASS | 0 `DataStore` hits in `src/app/erp`, `src/components/layout`, `src/context`. Remaining hits only in public pages (`/`, `/collections`, `/contact`, `/garment/[id]`) + `src/lib/dataStore.ts` (marketing site, out of ERP scope). No `localStorage` in ERP paths |
+| Pickup/returns payloads (AC3) | PASS | client sends inputs only (dates, damage/cleaning charge, refund mode); `lateFee`/`refund` come from server `settlement` |
+| `npm test` | PASS | 301 passed / 12 opt-in skipped (PowerShell) |
+| `tsc --noEmit` | PASS | clean |
+| `npm run build` | PASS | compiled; `/manifest.webmanifest` + 5 operations routes present |
+| T8.1 manifest + icons | PASS | `src/app/manifest.ts`, 192/512 PNG in `public/icons/` |
+| T8.1 service worker | **FIXED by backend** | `public/sw.js` shipped with TypeScript syntax (`(event: any)`, `as any`) in a plain `.js` file → `SyntaxError: Unexpected token ':'`, SW would never register. Types stripped; `node --check` OK |
+| AC9 PWA install | PASS (pending device check) | manifest/icons/SW valid. Real "Add to Home Screen" on Android Chrome over HTTPS = T9.2 |
+
+Notes:
+- Run tests from PowerShell/cmd. Under Git Bash vitest fails with "failed to find the runner" (env artifact, not code).
+- Minor: manifest lists each icon twice (`/icons/*` and `/icon-*`) and 512 is `maskable` with unknown safe-zone padding. Harmless; tidy optional.
+- Still open (unchanged): AC7 (R2 keys), AC8 (Sheets service account), AC10 `ERP_AUTH_GUARD=1` in Vercel, AC6 re-measure from Bargarh. Dev-only `scripts/set-dev-passwords.ts` must not run on prod.

@@ -2,16 +2,16 @@
 const CACHE_NAME = "barnali-erp-v1";
 const OFFLINE_URL = "/erp/login";
 
-self.addEventListener("install", (event: any) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(["/", OFFLINE_URL]);
     })
   );
-  (self as any).skipWaiting();
+  self.skipWaiting();
 });
 
-self.addEventListener("activate", (event: any) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
@@ -23,14 +23,14 @@ self.addEventListener("activate", (event: any) => {
       );
     })
   );
-  (self as any).clients.claim();
+  self.clients.claim();
 });
 
-self.addEventListener("fetch", (event: any) => {
+self.addEventListener("fetch", (event) => {
   if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request).catch(() => {
-        return caches.match(OFFLINE_URL) as Promise<Response>;
+        return caches.match(OFFLINE_URL);
       })
     );
   }
