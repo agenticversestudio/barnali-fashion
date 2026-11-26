@@ -44,6 +44,12 @@ export function StatusBadge({ status, className, showDot = true }: StatusBadgePr
       displayLabel = "Cleaning pending";
       break;
 
+    case "IN_CARE":
+      colorStyle = "bg-amber-50 text-amber-900 border-amber-300 font-semibold";
+      dotColor = "bg-amber-600";
+      displayLabel = "In Care";
+      break;
+
     case "DAMAGED_REPAIR":
     case "DAMAGED":
     case "UNDER_REPAIR":

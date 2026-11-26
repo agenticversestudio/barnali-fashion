@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -18,45 +18,76 @@ import {
   CheckCircle2,
   Calendar,
   AlertCircle,
+  Loader2,
+  Edit2,
+  Check,
 } from "lucide-react";
-import { DataStore } from "@/lib/dataStore";
+import { garmentsApi } from "@/lib/api";
 import { formatINR } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { GarmentUnit, ProductCategory } from "@/types";
+import type { GarmentDto, GarmentStatus } from "@/types/api";
+import { useAuth } from "@/context/AuthContext";
 
 export default function InventoryPage() {
   const router = useRouter();
-  const [garments, setGarments] = useState<GarmentUnit[]>([]);
+  const { isAdmin } = useAuth();
+
+  const [garments, setGarments] = useState<GarmentDto[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
-  // Selected item for Mobile Full Details Bottom Sheet
-  const [selectedGarment, setSelectedGarment] = useState<GarmentUnit | null>(null);
+  // Selected item for Bottom Sheet (Mobile / Tablet quick preview)
+  const [selectedGarment, setSelectedGarment] = useState<GarmentDto | null>(null);
 
-  // Add Costume Modal state (2-step Mobile Wizard)
+  // Quick Inline Rack Edit Modal / Prompt
+  const [editingRackGarment, setEditingRackGarment] = useState<GarmentDto | null>(null);
+  const [newRack, setNewRack] = useState("");
+  const [newShelf, setNewShelf] = useState("");
+  const [savingLocation, setSavingLocation] = useState(false);
+
+  // Add Costume Modal state
   const [showAddModal, setShowAddModal] = useState(false);
-  const [addStep, setAddStep] = useState<1 | 2>(1);
-  const [costumeId, setCostumeId] = useState("");
-  const [category, setCategory] = useState<ProductCategory>("Bridal Lehenga");
-  const [name, setName] = useState("");
-  const [size, setSize] = useState("M / Adjustable");
-  const [colour, setColour] = useState("Red");
-  const [purchasePrice, setPurchasePrice] = useState("25000");
-  const [rentalPrice, setRentalPrice] = useState("5000");
-  const [securityDeposit, setSecurityDeposit] = useState("3000");
-  const [condition, setCondition] = useState("Excellent");
-  const [location, setLocation] = useState("Godown Rack A-01");
-  const [photoUrl, setPhotoUrl] = useState(
-    "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=600"
-  );
+  const [creating, setCreating] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
 
-  const [qrGarment, setQrGarment] = useState<GarmentUnit | null>(null);
+  const [costumeId, setCostumeId] = useState("");
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState<string>("Bridal Lehenga");
+  const [size, setSize] = useState("M / Adjustable");
+  const [colour, setColour] = useState("Crimson Red");
+  const [fabric, setFabric] = useState("Raw Silk");
+  const [rentalPrice, setRentalPrice] = useState("4500");
+  const [securityDeposit, setSecurityDeposit] = useState("3000");
+  const [purchaseCost, setPurchaseCost] = useState("22000");
+  const [rack, setRack] = useState("Rack A-01");
+  const [shelf, setShelf] = useState("Shelf 1");
+  const [description, setDescription] = useState("");
+
+  const loadGarments = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await garmentsApi.list({
+        q: searchTerm.trim() || undefined,
+        category: selectedCategory !== "ALL" ? selectedCategory : undefined,
+        status: selectedStatus !== "ALL" ? (selectedStatus as GarmentStatus) : undefined,
+      });
+      setGarments(res.items || []);
+    } catch (err) {
+      console.error("Failed to load garments:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchTerm, selectedCategory, selectedStatus]);
 
   useEffect(() => {
-    setGarments(DataStore.getGarments());
-  }, []);
+    const timer = setTimeout(() => {
+      loadGarments();
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [loadGarments]);
 
   const categories = [
     "ALL",
@@ -69,845 +100,685 @@ export default function InventoryPage() {
     "Royal Jewellery & Accessories",
   ];
 
-  const statuses = [
-    { label: "All Costumes", value: "ALL", count: garments.length, dot: "" },
-    {
-      label: "Available",
-      value: "AVAILABLE",
-      count: garments.filter((g) => g.status === "AVAILABLE").length,
-      dot: "bg-emerald-500",
-    },
-    {
-      label: "Booked",
-      value: "BOOKED",
-      count: garments.filter(
-        (g) => g.status === "BOOKED" || g.status === "RESERVED" || g.status === "PREPARING"
-      ).length,
-      dot: "bg-amber-500",
-    },
-    {
-      label: "Out on rent",
-      value: "OUT_ON_RENT",
-      count: garments.filter((g) => g.status === "OUT_ON_RENT" || g.status === "RENTED").length,
-      dot: "bg-blue-500",
-    },
-    {
-      label: "Returned – cleaning pending",
-      value: "RETURNED_CLEANING",
-      count: garments.filter(
-        (g) =>
-          g.status === "RETURNED_CLEANING" ||
-          g.status === "RETURN_RECEIVED" ||
-          g.status === "IN_LAUNDRY"
-      ).length,
-      dot: "bg-purple-500",
-    },
-    {
-      label: "Damaged / Repair",
-      value: "DAMAGED_REPAIR",
-      count: garments.filter(
-        (g) =>
-          g.status === "DAMAGED_REPAIR" ||
-          g.status === "UNDER_REPAIR" ||
-          g.status === "REPAIR_PENDING"
-      ).length,
-      dot: "bg-rose-500",
-    },
-    {
-      label: "Unavailable",
-      value: "UNAVAILABLE",
-      count: garments.filter((g) => g.status === "UNAVAILABLE" || g.status === "RETIRED").length,
-      dot: "bg-slate-400",
-    },
-  ];
-
-  const filteredGarments = garments.filter((g) => {
-    const sTerm = searchTerm.toLowerCase();
-    const matchesSearch =
-      g.id.toLowerCase().includes(sTerm) ||
-      g.productName.toLowerCase().includes(sTerm) ||
-      (g.colour && g.colour.toLowerCase().includes(sTerm)) ||
-      (g.location && g.location.toLowerCase().includes(sTerm)) ||
-      g.storageLocation.toLowerCase().includes(sTerm);
-
-    const matchesCategory = selectedCategory === "ALL" || g.category === selectedCategory;
-
-    let matchesStatus = selectedStatus === "ALL";
-    if (selectedStatus === "AVAILABLE") matchesStatus = g.status === "AVAILABLE";
-    if (selectedStatus === "BOOKED")
-      matchesStatus =
-        g.status === "BOOKED" || g.status === "RESERVED" || g.status === "PREPARING";
-    if (selectedStatus === "OUT_ON_RENT")
-      matchesStatus = g.status === "OUT_ON_RENT" || g.status === "RENTED";
-    if (selectedStatus === "RETURNED_CLEANING")
-      matchesStatus =
-        g.status === "RETURNED_CLEANING" ||
-        g.status === "RETURN_RECEIVED" ||
-        g.status === "IN_LAUNDRY";
-    if (selectedStatus === "DAMAGED_REPAIR")
-      matchesStatus =
-        g.status === "DAMAGED_REPAIR" ||
-        g.status === "UNDER_REPAIR" ||
-        g.status === "REPAIR_PENDING";
-    if (selectedStatus === "UNAVAILABLE")
-      matchesStatus = g.status === "UNAVAILABLE" || g.status === "RETIRED";
-
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
-
-  const handleAddCostume = (e: React.FormEvent) => {
+  const handleUpdateLocation = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!costumeId || !name) {
-      alert("Please enter Costume ID and Name");
+    if (!editingRackGarment || !newRack.trim()) return;
+
+    setSavingLocation(true);
+    try {
+      await garmentsApi.updateLocation(editingRackGarment.id, {
+        rack: newRack.trim(),
+        shelf: newShelf.trim() || undefined,
+      });
+      setEditingRackGarment(null);
+      await loadGarments();
+    } catch (err: any) {
+      alert(err?.message || "Failed to update location");
+    } finally {
+      setSavingLocation(false);
+    }
+  };
+
+  const handleCreateGarment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!costumeId.trim() || !name.trim() || !rentalPrice || !securityDeposit || !rack.trim()) {
+      setAddError("Please fill in SKU ID, Name, Rental Price, Deposit and Rack location.");
       return;
     }
 
-    const newUnit: GarmentUnit = {
-      id: costumeId.toUpperCase().trim(),
-      costumeId: costumeId.toUpperCase().trim(),
-      productId: "PROD-MANUAL",
-      productName: name.trim(),
-      category: category,
-      barcode: `890782${Math.floor(1000 + Math.random() * 9000)}`,
-      size: size,
-      colour: colour.trim(),
-      purchasePrice: Number(purchasePrice) || 25000,
-      rentalPrice: Number(rentalPrice) || 5000,
-      securityDeposit: Number(securityDeposit) || 3000,
-      condition: condition,
-      conditionRating: condition as any,
-      location: location.trim(),
-      storageLocation: location.trim(),
-      status: "AVAILABLE",
-      rentalCount: 0,
-      image:
-        photoUrl ||
-        "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=600",
-      notes: "Newly entered piece",
-    };
+    setCreating(true);
+    setAddError(null);
 
-    DataStore.saveGarment(newUnit);
-    setGarments(DataStore.getGarments());
-    setShowAddModal(false);
-    setAddStep(1);
-    setCostumeId("");
-    setName("");
+    try {
+      await garmentsApi.create({
+        id: costumeId.trim().toUpperCase(),
+        name: name.trim(),
+        category,
+        size,
+        colour,
+        fabric,
+        rentalPrice: Number(rentalPrice),
+        securityDeposit: Number(securityDeposit),
+        purchaseCost: purchaseCost ? Number(purchaseCost) : undefined,
+        rack: rack.trim(),
+        shelf: shelf.trim() || undefined,
+        description: description.trim() || undefined,
+      });
+
+      setShowAddModal(false);
+      // Reset form
+      setCostumeId("");
+      setName("");
+      setDescription("");
+      await loadGarments();
+    } catch (err: any) {
+      setAddError(err?.message || "Failed to create garment. SKU might already exist.");
+    } finally {
+      setCreating(false);
+    }
   };
 
   return (
-    <div className="space-y-3.5 md:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+    <div className="space-y-4 md:space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E6E4DF] shadow-2xs">
         <div>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-slate-900">
-            Inventory
-          </h1>
-          <p className="text-[11px] md:text-xs text-slate-500 mt-0.5">
-            11 Exact costume fields &amp; 6 status states across Bargarh racks.
+          <div className="flex items-center gap-2">
+            <h1 className="font-serif font-bold text-xl md:text-2xl text-slate-900 tracking-tight">
+              Costumes &amp; Inventory Assets
+            </h1>
+            <span className="text-xs font-mono font-semibold bg-[#6B1D2F]/10 text-[#6B1D2F] px-2.5 py-0.5 rounded-full">
+              {garments.length} Pieces
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mt-1">
+            Real-time godown rack tracking, booking availability &amp; care states.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* View Mode Toggle (desktop) */}
-          <div className="hidden md:flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
+          {isAdmin && (
+            <button
+              onClick={() => {
+                setCostumeId(`LF-${String(garments.length + 1).padStart(3, "0")}`);
+                setShowAddModal(true);
+              }}
+              className="flex items-center gap-2 px-3.5 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Costume</span>
+            </button>
+          )}
+
+          <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200">
             <button
               onClick={() => setViewMode("table")}
-              className={`p-1.5 rounded-md text-xs transition-colors ${
-                viewMode === "table"
-                  ? "bg-white text-slate-900 shadow-xs font-semibold"
-                  : "text-slate-500"
+              className={`p-2 rounded-lg text-xs font-medium transition-colors ${
+                viewMode === "table" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-500"
               }`}
               title="Table View"
             >
-              <List className="w-3.5 h-3.5" />
+              <List className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded-md text-xs transition-colors ${
-                viewMode === "grid"
-                  ? "bg-white text-slate-900 shadow-xs font-semibold"
-                  : "text-slate-500"
+              className={`p-2 rounded-lg text-xs font-medium transition-colors ${
+                viewMode === "grid" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-500"
               }`}
               title="Grid View"
             >
-              <Grid className="w-3.5 h-3.5" />
+              <Grid className="w-4 h-4" />
             </button>
           </div>
-
-          <button
-            onClick={() => {
-              setAddStep(1);
-              setShowAddModal(true);
-            }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 md:px-3.5 md:py-2 bg-[#6B1D2F] hover:bg-[#551624] text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Piece</span>
-          </button>
         </div>
       </div>
 
-      {/* COMPACT FILTER & SEARCH STRIP */}
-      <div className="bg-white p-3.5 md:p-4 rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-          <div className="relative sm:col-span-1 md:col-span-2">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+      {/* Search & Category Filter Bar */}
+      <div className="space-y-3 bg-white p-3.5 md:p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="relative md:col-span-2">
             <input
               type="text"
-              placeholder="Search Costume ID (LF-001), category, size, colour, or rack..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-xs pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-[#6B1D2F] text-slate-800"
+              placeholder="Search by SKU (e.g. LF-001), garment name, fabric or rack..."
+              className="w-full pl-9 pr-4 py-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#6B1D2F]"
             />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="text-xs py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-hidden cursor-pointer"
-          >
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c === "ALL" ? "All Categories" : c}
-              </option>
-            ))}
-          </select>
+          <div>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full py-2.5 px-3 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-[#6B1D2F]"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="AVAILABLE">Available Now</option>
+              <option value="OUT_ON_RENT">Out on Rent</option>
+              <option value="RETURNED_CLEANING">Cleaning Pending</option>
+              <option value="IN_CARE">In Care / Tailoring</option>
+              <option value="DAMAGED_REPAIR">Damaged / Repair</option>
+              <option value="UNAVAILABLE">Unavailable / Retired</option>
+            </select>
+          </div>
         </div>
 
-        {/* Wrapping Status Pills with Colour Dots (Zero Horizontal Scroll on Tablet) */}
-        <div className="flex flex-wrap items-center gap-1.5 border-t border-[#EFECE6] pt-2.5 select-none">
-          {statuses.map((st) => (
+        {/* Scrollable Category Chips */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-1 border-t border-slate-100">
+          {categories.map((cat) => (
             <button
-              key={st.value}
-              onClick={() => setSelectedStatus(st.value)}
-              className={`min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${
-                selectedStatus === st.value
-                  ? "bg-slate-900 text-white shadow-xs font-semibold"
-                  : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/80"
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-colors shrink-0 ${
+                selectedCategory === cat
+                  ? "bg-[#6B1D2F] text-white font-semibold"
+                  : "bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/80"
               }`}
             >
-              {st.dot && <span className={`w-2 h-2 rounded-full ${st.dot}`} />}
-              <span>{st.label}</span>
-              <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                  selectedStatus === st.value
-                    ? "bg-white/20 text-white"
-                    : "bg-slate-200 text-slate-700"
-                }`}
-              >
-                {st.count}
-              </span>
+              {cat === "ALL" ? "All Categories" : cat}
             </button>
           ))}
         </div>
       </div>
 
-      {/* ========================================================= */}
-      {/* MOBILE & TABLET CARDS VIEW (< 1024px): 2-COL ON TABLET    */}
-      {/* ========================================================= */}
-      <div className="block lg:hidden">
-        {filteredGarments.length === 0 ? (
-          <div className="bg-white p-8 rounded-xl border border-[#E6E4DF] text-center text-xs text-slate-500 shadow-2xs">
-            No costumes found matching your filter.
+      {/* Main Inventory Display */}
+      {loading ? (
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center">
+          <Loader2 className="w-6 h-6 animate-spin text-[#6B1D2F] mx-auto mb-2" />
+          <div className="text-xs text-slate-500">Loading inventory assets from database...</div>
+        </div>
+      ) : garments.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+            <Shirt className="w-6 h-6" />
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            {filteredGarments.map((g) => (
-              <div
-                key={g.id}
-                className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col justify-between gap-3 min-w-0"
-              >
-                {/* Row 1: Header (Costume ID on left, Status Badge on right) */}
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-xs font-bold text-[#6B1D2F] bg-rose-50/60 px-2 py-0.5 rounded border border-rose-200/60">
+          <div className="text-sm font-bold text-slate-800">No costumes match your filters</div>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            Try clearing search keywords or switching category filters.
+          </p>
+          <button
+            onClick={() => {
+              setSearchTerm("");
+              setSelectedCategory("ALL");
+              setSelectedStatus("ALL");
+            }}
+            className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg"
+          >
+            Clear Filters
+          </button>
+        </div>
+      ) : viewMode === "grid" ? (
+        /* Grid View */
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {garments.map((g) => (
+            <div
+              key={g.id}
+              className="bg-white rounded-2xl border border-[#E6E4DF] overflow-hidden shadow-2xs hover:shadow-md transition-shadow flex flex-col group"
+            >
+              <div className="h-56 bg-slate-100 relative overflow-hidden">
+                <img
+                  src={
+                    g.mainPhotoUrl ||
+                    "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=600"
+                  }
+                  alt={g.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+                <div className="absolute top-2.5 left-2.5">
+                  <span className="font-mono font-bold text-xs bg-black/75 text-white px-2 py-0.5 rounded-md backdrop-blur-xs">
                     {g.id}
                   </span>
+                </div>
+                <div className="absolute top-2.5 right-2.5">
                   <StatusBadge status={g.status} />
                 </div>
+              </div>
 
-                {/* Row 2: Body Block (Thumbnail + Name on own line, category/size/colour, and 2-col info strip) */}
-                <div className="space-y-2 min-w-0">
-                  <div className="flex items-start gap-3">
-                    <img
-                      src={g.image}
-                      alt={g.productName}
-                      className="w-14 h-14 rounded-lg object-cover border border-[#E6E4DF] shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="text-xs font-semibold text-slate-900 leading-snug line-clamp-2">
-                        {g.productName}
-                      </div>
-                      <div className="text-[11px] text-slate-600 mt-1">
-                        {g.category} · {g.size} · {g.colour}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-xs">
-                    <div>
-                      <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Rental Rate</span>
-                      <span className="font-semibold text-slate-900">{formatINR(g.rentalPrice)} <span className="text-[10px] text-slate-500 font-normal">/ 3d</span></span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Godown Rack</span>
-                      <span className="font-semibold text-slate-800 truncate block">{g.location || g.storageLocation}</span>
-                    </div>
+              <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                <div>
+                  <div className="text-[11px] text-slate-400 font-medium">{g.category}</div>
+                  <h3 className="font-serif font-bold text-sm text-slate-900 line-clamp-1 mt-0.5">
+                    {g.name}
+                  </h3>
+                  <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-1">
+                    <span>Size: {g.size}</span>
+                    {g.colour && <span>• {g.colour}</span>}
                   </div>
                 </div>
 
-                {/* Row 3: Footer (Details on left, Book Piece on right) */}
-                <div className="flex items-center justify-between pt-2.5 border-t border-[#EFECE6] gap-2 mt-auto">
-                  <button
-                    onClick={() => setSelectedGarment(g)}
-                    className="min-h-[40px] px-3.5 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors flex items-center justify-center"
-                  >
-                    Details
-                  </button>
+                <div className="pt-2 border-t border-slate-100 space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 text-[11px]">Rental Tariff:</span>
+                    <span className="font-bold text-[#6B1D2F] font-mono">
+                      {formatINR(g.rentalPrice)}
+                    </span>
+                  </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between text-[11px] bg-slate-50 p-2 rounded-lg">
+                    <div className="flex items-center gap-1.5 text-slate-600 truncate">
+                      <MapPin className="w-3.5 h-3.5 text-[#6B1D2F] shrink-0" />
+                      <span className="truncate">
+                        {g.rack} {g.shelf ? `· ${g.shelf}` : ""}
+                      </span>
+                    </div>
                     <button
-                      onClick={() => setQrGarment(g)}
-                      title="Rack Tag"
-                      className="min-h-[40px] min-w-[40px] px-2.5 text-slate-600 hover:text-slate-900 bg-white border border-[#E6E4DF] rounded-lg text-xs transition-colors flex items-center justify-center shadow-2xs"
+                      onClick={() => {
+                        setEditingRackGarment(g);
+                        setNewRack(g.rack);
+                        setNewShelf(g.shelf || "");
+                      }}
+                      className="text-slate-400 hover:text-[#6B1D2F] p-0.5"
+                      title="Edit Rack Location"
                     >
-                      <QrCode className="w-4 h-4" />
+                      <Edit2 className="w-3 h-3" />
                     </button>
-                    <button
-                      onClick={() => router.push(`/erp/bookings?new=true&sku=${g.id}`)}
-                      className="min-h-[40px] px-4 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors flex items-center justify-center"
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <Link
+                      href={`/erp/inventory/${g.id}`}
+                      className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-center font-semibold rounded-lg text-[11px] transition-colors"
                     >
-                      Book Piece
-                    </button>
+                      Details
+                    </Link>
+                    <Link
+                      href={`/erp/bookings/new?sku=${g.id}`}
+                      className="flex-1 py-1.5 bg-[#6B1D2F] hover:bg-[#521624] text-white text-center font-semibold rounded-lg text-[11px] transition-colors"
+                    >
+                      Book Now
+                    </Link>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* ========================================================= */}
-      {/* DESKTOP PRESENTATION (>= 1024px): TABLE OR GRID           */}
-      {/* ========================================================= */}
-      <div className="hidden lg:block">
-        {viewMode === "table" ? (
-          <div className="bg-white rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-[#FAF9F6] border-b border-[#E6E4DF] text-slate-600 uppercase text-[10px] tracking-wider font-semibold">
-                  <tr>
-                    <th className="py-3 px-4">Item</th>
-                    <th className="py-3 px-3">Category</th>
-                    <th className="py-3 px-3">Size &amp; Color</th>
-                    <th className="py-3 px-3">Godown Rack</th>
-                    <th className="py-3 px-3">Rental Rate</th>
-                    <th className="py-3 px-3">Deposit</th>
-                    <th className="py-3 px-3">Status</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#EFECE6]">
-                  {filteredGarments.map((g) => (
-                    <tr key={g.id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={g.image}
-                            alt={g.productName}
-                            className="w-11 h-11 rounded-lg object-cover border border-slate-200 shrink-0"
-                          />
-                          <div>
-                            <span className="font-mono text-xs font-semibold text-slate-900">
-                              {g.id}
-                            </span>
-                            <div className="text-slate-700 font-medium line-clamp-1 max-w-[200px]">
-                              {g.productName}
-                            </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* Table View */
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] shadow-2xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-[#FAF9F6] border-b border-[#E6E4DF] text-[11px] font-bold uppercase text-slate-500">
+                  <th className="py-3 px-4">Garment SKU</th>
+                  <th className="py-3 px-4">Category &amp; Specs</th>
+                  <th className="py-3 px-4">Current Status</th>
+                  <th className="py-3 px-4">Godown Location</th>
+                  <th className="py-3 px-4 text-right">Rental / Deposit</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#EFECE6]">
+                {garments.map((g) => (
+                  <tr key={g.id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={
+                            g.mainPhotoUrl ||
+                            "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=200"
+                          }
+                          alt={g.name}
+                          className="w-11 h-11 object-cover rounded-lg border border-slate-200 shrink-0"
+                          loading="lazy"
+                        />
+                        <div>
+                          <span className="font-mono font-bold text-xs text-[#6B1D2F]">
+                            {g.id}
+                          </span>
+                          <div className="font-serif font-semibold text-slate-900 line-clamp-1">
+                            {g.name}
                           </div>
                         </div>
-                      </td>
-                      <td className="py-3 px-3 text-slate-500 font-medium whitespace-nowrap">
-                        {g.category}
-                      </td>
-                      <td className="py-3 px-3 whitespace-nowrap">
-                        <div className="font-medium text-slate-800">{g.size}</div>
-                        <div className="text-[11px] text-slate-400">{g.colour || "—"}</div>
-                      </td>
-                      <td className="py-3 px-3 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1 text-slate-600 font-medium bg-slate-50 border border-slate-200 px-2 py-0.5 rounded text-[11px]">
-                          <MapPin className="w-3 h-3 text-slate-400" />
-                          <span>{g.location || g.storageLocation}</span>
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 font-semibold text-slate-900 whitespace-nowrap">
-                        {formatINR(g.rentalPrice)}
-                      </td>
-                      <td className="py-3 px-3 text-slate-500 font-medium whitespace-nowrap">
-                        {formatINR(g.securityDeposit)}
-                      </td>
-                      <td className="py-3 px-3 whitespace-nowrap">
-                        <StatusBadge status={g.status} />
-                      </td>
-                      <td className="py-3 px-4 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() => setQrGarment(g)}
-                            title="View Rack Tag"
-                            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                          >
-                            <QrCode className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => setSelectedGarment(g)}
-                            className="px-2.5 py-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors text-[11px] font-medium"
-                          >
-                            Details
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredGarments.map((g) => (
-              <div
-                key={g.id}
-                onClick={() => setSelectedGarment(g)}
-                className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-2xs hover:shadow-md transition-all flex flex-col justify-between cursor-pointer group"
-              >
-                <div className="relative">
-                  <img
-                    src={g.image}
-                    alt={g.productName}
-                    className="w-full h-44 object-cover group-hover:scale-102 transition-transform duration-200"
-                  />
-                  <div className="absolute top-2 left-2">
-                    <span className="font-mono text-[10px] bg-slate-900/90 text-white font-bold px-2 py-0.5 rounded shadow-xs">
-                      {g.id}
-                    </span>
-                  </div>
-                  <div className="absolute top-2 right-2">
-                    <StatusBadge status={g.status} />
-                  </div>
-                </div>
-
-                <div className="p-3.5 flex-1 flex flex-col justify-between">
-                  <div>
-                    <span className="text-[10px] font-semibold text-slate-400 uppercase">
-                      {g.category}
-                    </span>
-                    <h3 className="font-medium text-slate-900 text-xs mt-0.5 line-clamp-1">
-                      {g.productName}
-                    </h3>
-                    <div className="text-[11px] text-slate-500 mt-1">
-                      Size: {g.size} · {g.colour}
-                    </div>
-                  </div>
-
-                  <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <div>
-                      <div className="text-[10px] text-slate-400">Rental / 3d</div>
-                      <div className="font-bold text-[#6B1D2F]">{formatINR(g.rentalPrice)}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[10px] text-slate-400">Rack</div>
-                      <div className="text-[11px] font-medium text-slate-700">
-                        {g.location || g.storageLocation}
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+                    </td>
 
-      {/* ========================================================= */}
-      {/* FULL DETAILS BOTTOM SHEET (ALL 11 CLIENT FIELDS)          */}
-      {/* ========================================================= */}
-      {selectedGarment && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center z-50 animate-in fade-in">
-          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-2xl border border-slate-200 max-w-lg w-full p-4 sm:p-6 text-xs max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
-            {/* Grab handle for mobile */}
-            <div className="sm:hidden w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3" />
+                    <td className="py-3.5 px-4">
+                      <div className="text-slate-800 font-medium">{g.category}</div>
+                      <div className="text-[11px] text-slate-500">
+                        Size: <span className="font-semibold text-slate-700">{g.size}</span>
+                        {g.colour && <span> · {g.colour}</span>}
+                      </div>
+                    </td>
 
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-sm font-bold text-[#6B1D2F]">
-                  {selectedGarment.id}
-                </span>
-                <StatusBadge status={selectedGarment.status} />
-              </div>
-              <button
-                onClick={() => setSelectedGarment(null)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+                    <td className="py-3.5 px-4">
+                      <StatusBadge status={g.status} />
+                      {g.nextBooking && (
+                        <div className="text-[10px] text-amber-800 font-medium mt-1">
+                          Next: {g.nextBooking.from} ({g.nextBooking.customerName})
+                        </div>
+                      )}
+                    </td>
 
-            {/* Content: Photo + 11 Fields */}
-            <div className="mt-3 space-y-3">
-              <div className="relative rounded-xl overflow-hidden border border-slate-200 h-48 sm:h-56 bg-slate-100">
-                <img
-                  src={selectedGarment.image}
-                  alt={selectedGarment.productName}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute bottom-2 left-2 bg-slate-900/80 text-white text-[10px] font-mono px-2 py-0.5 rounded">
-                  {selectedGarment.category}
-                </div>
-              </div>
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-1.5 text-slate-700 font-medium">
+                        <MapPin className="w-3.5 h-3.5 text-[#6B1D2F] shrink-0" />
+                        <span>{g.rack}</span>
+                        {g.shelf && <span className="text-slate-400">· {g.shelf}</span>}
+                        <button
+                          onClick={() => {
+                            setEditingRackGarment(g);
+                            setNewRack(g.rack);
+                            setNewShelf(g.shelf || "");
+                          }}
+                          className="text-slate-400 hover:text-[#6B1D2F] ml-1 p-0.5"
+                          title="Quick update rack"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </td>
 
-              <div>
-                <h3 className="text-sm font-semibold text-slate-900">
-                  {selectedGarment.productName}
-                </h3>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Condition:{" "}
-                  <strong className="text-emerald-700">
-                    {selectedGarment.condition || selectedGarment.conditionRating}
-                  </strong>{" "}
-                  · Colour: <strong>{selectedGarment.colour || "Standard"}</strong> · Size:{" "}
-                  <strong>{selectedGarment.size}</strong>
-                </p>
-              </div>
+                    <td className="py-3.5 px-4 text-right">
+                      <div className="font-mono font-bold text-slate-900 text-xs">
+                        {formatINR(g.rentalPrice)}
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-mono">
+                        Dep: {formatINR(g.securityDeposit)}
+                      </div>
+                    </td>
 
-              {/* 11 Fields Details Grid */}
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <span className="text-[10px] text-slate-400 font-medium block">
-                    Rental Price / 3 Days
-                  </span>
-                  <span className="text-sm font-bold text-[#6B1D2F]">
-                    {formatINR(selectedGarment.rentalPrice)}
-                  </span>
-                </div>
-
-                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <span className="text-[10px] text-slate-400 font-medium block">
-                    Security Deposit (Refundable)
-                  </span>
-                  <span className="text-sm font-bold text-slate-900">
-                    {formatINR(selectedGarment.securityDeposit)}
-                  </span>
-                </div>
-
-                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <span className="text-[10px] text-slate-400 font-medium block">
-                    Purchase Price / Asset Cost
-                  </span>
-                  <span className="font-semibold text-slate-700">
-                    {formatINR(selectedGarment.purchasePrice || 25000)}
-                  </span>
-                </div>
-
-                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <span className="text-[10px] text-slate-400 font-medium block">
-                    Storage Godown Rack
-                  </span>
-                  <span className="font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
-                    <MapPin className="w-3 h-3 text-[#6B1D2F]" />
-                    <span>{selectedGarment.location || selectedGarment.storageLocation}</span>
-                  </span>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    setSelectedGarment(null);
-                    router.push(`/erp/bookings?new=1&sku=${selectedGarment.id}`);
-                  }}
-                  className="flex-1 py-2.5 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs"
-                >
-                  <ClipboardList className="w-3.5 h-3.5" />
-                  <span>Book this Piece</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setQrGarment(selectedGarment);
-                    setSelectedGarment(null);
-                  }}
-                  className="px-3 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-medium text-xs transition-colors flex items-center gap-1"
-                >
-                  <QrCode className="w-3.5 h-3.5" />
-                  <span>Rack Tag</span>
-                </button>
-              </div>
-            </div>
+                    <td className="py-3.5 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Link
+                          href={`/erp/inventory/${g.id}`}
+                          className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-[11px] transition-colors"
+                        >
+                          Details
+                        </Link>
+                        <Link
+                          href={`/erp/bookings/new?sku=${g.id}`}
+                          className="px-2.5 py-1.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-semibold rounded-lg text-[11px] transition-colors"
+                        >
+                          Book
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      {/* ========================================================= */}
-      {/* ADD PIECE WIZARD (MOBILE STEP-BY-STEP & DESKTOP)          */}
-      {/* ========================================================= */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center z-50 animate-in fade-in">
-          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-2xl border border-slate-200 max-w-md w-full p-4 sm:p-6 text-xs max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
-            <div className="sm:hidden w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3" />
-
-            {/* Modal Header & Step Indicator */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+      {/* Quick Edit Rack Modal */}
+      {editingRackGarment && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 border border-[#E6E4DF] shadow-xl space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <div>
-                <span className="font-semibold text-sm text-slate-900">Add New Costume Piece</span>
-                <div className="text-[10px] text-slate-400 mt-0.5">
-                  Step {addStep} of 2: {addStep === 1 ? "Costume Identity" : "Pricing & Godown Rack"}
-                </div>
+                <h3 className="font-bold text-slate-900 text-sm">Update Godown Rack</h3>
+                <span className="text-[11px] font-mono text-[#6B1D2F] font-semibold">
+                  {editingRackGarment.id} · {editingRackGarment.name}
+                </span>
               </div>
               <button
-                onClick={() => setShowAddModal(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                onClick={() => setEditingRackGarment(null)}
+                className="text-slate-400 hover:text-slate-600"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleAddCostume} className="mt-4 space-y-3">
-              {addStep === 1 ? (
-                <>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div>
-                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                        Costume ID *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. LF-005"
-                        value={costumeId}
-                        onChange={(e) => setCostumeId(e.target.value)}
-                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-mono font-bold text-slate-900"
-                      />
-                    </div>
+            <form onSubmit={handleUpdateLocation} className="space-y-3 text-xs">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                  Rack Name / Number
+                </label>
+                <input
+                  type="text"
+                  value={newRack}
+                  onChange={(e) => setNewRack(e.target.value)}
+                  placeholder="e.g. Rack A-02, Godown Rack B"
+                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium focus:outline-none focus:border-[#6B1D2F]"
+                  required
+                />
+              </div>
 
-                    <div>
-                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                        Category *
-                      </label>
-                      <select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value as ProductCategory)}
-                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-800"
-                      >
-                        {categories
-                          .filter((c) => c !== "ALL")
-                          .map((c) => (
-                            <option key={c} value={c}>
-                              {c}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-                  </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                  Shelf / Compartment (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={newShelf}
+                  onChange={(e) => setNewShelf(e.target.value)}
+                  placeholder="e.g. Shelf 2, Box 3"
+                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium focus:outline-none focus:border-[#6B1D2F]"
+                />
+              </div>
 
-                  <div>
-                    <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                      Garment Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Red Royal Zardozi Bridal Lehenga"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-medium"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div>
-                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                        Size
-                      </label>
-                      <input
-                        type="text"
-                        value={size}
-                        onChange={(e) => setSize(e.target.value)}
-                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                        Colour
-                      </label>
-                      <input
-                        type="text"
-                        value={colour}
-                        onChange={(e) => setColour(e.target.value)}
-                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                      Photo URL
-                    </label>
-                    <input
-                      type="url"
-                      value={photoUrl}
-                      onChange={(e) => setPhotoUrl(e.target.value)}
-                      className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-[11px]"
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div>
-                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                        Rental Rate (₹) *
-                      </label>
-                      <input
-                        type="number"
-                        required
-                        value={rentalPrice}
-                        onChange={(e) => setRentalPrice(e.target.value)}
-                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-bold text-[#6B1D2F]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                        Security Deposit (₹) *
-                      </label>
-                      <input
-                        type="number"
-                        required
-                        value={securityDeposit}
-                        onChange={(e) => setSecurityDeposit(e.target.value)}
-                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-bold"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div>
-                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                        Purchase / Asset Cost (₹)
-                      </label>
-                      <input
-                        type="number"
-                        value={purchasePrice}
-                        onChange={(e) => setPurchasePrice(e.target.value)}
-                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-mono"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                        Condition
-                      </label>
-                      <select
-                        value={condition}
-                        onChange={(e) => setCondition(e.target.value)}
-                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-medium"
-                      >
-                        <option value="Excellent">Excellent</option>
-                        <option value="Good">Good</option>
-                        <option value="Minor Wear">Minor Wear</option>
-                        <option value="Repairs Needed">Repairs Needed</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                      Godown Rack Location *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Godown Rack A-01"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold"
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* Sticky Bottom Actions */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                {addStep === 2 ? (
-                  <button
-                    type="button"
-                    onClick={() => setAddStep(1)}
-                    className="px-3.5 py-2 border border-slate-200 rounded-lg font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    Back
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setShowAddModal(false)}
-                    className="px-3.5 py-2 border border-slate-200 rounded-lg font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    Cancel
-                  </button>
-                )}
-
-                {addStep === 1 ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!costumeId || !name) {
-                        alert("Please fill Costume ID and Name");
-                        return;
-                      }
-                      setAddStep(2);
-                    }}
-                    className="px-4 py-2 bg-[#6B1D2F] hover:bg-[#551624] text-white font-semibold rounded-lg shadow-xs"
-                  >
-                    Next: Pricing &amp; Rack
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-[#6B1D2F] hover:bg-[#551624] text-white font-semibold rounded-lg shadow-xs"
-                  >
-                    Save Piece
-                  </button>
-                )}
+              <div className="flex items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingRackGarment(null)}
+                  className="flex-1 py-2 rounded-xl border border-slate-200 text-slate-600 font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingLocation}
+                  className="flex-1 py-2 bg-[#6B1D2F] text-white rounded-xl font-semibold shadow-xs flex items-center justify-center gap-1.5"
+                >
+                  {savingLocation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  <span>Save Location</span>
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Rack Tag Modal */}
-      {qrGarment && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 max-w-xs w-full border border-slate-200 shadow-xl text-center">
-            <h3 className="font-semibold text-sm text-slate-900">Storage Rack Label</h3>
-            <p className="text-xs text-slate-500 mt-0.5">{qrGarment.productName}</p>
-
-            <div className="my-4 p-4 border border-dashed border-slate-300 rounded-lg bg-slate-50 flex flex-col items-center">
-              <div className="text-xl font-mono font-bold text-slate-900">{qrGarment.id}</div>
-              <div className="text-xs text-slate-600 mt-1">
-                {qrGarment.category} · {qrGarment.size}
+      {/* Add New Costume Modal (Admin Only) */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div>
+                <h3 className="font-serif font-bold text-slate-900 text-base">Add New Rental Costume</h3>
+                <p className="text-[11px] text-slate-500">Persists directly to live Turso database</p>
               </div>
-              <div className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 mt-2">
-                Rack: {qrGarment.location || qrGarment.storageLocation}
-              </div>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <button
-              onClick={() => setQrGarment(null)}
-              className="w-full py-2 bg-slate-900 text-white rounded-lg text-xs font-medium hover:bg-slate-800"
-            >
-              Close
-            </button>
+            {addError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                <span>{addError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateGarment} className="space-y-3.5 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Costume SKU ID *
+                  </label>
+                  <input
+                    type="text"
+                    value={costumeId}
+                    onChange={(e) => setCostumeId(e.target.value)}
+                    placeholder="e.g. LF-041"
+                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-bold text-slate-800"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Category *
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium text-slate-800"
+                  >
+                    {categories.filter((c) => c !== "ALL").map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  Costume Title / Design Name *
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Zardosi Maroon Velvet Bridal Lehenga"
+                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium text-slate-800"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2.5">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">
+                    Size *
+                  </label>
+                  <input
+                    type="text"
+                    value={size}
+                    onChange={(e) => setSize(e.target.value)}
+                    placeholder="e.g. M / 38"
+                    className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">
+                    Colour
+                  </label>
+                  <input
+                    type="text"
+                    value={colour}
+                    onChange={(e) => setColour(e.target.value)}
+                    placeholder="e.g. Maroon"
+                    className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">
+                    Fabric
+                  </label>
+                  <input
+                    type="text"
+                    value={fabric}
+                    onChange={(e) => setFabric(e.target.value)}
+                    placeholder="e.g. Velvet"
+                    className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2.5">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1">
+                    Rental Tariff (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    value={rentalPrice}
+                    onChange={(e) => setRentalPrice(e.target.value)}
+                    className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-bold text-[#6B1D2F]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1">
+                    Deposit (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    value={securityDeposit}
+                    onChange={(e) => setSecurityDeposit(e.target.value)}
+                    className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-bold"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1">
+                    Purchase Cost (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={purchaseCost}
+                    onChange={(e) => setPurchaseCost(e.target.value)}
+                    className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono text-slate-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Rack Location *
+                  </label>
+                  <input
+                    type="text"
+                    value={rack}
+                    onChange={(e) => setRack(e.target.value)}
+                    placeholder="e.g. Rack A-01"
+                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Shelf
+                  </label>
+                  <input
+                    type="text"
+                    value={shelf}
+                    onChange={(e) => setShelf(e.target.value)}
+                    placeholder="e.g. Shelf 1"
+                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  Design &amp; Fitting Notes (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="e.g. Padded blouse, includes matching dupatta and can-can skirt layer."
+                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                />
+              </div>
+
+              <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creating}
+                  className="flex-1 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white rounded-xl font-semibold shadow-xs flex items-center justify-center gap-1.5"
+                >
+                  {creating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" />
+                      <span>Saving Piece...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Add to Live Stock</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
