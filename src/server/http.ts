@@ -39,6 +39,8 @@ export function errorResponse(e: unknown): Response {
     const body: ApiErrorBody = { error: { code: e.code, message: e.message, details: e.details } };
     return json(body, { status: e.status });
   }
+  // Next signals "this route is dynamic" by throwing during build prerender: let it through instead of logging/500ing it.
+  if (e instanceof Error && ((e as { digest?: string }).digest === "DYNAMIC_SERVER_USAGE" || /bail out of prerendering/.test(e.message))) throw e;
   console.error("[api] unhandled", e);
   const body: ApiErrorBody = { error: { code: "INTERNAL", message: "Something went wrong" } };
   return json(body, { status: 500 });
