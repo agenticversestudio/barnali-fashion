@@ -168,3 +168,9 @@ Not done / not claimable by me: T6.10 (staging walkthrough on real phone+tablet+
 - Added "Pay deposit refund" button to `/erp/bookings` order list table for completed bookings with held refunds.
 - Added "Pay deposit refund" button to `/erp/operations/returns` settlement summary.
 - Verified: `tsc --noEmit` clean, `npm run test:smoke` (11/11 pass in 31s), `npm run build` succeeds (54 routes). All code gaps are closed!
+
+## Final green status, commit 312f76f (2026-11-27, Claude)
+
+`tsc --noEmit` clean · `npm test` 312 passed / 12 opt-in skipped (16 files) · `npm run build` OK · smoke 11/11.
+UI confirmed: "Pay deposit refund" on the order drawer banner, orders table and return counter; modal locks REFUND to the exact `refundAmount`.
+All code-level gaps found in this review are closed. Remaining items are not code: live R2 (AC7) and Sheets (AC8) checks, AC6 from Bargarh, device PWA install, T6.10 staging walkthrough + client Milestone 2 sign-off, and T9.1/T9.2 production setup with the owner's accounts.

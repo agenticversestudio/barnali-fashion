@@ -179,7 +179,7 @@ Enter the **advance amount** and how it was paid (**Cash / UPI / Card / Bank tra
 - **Refund** = deposit − deductions (never below 0). *Example: deposit ₹2,000, deductions ₹1,050 → refund ₹950.*
 - If deductions are **more than the deposit**, the customer **owes the difference** (*"Customer owes ₹X"*). Collect it and record it with **Add payment → Extra**.
 
-7. If there is a refund, choose **Cash / UPI / Bank transfer** and **pay it**. If you cannot pay it now, leave it: the booking shows an alert **"Deposit refund pending"** until it is paid.
+7. If there is a refund, choose **Cash / UPI / Bank transfer** and **pay it**. If you cannot pay it now, leave it: the booking shows an alert **"Deposit refund pending"**. Later open the booking and tap **Pay deposit refund** (the amount is fixed by the system) to pay it and clear the alert.
 8. Put the garment on the right rack (or hand it to the dry-cleaner). Booking status becomes **Completed**.
 
 **हिन्दी**
