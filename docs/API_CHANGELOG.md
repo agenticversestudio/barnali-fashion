@@ -40,7 +40,7 @@ Legend: ✅ live · ⏳ planned (phase). Staff = `S`, admin = `A`.
 | garments: `GET /garments` (q, category, status, rack, availableFrom/To, limit, cursor), `GET /garments/:id`, `GET /garments/availability?from&to`, `PATCH /garments/:id/location`, `PATCH /garments/:id/status` (S); `POST /garments`, `PATCH /garments/:id` (A) | S/A | ✅ |
 | customers: `GET /customers?q`, `POST /customers` (upsert by phone), `GET/PATCH /customers/:id` | S | ✅ |
 | `POST /bookings/quote`, `POST /bookings`, `GET /bookings`, `GET/PATCH /bookings/:id`, `POST /bookings/:id/pickup`, `/return`, `/payments` (S); `POST /bookings/:id/cancel` (A) | S/A | ✅ |
-| care, alerts, expenses, cash, reports | S/A | ⏳ P4 |
+| care, alerts, expenses, cash, reports | S/A | ✅ P4 |
 | photos | S | ⏳ P5 |
 
 This file is updated whenever an endpoint goes live or a DTO changes. Check the top entry before each integration session.
@@ -65,3 +65,21 @@ This file is updated whenever an endpoint goes live or a DTO changes. Check the 
 **Garment list** also returns `nextBooking` (for the BOOKED badge) and, for admin only, `purchaseCost`; `GET /garments/:id` adds `history[]` and (admin) `stats`.
 **Pagination**: lists return `nextCursor`; pass it back as `?cursor=`.
 **Error codes → HTTP**: VALIDATION 400 · UNAUTHENTICATED 401 · FORBIDDEN 403 · NOT_FOUND 404 · GARMENT_CONFLICT 409 · RULE 422 · LOCKED 423.
+
+## 2026-11-26 — Phase 4 live: care, alerts, money-admin (what the UI must know)
+
+**Care jobs** (staff + admin)
+- `GET /care?status=OUT|RECEIVED&garmentId=` → `{ items: CareJobDto[] }`; `isOverdue` is server-derived (OUT and `expectedDate` < today).
+- `POST /care` body `CreateCareRequest` → 201 `CareJobDto` (id `CARE-NNNN`). Garment becomes `IN_CARE`. 422 if garment is `OUT_ON_RENT`.
+- `POST /care/:id/receive` body `ReceiveCareRequest` (`rcvDate` ≤ today, `nextStatus`). Garment gets `nextStatus` only when no other OUT job remains for it.
+
+**Alerts** `GET /alerts` (staff + admin) → `AlertDto[]`: `PICKUP_SOON` (confirmed, pickup today..+2), `RETURN_DUE`, `RETURN_OVERDUE`, `CARE_OVERDUE`, `REFUND_PENDING`. `refId` = booking/care id to deep-link.
+
+**Admin only (staff gets 403)**
+- Expenses: `GET /expenses?from&to&category`, `POST /expenses`, `PATCH|DELETE /expenses/:id` (`ExpenseDto`, id `EXP-NNNN`). Edits/deletes are audited; an expense dated on a closed cash day is refused (422).
+- Cash: `GET /cash/today?date=` → `CashTodayDto`; `POST /cash/closing` body `CloseCashRequest` → `CashClosingDto` (server recomputes expected/variance, ignores any client `expectedCash`; one closing per day, future day 400, duplicate 422); `GET /cash/closings`. `expectedCash = openingCash + cashIn − cashRefunds − cashExpenses`; opening = previous day's actual cash. A closed day returns frozen numbers + `closing`.
+- Reports: `GET /reports/summary?from&to` → `ReportSummary` (default = month to date; max 366 days). Revenue is accrual by pickup date; deposits are never revenue.
+- CSV: `GET /reports/export.csv?type=bookings|payments|cashclosings|expenses|garments|customers` (UTF-8 BOM, spreadsheet-formula guard).
+
+**New DTOs in `@/types/api`**: `CashClosingDto`, `CashTodayDto`, `CloseCashRequest`, `ReportSummary`, `SyncStatus`.
+**Security**: `tests/api/staff-fuzz.test.ts` enumerates every route file; a route added without classification fails CI.

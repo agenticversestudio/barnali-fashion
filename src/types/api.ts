@@ -222,5 +222,27 @@ export interface AlertDto {
   title: string; message: string; refId: string; date?: string;
 }
 export interface ExpenseDto { id: string; date: string; category: string; description: string; amount: number; mode: "CASH" | "UPI" | "BANK_TRANSFER"; receiptNo?: string }
-export interface CashTodayDto { date: string; openingCash: number; cashIn: number; cashRefunds: number; cashExpenses: number; expectedCash: number; closed: boolean }
+export interface CashClosingDto {
+  id: string; date: string; openingCash: number; cashIn: number; cashRefunds: number; cashExpenses: number;
+  expectedCash: number; actualCash: number; variance: number; notes?: string; verifiedBy: string; createdAt: string;
+}
+/** expectedCash = openingCash + cashIn − cashRefunds − cashExpenses (all server computed). A closed day returns its frozen numbers + `closing`. */
+export interface CashTodayDto { date: string; openingCash: number; cashIn: number; cashRefunds: number; cashExpenses: number; expectedCash: number; closed: boolean; closing?: CashClosingDto }
+export interface CloseCashRequest { date?: string; openingCash?: number; actualCash: number; notes?: string }
+
+// ---------- reports (admin) ----------
+export interface ReportSummary {
+  from: string; to: string;
+  revenue: { rental: number; dryClean: number; transit: number; lateFees: number; damageAndCleaning: number; cancellationIncome: number; total: number };
+  expenses: { total: number; byCategory: { category: string; amount: number }[] };
+  profit: number; // revenue.total − expenses.total
+  cashCollected: number; // all payments in − refunds paid, in range (by payment date)
+  depositsHeld: number; // snapshot now: deposits of bookings out on rent + refunds still owed
+  bookings: { total: number; confirmed: number; outOnRent: number; completed: number; cancelled: number };
+  topGarments: { garmentId: string; name: string; timesRented: number; revenue: number }[];
+  utilisation: { garments: number; bookedDays: number; availableDays: number; percent: number };
+}
+
+// ---------- sheets sync (admin) ----------
+export interface SyncStatus { lastSyncAt?: string; lastStatus?: "OK" | "FAILED"; lastMessage?: string; configured: boolean }
 export interface SettingsDto { lateFeePercent: number; bufferDays: number; shopName: string; shopAddress: string; shopPhone: string; defaultCareVendor: string }

@@ -18,10 +18,10 @@ export async function cleanup() {
       "DELETE FROM bookings WHERE id LIKE 'ZT%' OR created_by LIKE 'ZT%'",
       "DELETE FROM customers WHERE id LIKE 'ZT%' OR phone LIKE '7999%' OR phone LIKE '9000%' OR phone LIKE '0000%'",
       "DELETE FROM garments WHERE id LIKE 'ZT%'",
+      "DELETE FROM expenses WHERE id LIKE 'ZT%' OR recorded_by LIKE 'ZT%'",
+      "DELETE FROM cash_closings WHERE id LIKE 'ZT%' OR verified_by LIKE 'ZT%'",
       "DELETE FROM sessions WHERE user_id LIKE 'ZT%' OR user_id IN (SELECT id FROM users WHERE username LIKE 'zt!_%' ESCAPE '!')",
       "DELETE FROM users WHERE id LIKE 'ZT%' OR username LIKE 'zt!_%' ESCAPE '!'",
-      "DELETE FROM expenses WHERE id LIKE 'ZT%'",
-      "DELETE FROM cash_closings WHERE id LIKE 'ZT%'",
     ],
     "write",
   );

@@ -41,12 +41,12 @@ Milestones (Agreement Art. 2/4): **Week 1** = Phases 0–3 · **Week 2** = Phase
 - [x] **CHECKPOINT: Week-1 review.** Commit + short demo script with curl; owner informed. (done: `docs/WEEK1_DEMO.md`, 108 tests)
 
 ## Phase 4 — Care, Cash, Reports, Alerts  (Week 2)
-- [ ] **T4.1 [C]** Care jobs API (create, list, receive → garment status).
-- [ ] **T4.2 [C]** Alerts endpoint (pickups ≤ 2 days, returns due/overdue, care overdue, refunds pending).
-- [ ] **T4.3 [C]** Expenses API (admin only).
-- [ ] **T4.4 [C]** Cash: `/cash/today` computed from payments + expenses; closing save with variance. *Verify:* numbers reconcile with hand example.
-- [ ] **T4.5 [C]** Reports summary (revenue, deposits held, expenses, top garments, utilisation) admin only + CSV export.
-- [ ] **T4.6 [C]** Staff-token fuzz test over **every** route (AC4).
+- [x] **T4.1 [C]** Care jobs API (create, list, receive → garment status).
+- [x] **T4.2 [C]** Alerts endpoint (pickups ≤ 2 days, returns due/overdue, care overdue, refunds pending).
+- [x] **T4.3 [C]** Expenses API (admin only).
+- [x] **T4.4 [C]** Cash: `/cash/today` computed from payments + expenses; closing save with variance. *Verify:* numbers reconcile with hand example.
+- [x] **T4.5 [C]** Reports summary (revenue, deposits held, expenses, top garments, utilisation) admin only + CSV export.
+- [x] **T4.6 [C]** Staff-token fuzz test over **every** route (AC4).
 
 ## Phase 5 — Photos
 - [ ] **T5.1 [C]** `storage.ts` R2 presign (`aws4fetch`), bucket CORS config doc.
