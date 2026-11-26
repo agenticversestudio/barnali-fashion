@@ -94,3 +94,10 @@ Upload flow (browser compresses to WebP ≤ 400 KB first, T5.3):
 
 Reads: `GarmentDto.mainPhotoUrl` (list + detail) and `BookingItemDto.mainPhotoUrl` are present only when a MAIN (else FRONT) photo exists. `GarmentDetailDto.photos[]` (MAIN first). URLs are signed for 1 h — do not store them; refetch.
 Staff may upload; only admin may delete. Env: `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`.
+## 2026-11-26 — Phase 7 live: Google Sheets sync (admin)
+
+- `POST /sync/sheets` — admin "Sync now". Returns `{ ok, tabs, rows, startedAt, finishedAt }` (takes a few seconds). 422 if not configured or a sync is already running; 500 `INTERNAL` with a short reason if Google rejects it (also recorded in the log).
+- `GET /sync/status` — admin → `SyncStatus { configured, lastSyncAt?, lastStatus?: "OK"|"FAILED", lastMessage? }`. Use for the dashboard "Last synced …" label / failure banner (show banner when `lastStatus === "FAILED"` or `configured === false`).
+- `GET /cron/sheets` — scheduler only (`Authorization: Bearer CRON_SECRET`, no session). Runs nightly at 23:30 IST via `vercel.json`. UI must not call it.
+- Sheet is a one-way mirror (Bookings, Payments, CashClosings, Expenses, Garments, Customers, `_SyncLog`), fully rewritten on each run. Setup: `docs/SHEETS_SETUP.md`.
+- New table `sync_log` (migration `002_sync_log.sql`); run `npm run db:migrate`.

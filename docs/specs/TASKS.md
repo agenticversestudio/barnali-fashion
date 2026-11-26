@@ -68,8 +68,8 @@ Per screen: swap `DataStore` → `src/lib/api`, add loading/error/empty states, 
 - [ ] **T6.10 [C+G]** Staging deploy + end-to-end walkthrough on real phone + tablet + desktop. **→ Milestone 2 review (₹6,000).**
 
 ## Phase 7 — Google Sheet Sync & Export
-- [ ] **T7.1 [C]** `sheets.ts` JWT → token → write tabs. *Verify:* test sheet populated.
-- [ ] **T7.2 [C]** Cron endpoint + scheduler config (per hosting decision) + `_SyncLog` + dashboard banner field.
+- [x] **T7.1 [C]** `sheets.ts` JWT → token → write tabs. *Verify:* test sheet populated.
+- [x] **T7.2 [C]** Cron endpoint + scheduler config (per hosting decision) + `_SyncLog` + dashboard banner field.
 - [ ] **T7.3 [U]** Owner creates Sheet, shares with service account. **[G]** "Sync now" button + last-sync label.
 
 ## Phase 8 — PWA, Hardening, Test Pass
