@@ -4,6 +4,7 @@ import { db, type Exec } from "../db";
 import { fail } from "../http";
 import { likeArg } from "../query";
 import { todayIST } from "../ids";
+import { garmentPhotos, mainPhotoUrls } from "./photos";
 
 export const BUFFER_DAYS = 1; // must match the trigger in db/migrations/001_init.sql
 
@@ -101,10 +102,13 @@ export async function listGarments(f: GarmentFilter, role: Role): Promise<{ garm
   });
   const rows = r.rows.slice(0, f.limit);
   const next = await nextBookings(rows.map((x) => String(x.id)));
+  const mains = await mainPhotoUrls(rows.map((x) => String(x.id)));
   const garments = rows.map((row) => {
     const dto = garmentDto(row, role);
     const nb = next.get(dto.id);
     if (nb) dto.nextBooking = nb;
+    const mp = mains.get(dto.id);
+    if (mp) dto.mainPhotoUrl = mp;
     return dto;
   });
   return { garments, nextCursor: r.rows.length > f.limit ? garments[garments.length - 1].id : undefined };
@@ -121,6 +125,9 @@ export async function getGarmentDetail(id: string, role: Role): Promise<GarmentD
   const base = garmentDto(row, role);
   const nb = (await nextBookings([id])).get(id);
   if (nb) base.nextBooking = nb;
+  const photos = await garmentPhotos(id);
+  const main = photos.find((p) => p.kind === "MAIN" || p.kind === "FRONT");
+  if (main) base.mainPhotoUrl = main.url;
   const h = await db().execute({
     sql: `SELECT bi.booking_id, bi.pickup_date, bi.return_due_date, b.status, c.name AS customer, bi.rental_price
           FROM booking_items bi JOIN bookings b ON b.id = bi.booking_id JOIN customers c ON c.id = b.customer_id
@@ -129,7 +136,7 @@ export async function getGarmentDetail(id: string, role: Role): Promise<GarmentD
   });
   const detail: GarmentDetailDto = {
     ...base,
-    photos: [], // Phase 5
+    photos,
     history: h.rows.map((x) => ({
       bookingId: String(x.booking_id),
       from: String(x.pickup_date),

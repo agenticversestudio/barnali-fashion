@@ -41,7 +41,7 @@ Legend: ✅ live · ⏳ planned (phase). Staff = `S`, admin = `A`.
 | customers: `GET /customers?q`, `POST /customers` (upsert by phone), `GET/PATCH /customers/:id` | S | ✅ |
 | `POST /bookings/quote`, `POST /bookings`, `GET /bookings`, `GET/PATCH /bookings/:id`, `POST /bookings/:id/pickup`, `/return`, `/payments` (S); `POST /bookings/:id/cancel` (A) | S/A | ✅ |
 | care, alerts, expenses, cash, reports | S/A | ✅ P4 |
-| photos | S | ⏳ P5 |
+| photos | S | ✅ P5 (backend; needs R2 keys, see docs/R2_SETUP.md) |
 
 This file is updated whenever an endpoint goes live or a DTO changes. Check the top entry before each integration session.
 
@@ -83,3 +83,14 @@ This file is updated whenever an endpoint goes live or a DTO changes. Check the 
 
 **New DTOs in `@/types/api`**: `CashClosingDto`, `CashTodayDto`, `CloseCashRequest`, `ReportSummary`, `SyncStatus`.
 **Security**: `tests/api/staff-fuzz.test.ts` enumerates every route file; a route added without classification fails CI.
+## 2026-11-26 — Phase 5 live: photos (what the UI must know)
+
+Upload flow (browser compresses to WebP ≤ 400 KB first, T5.3):
+1. `POST /photos/presign` body `PresignRequest` `{garmentId?, kind, contentType: "image/webp"|"image/jpeg", bytes}` → `{ uploadUrl, objectKey }`. `garmentId` required for kinds MAIN/FRONT/BACK/DETAIL. 400 if `bytes` > 409 600; 422 if the garment already has 8 photos; 404 unknown garment.
+2. Browser `PUT`s the file body straight to `uploadUrl` (valid 5 min; no cookie, no extra headers needed).
+3. `POST /photos` body `RegisterPhotoRequest` `{objectKey, kind, garmentId?, bookingId?, careJobId?, note?}` → 201 `{ photo: PhotoDto }`. Server HEADs the object: missing → 422, > 400 KB → 400 (object deleted), already registered → 422.
+4. `DELETE /photos/:id` — **admin only**.
+5. Pass the returned photo `id`s as `photoIds` to `POST /bookings/:id/pickup` and `/return` to attach handover / damage photos to the booking.
+
+Reads: `GarmentDto.mainPhotoUrl` (list + detail) and `BookingItemDto.mainPhotoUrl` are present only when a MAIN (else FRONT) photo exists. `GarmentDetailDto.photos[]` (MAIN first). URLs are signed for 1 h — do not store them; refetch.
+Staff may upload; only admin may delete. Env: `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`.

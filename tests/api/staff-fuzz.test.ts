@@ -11,6 +11,7 @@ import { POST as login } from "@/app/api/v1/auth/login/route";
 import { call, cleanup, cookieOf, mkUser } from "../helpers";
 
 type Mod = Record<string, (req: Request, ctx: { params: Promise<Record<string, string>> }) => Promise<Response>>;
+process.env.STORAGE_DRIVER = "fake";
 const modules = import.meta.glob("../../src/app/api/v1/**/route.ts", { eager: true }) as Record<string, Mod>;
 const METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
 
@@ -24,6 +25,7 @@ const STAFF_OK = new Set([
   "POST /api/v1/bookings/[id]/pickup", "POST /api/v1/bookings/[id]/return", "POST /api/v1/bookings/[id]/payments",
   "GET /api/v1/care", "POST /api/v1/care", "POST /api/v1/care/[id]/receive",
   "GET /api/v1/alerts",
+  "POST /api/v1/photos/presign", "POST /api/v1/photos",
 ]);
 /** callable without a session */
 const PUBLIC = new Set(["GET /api/v1/health", "POST /api/v1/auth/login", "POST /api/v1/auth/logout"]);

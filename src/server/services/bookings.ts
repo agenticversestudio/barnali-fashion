@@ -7,6 +7,7 @@ import { ApiError, fail } from "../http";
 import { todayIST } from "../ids";
 import { likeArg } from "../query";
 import { BUFFER_DAYS } from "./garments";
+import { mainPhotoUrls } from "./photos";
 
 const opt = (v: unknown) => (v === null || v === undefined || v === "" ? undefined : String(v));
 
@@ -76,6 +77,7 @@ export async function bookingDtos(ids: string[], x: Exec = db()): Promise<Bookin
           FROM payments p LEFT JOIN users u ON u.id = p.recorded_by WHERE p.booking_id IN (${ph}) ORDER BY p.id`,
     args: ids,
   });
+  const mains = await mainPhotoUrls([...new Set(it.rows.map((r) => String(r.garment_id)))]);
   const items = new Map<string, BookingItemDto[]>();
   for (const r of it.rows) {
     const k = String(r.booking_id);
@@ -83,6 +85,7 @@ export async function bookingDtos(ids: string[], x: Exec = db()): Promise<Bookin
     items.get(k)!.push({
       garmentId: String(r.garment_id), name: String(r.name), size: String(r.size), rack: opt(r.rack),
       rentalPrice: Number(r.rental_price), securityDeposit: Number(r.security_deposit),
+      ...(mains.has(String(r.garment_id)) ? { mainPhotoUrl: mains.get(String(r.garment_id)) } : {}),
     });
   }
   const pays = new Map<string, PaymentDto[]>();

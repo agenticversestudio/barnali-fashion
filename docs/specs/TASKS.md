@@ -49,10 +49,10 @@ Milestones (Agreement Art. 2/4): **Week 1** = Phases 0–3 · **Week 2** = Phase
 - [x] **T4.6 [C]** Staff-token fuzz test over **every** route (AC4).
 
 ## Phase 5 — Photos
-- [ ] **T5.1 [C]** `storage.ts` R2 presign (`aws4fetch`), bucket CORS config doc.
-- [ ] **T5.2 [C]** `/photos/presign`, `/photos`, delete; limits (8/garment, 400 KB). *Verify:* upload via curl, read signed URL.
+- [x] **T5.1 [C]** `storage.ts` R2 presign (`aws4fetch`), bucket CORS config doc.
+- [x] **T5.2 [C]** `/photos/presign`, `/photos`, delete; limits (8/garment, 400 KB). *Verify:* upload via curl, read signed URL.
 - [ ] **T5.3 [G]** Camera capture + client compression component (WebP 1280 px) *(contract in ARCHITECTURE §7)*.
-- [ ] **T5.4 [C]** Photos embedded in garment/booking DTOs (main photo URL in lists).
+- [x] **T5.4 [C]** Photos embedded in garment/booking DTOs (main photo URL in lists).
 
 ## Phase 6 — Frontend Integration  (Week 3) — Gemini leads, Claude supports
 Per screen: swap `DataStore` → `src/lib/api`, add loading/error/empty states, pass device checklist (PRD §6: 390/820/1280 px, ≥ 40 px targets, no truncation). Tick only after Claude re-tests the API calls.

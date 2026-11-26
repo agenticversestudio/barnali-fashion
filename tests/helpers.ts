@@ -11,7 +11,7 @@ export async function cleanup() {
   await c.batch(
     [
       "DELETE FROM audit_log WHERE entity_id LIKE 'ZT%' OR user_id LIKE 'ZT%' OR entity_id IN (SELECT id FROM users WHERE username LIKE 'zt!_%' ESCAPE '!')",
-      "DELETE FROM photos WHERE garment_id LIKE 'ZT%'",
+      "DELETE FROM photos WHERE garment_id LIKE 'ZT%' OR created_by LIKE 'ZT%'",
       `DELETE FROM care_jobs WHERE garment_id LIKE 'ZT%' OR booking_id IN ${bk}`,
       `DELETE FROM payments WHERE booking_id IN ${bk} OR recorded_by LIKE 'ZT%'`,
       `DELETE FROM booking_items WHERE booking_id IN ${bk} OR garment_id LIKE 'ZT%'`,
