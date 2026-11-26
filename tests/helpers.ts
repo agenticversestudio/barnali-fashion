@@ -7,19 +7,19 @@ import { db } from "@/server/db";
  */
 export async function cleanup() {
   const c = db();
-  const ids = "id LIKE 'ZT%'";
+  const bk = "(SELECT id FROM bookings WHERE id LIKE 'ZT%' OR created_by LIKE 'ZT%')";
   await c.batch(
     [
       "DELETE FROM audit_log WHERE entity_id LIKE 'ZT%' OR user_id LIKE 'ZT%' OR entity_id IN (SELECT id FROM users WHERE username LIKE 'zt!_%' ESCAPE '!')",
       "DELETE FROM photos WHERE garment_id LIKE 'ZT%'",
-      "DELETE FROM care_jobs WHERE garment_id LIKE 'ZT%'",
-      "DELETE FROM payments WHERE booking_id LIKE 'ZT%' OR recorded_by LIKE 'ZT%'",
-      "DELETE FROM booking_items WHERE booking_id LIKE 'ZT%'",
-      `DELETE FROM bookings WHERE ${ids}`,
-      `DELETE FROM customers WHERE ${ids}`,
-      `DELETE FROM garments WHERE ${ids}`,
+      `DELETE FROM care_jobs WHERE garment_id LIKE 'ZT%' OR booking_id IN ${bk}`,
+      `DELETE FROM payments WHERE booking_id IN ${bk} OR recorded_by LIKE 'ZT%'`,
+      `DELETE FROM booking_items WHERE booking_id IN ${bk} OR garment_id LIKE 'ZT%'`,
+      "DELETE FROM bookings WHERE id LIKE 'ZT%' OR created_by LIKE 'ZT%'",
+      "DELETE FROM customers WHERE id LIKE 'ZT%' OR phone LIKE '7999%' OR phone LIKE '9000%' OR phone LIKE '0000%'",
+      "DELETE FROM garments WHERE id LIKE 'ZT%'",
       "DELETE FROM sessions WHERE user_id LIKE 'ZT%' OR user_id IN (SELECT id FROM users WHERE username LIKE 'zt!_%' ESCAPE '!')",
-      `DELETE FROM users WHERE ${ids} OR username LIKE 'zt!_%' ESCAPE '!'`,
+      "DELETE FROM users WHERE id LIKE 'ZT%' OR username LIKE 'zt!_%' ESCAPE '!'",
       "DELETE FROM expenses WHERE id LIKE 'ZT%'",
       "DELETE FROM cash_closings WHERE id LIKE 'ZT%'",
     ],

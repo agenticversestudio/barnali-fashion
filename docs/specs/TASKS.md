@@ -29,11 +29,11 @@ Milestones (Agreement Art. 2/4): **Week 1** = Phases 0–3 · **Week 2** = Phase
 - [x] **T2.5 [C]** Security checklist: Origin check on mutations, cookie flags, no secrets in responses.
 
 ## Phase 3 — Core Rental Domain (money-critical)
-- [ ] **T3.1 [C]** Add `vitest`. `pricing.ts`: `quote`, `lateDays`, `settle`. ≥ 15 table tests (late 0/1/3 days, damage > deposit, zero deposit, dry-clean+transit, partial advance, date-string edge: month end, leap day). *Verify:* tests green.
-- [ ] **T3.2 [C]** Garments API: list/search/filter, detail, create/edit (admin), location, status transitions, `availability` matrix. Staff redaction of `purchaseCost`. *Verify:* staff vs admin response diff test.
-- [ ] **T3.3 [C]** Customers API (phone search, upsert, derived totals).
-- [ ] **T3.4 [C]** `availability.ts` + `POST /bookings/quote`. *Verify:* conflict message names holder + dates.
-- [ ] **T3.5 [C]** `POST /bookings` (§4 transaction; IDs from counters; price from DB; advance payment row). *Verify:* **concurrency test** — 10 parallel create calls same garment/dates → exactly 1 success, 9 × 409 (AC1).
+- [x] **T3.1 [C]** Add `vitest`. `pricing.ts`: `quote`, `lateDays`, `settle`. ≥ 15 table tests (late 0/1/3 days, damage > deposit, zero deposit, dry-clean+transit, partial advance, date-string edge: month end, leap day). *Verify:* tests green.
+- [x] **T3.2 [C]** Garments API: list/search/filter, detail, create/edit (admin), location, status transitions, `availability` matrix. Staff redaction of `purchaseCost`. *Verify:* staff vs admin response diff test.
+- [x] **T3.3 [C]** Customers API (phone search, upsert, derived totals).
+- [x] **T3.4 [C]** `availability.ts` + `POST /bookings/quote`. *Verify:* conflict message names holder + dates.
+- [x] **T3.5 [C]** `POST /bookings` (§4 transaction; IDs from counters; price from DB; advance payment row). *Verify:* **concurrency test** — 10 parallel create calls same garment/dates → exactly 1 success, 9 × 409 (AC1).
 - [ ] **T3.6 [C]** `POST /bookings/:id/pickup` + payments endpoint.
 - [ ] **T3.7 [C]** `POST /bookings/:id/return` using `settle()`; frees dates; creates care jobs; REFUND payment. *Verify:* AC2/AC3 (client-sent `lateFee` ignored).
 - [ ] **T3.8 [C]** Cancel + admin edit with audit log. *Verify:* cancelled booking frees garment dates.
