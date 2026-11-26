@@ -91,3 +91,23 @@ Notes:
 - Run tests from PowerShell/cmd. Under Git Bash vitest fails with "failed to find the runner" (env artifact, not code).
 - Minor: manifest lists each icon twice (`/icons/*` and `/icon-*`) and 512 is `maskable` with unknown safe-zone padding. Harmless; tidy optional.
 - Still open (unchanged): AC7 (R2 keys), AC8 (Sheets service account), AC10 `ERP_AUTH_GUARD=1` in Vercel, AC6 re-measure from Bargarh. Dev-only `scripts/set-dev-passwords.ts` must not run on prod.
+
+## T9.1 production-readiness review (2026-11-26, Claude)
+
+Rehearsed on a scratch SQLite DB (`--sqlite`), all migrations applied.
+
+| Check | Result |
+|---|---|
+| `import-csv --dry-run` | PASS: validates, writes nothing |
+| `import-csv` real | PASS: 2 garments imported |
+| re-import same SKUs | PASS: refused, all-or-nothing, per-line errors; `--skip-existing` skips |
+| import `CATALOGUE_TEMPLATE.csv` as-is | PASS: refused (EXAMPLE rows blocked) |
+| `wipe-data` without `--yes-wipe` | PASS: refuses |
+| `wipe-data --yes-wipe` | PASS: backup first, business tables 0, users/settings kept, next booking BF-BK-2026-001 |
+
+Fixes: `set-dev-passwords.ts` (admin123/staff123 from `.env.local`) now refuses without `--i-am-on-a-dev-database`. HANDOVER.md: added `ERP_AUTH_GUARD`, `SEED_ADMIN_*`, first-booking-number note (seed starts at 081), PWA install step, offline wording.
+
+Open frontend gaps vs STAFF_GUIDE (owner: Gemini):
+- Pickup page sends hardcoded `handoverCondition`; no free-text input, no HANDOVER photo capture. Guide §5 steps 4 promises both.
+- Return page: no DAMAGE photo capture (guide §6 step 3). Backend already supports kinds HANDOVER/DAMAGE.
+- Button labels differ from guide ("Confirm Handover & Issue", "Print Issue Slip", "Orders & Billing"/"Care & Laundry"). Align guide or UI.

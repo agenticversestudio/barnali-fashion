@@ -19,7 +19,7 @@ The owner (admin) additionally sees expenses, daily cash closing, reports, staff
 
 Everything money-related (late fee, refund, totals) is calculated **by the server**. The screen only displays it, so a staff member cannot type a wrong late fee or refund.
 
-Not included, by agreement: public online booking, online payments, automatic WhatsApp sending (staff tap a prefilled `wa.me` link and press send themselves), GST invoicing, offline mode.
+Not included, by agreement: public online booking, online payments, automatic WhatsApp sending (staff tap a prefilled `wa.me` link and press send themselves), GST invoicing, and offline working (the installed app only keeps its login screen available offline; bookings need internet).
 
 ## 2. How it fits together
 
@@ -76,6 +76,8 @@ Set in the Vercel dashboard → Project → Settings → Environment Variables. 
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` | photo storage (setup: `docs/R2_SETUP.md`) | photo upload returns "storage not configured"; everything else works |
 | `GOOGLE_SA_EMAIL`, `GOOGLE_SA_PRIVATE_KEY`, `GOOGLE_SHEET_ID` | Google Sheet copy (setup: `docs/SHEETS_SETUP.md`) | "Sync now" says not configured; everything else works |
 | `CRON_SECRET` | password the nightly job uses (16+ random characters) | the nightly sync is refused |
+| `ERP_AUTH_GUARD` | set to `1` in production: makes every `/erp/*` page redirect to login when not signed in (the API is always protected; this protects the screens) | pages open without login (empty, because data calls still fail) |
+| `SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD` | only for the first `db:seed` run: the real admin's login. If omitted a random password is printed once | username `admin` with a random password |
 | `APP_ORIGIN` | the app's own address, e.g. `https://erp.example.com` (used to block requests from other websites) | falls back to the request host |
 
 Rotating a secret (do this if a laptop is lost or someone leaves): create a new token/key in that service's dashboard → paste it into Vercel → redeploy → delete the old token. Rotating the Turso token or R2 key never loses data.
@@ -158,15 +160,17 @@ Expected loss if the worst happens: at most the time since the last backup (week
 
 - [ ] All accounts in §3 created in the owner's name; developer added as temporary member.
 - [ ] Environment variables set in Vercel (§4); region `bom1`.
+- [ ] `ERP_AUTH_GUARD=1` set in Vercel (§4); open `/erp/dashboard` in a private window and confirm it redirects to login.
 - [ ] `npm run db:migrate` on the production database.
-- [ ] **Create the real admin** and **delete/rotate the development admin** (the development account must not exist in production).
+- [ ] **Create the real admin:** `SEED_ADMIN_USERNAME=... SEED_ADMIN_PASSWORD=... npm run db:seed` (without `--demo`). Then **delete/rotate the development admin** if the database was used for development. **Never run `scripts/set-dev-passwords.ts` on production** (it sets admin123/staff123; it now refuses unless given `--i-am-on-a-dev-database`).
+- [ ] **Booking numbers:** `db:seed` starts numbering at BF-BK-2026-081 (prototype numbering). For a clean start at 001 run `npm run db:wipe -- --yes-wipe` once on the empty database (or `--booking-start N` to continue from N).
 - [ ] **No demo data in production.** If the database was used for development: `npm run db:wipe -- --yes-wipe` (takes a backup first, keeps users and settings, resets numbering; delete test photos in the R2 dashboard).
 - [ ] Import the real catalogue (§8) — first with `--dry-run`.
 - [ ] Settings screen: shop name, address, phone, late-fee % (15 by agreement).
 - [ ] One test booking → pickup → return → refund on a test garment, then cancel / remove it (or wipe again) so it is not in the real books.
 - [ ] Take one photo, run "Sync now" and check the Sheet, check the nightly cron ran the next morning.
 - [ ] First backup taken and copied off the laptop; restore drill repeated on a scratch database.
-- [ ] Staff guide printed (`docs/STAFF_GUIDE.md`); app installed to the home screen on each staff phone.
+- [ ] Staff guide printed (`docs/STAFF_GUIDE.md`); app installed to the home screen on each staff phone (Android Chrome: menu → Install app; needs the https address).
 
 ## 10. Troubleshooting
 

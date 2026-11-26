@@ -11,6 +11,13 @@ if (!urlMatch || !tokenMatch) {
   process.exit(1);
 }
 
+// DEV ONLY. Sets admin/admin123 and staff/staff123. Running this against production would hand anyone the admin login.
+if (!process.argv.includes("--i-am-on-a-dev-database")) {
+  console.error(`Refusing to run: this sets well-known passwords (admin123 / staff123) on ${urlMatch[1]}.
+Never run it against production. For a dev database re-run with --i-am-on-a-dev-database.`);
+  process.exit(2);
+}
+
 const db = createClient({ url: urlMatch[1], authToken: tokenMatch[1] });
 
 async function main() {
