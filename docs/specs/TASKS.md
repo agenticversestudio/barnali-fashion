@@ -11,11 +11,11 @@ Milestones (Agreement Art. 2/4): **Week 1** = Phases 0–3 · **Week 2** = Phase
 - [x] **T0.1 [U]** Specs approved; O1–O5 default answers taken (see `docs/DECISIONS.md`).
 - [ ] **T0.2 [U]** Create free accounts: Turso, Cloudflare (R2 + Workers), Google Cloud (service account). Send credentials via `.env.local` only, **never in chat/docs**.
 - [x] **T0.3 [C]** Read Next 16 docs (route handlers, proxy, cookies). Findings in `docs/DECISIONS.md`: `proxy.ts` replaces middleware, optimistic-only, adapter support platform-specific → page auth done in `erp/layout.tsx`.
-- [ ] **T0.4 [C]** **Hosting gate spike:** Next 16 + `@opennextjs/cloudflare` hello route + Turso query + PBKDF2 hash timing. *Verify:* works on `*.workers.dev`. Record decision (Cloudflare vs Vercel Hobby) in `docs/DECISIONS.md`.
+- [x] **T0.4 [C]** Hosting spike done → **Vercel Hobby** (Cloudflare free: 10 ms CPU kills PBKDF2 login). See DECISIONS.md. ToS risk flagged to owner.
 - [x] **T0.5 [C]** `RENTAL_BUSINESS_LOGIC.md` + `DATABASE_SCHEMA.md` updated. (Gemini ₹300→15 % text change in `invoices/page.tsx` pending commit by Gemini.)
 
 ## Phase 1 — Database Initialisation  (Week 1)
-- [ ] **T1.1 [C]** Add deps `@libsql/client`; `src/server/db.ts` (client, `tx()` helper). *Verify:* `/api/v1/health` returns `{db:"ok"}` locally.
+- [x] **T1.1 [C]** Add dep `@tursodatabase/serverless` (import `/compat`); `src/server/db.ts` (client, `tx()` helper). *Verify:* `/api/v1/health` returns `{db:"ok"}` locally. (verified vs Turso Mumbai; note: `cacheComponents` is on, so no `export const dynamic` in routes)
 - [ ] **T1.2 [C]** `db/migrations/001_init.sql` (ARCHITECTURE §3 incl. triggers) + `scripts/migrate.ts` with `_migrations` table. *Verify:* run twice, second is no-op; `.schema` matches.
 - [ ] **T1.3 [C]** Trigger test (SQL-only): insert overlapping `booking_items` → `GARMENT_CONFLICT`; non-overlap ok; buffer edge days ok; inactive ignored.
 - [ ] **T1.4 [C]** `scripts/seed.ts`: settings, counters, 1 admin (password from env, prompted), demo garments/customers from `mockData.ts` **behind `--demo` flag only**. *Verify:* seed twice idempotent.

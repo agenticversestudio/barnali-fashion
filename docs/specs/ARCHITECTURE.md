@@ -8,7 +8,7 @@ Status: **DRAFT — awaiting owner approval** · Companion: `PRD.md`, `TASKS.md`
 |-------|--------|------------------|
 | App | Next.js 16 App Router (existing) | Already built; API route handlers live in same repo, one deploy. |
 | Database | **Turso (libSQL / SQLite)** | Free, never pauses, no cold start, real transactions + triggers = no double-booking. |
-| DB client | `@libsql/client` (plain SQL, no ORM) | ~12 tables; ORM adds weight and a second schema to maintain. |
+| DB client | `@tursodatabase/serverless` compat (plain SQL, no ORM; fetch-based, runs on Node and Workers) | ~12 tables; ORM adds weight and a second schema to maintain. |
 | Auth | Own username + password, DB-backed session cookie | 2 roles, 4 users; no third-party auth service needed. |
 | Password hash | WebCrypto PBKDF2-SHA256 | Built into every runtime, no native deps. |
 | Photos | **Cloudflare R2** (S3 API) + `aws4fetch` | 10 GB free, no egress fee; browser uploads direct to R2. |
