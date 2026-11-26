@@ -1,37 +1,60 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Lock,
   Eye,
   EyeOff,
-  ShieldCheck,
   Sparkles,
   ArrowRight,
   Globe,
-  Building2,
+  AlertCircle,
+  Loader2,
+  ShieldCheck,
+  User,
 } from "lucide-react";
-import { DataStore } from "@/lib/dataStore";
-import { UserRole } from "@/types";
+import { authApi } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("owner@barnalifashion.com");
-  const [password, setPassword] = useState("••••••••");
-  const [showPassword, setShowPassword] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<UserRole>("owner");
+  const searchParams = useSearchParams();
+  const nextUrl = searchParams.get("next") || "/erp/dashboard";
+  const { refreshUser } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [username, setUsername] = useState("admin");
+  const [password, setPassword] = useState("admin123");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    DataStore.setCurrentRole(selectedRole);
-    router.push("/erp/dashboard");
+    if (!username.trim() || !password) {
+      setError("Please enter both username and password");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await authApi.login({ username: username.trim(), password });
+      await refreshUser();
+      router.push(nextUrl);
+    } catch (err: any) {
+      setError(err?.message || "Invalid username or password");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleQuickDemoEnter = (role: UserRole) => {
-    DataStore.setCurrentRole(role);
-    router.push("/erp/dashboard");
+  const handleQuickDemoFill = (u: string, p: string) => {
+    setUsername(u);
+    setPassword(p);
+    setError(null);
   };
 
   return (
@@ -60,7 +83,7 @@ export default function LoginPage() {
       </div>
 
       {/* Main Login Card */}
-      <div className="max-w-md w-full mx-auto my-8 bg-white rounded-3xl border border-[#EFE9DD] p-8 shadow-xl text-xs space-y-6">
+      <div className="max-w-md w-full mx-auto my-8 bg-white rounded-3xl border border-[#EFE9DD] p-7 md:p-8 shadow-xl text-xs space-y-6">
         <div className="text-center space-y-1">
           <div className="w-12 h-12 rounded-2xl bg-[#4B1835] text-[#D4B67F] font-serif font-black text-xl flex items-center justify-center mx-auto shadow-md">
             BF
@@ -73,57 +96,76 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Demo Fast Access Pill */}
+        {/* Quick Demo Credentials */}
         <div className="bg-[#FAF5EB] p-3.5 rounded-2xl border border-[#E8DFD1] space-y-2">
           <div className="flex items-center justify-between text-[11px] font-bold text-[#8C6F3B]">
             <span className="flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>1-Click Prototype Demo Access</span>
+              <span>Select Role for Quick Access</span>
             </span>
-            <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.2 rounded-full font-bold">
-              Active
+            <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">
+              Secure Auth
             </span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-[11px]">
             <button
-              onClick={() => handleQuickDemoEnter("owner")}
-              className="p-2 bg-white hover:bg-[#F3EFE7] border border-[#E8DFD1] rounded-xl font-bold text-[#4B1835] text-left transition-colors"
+              type="button"
+              onClick={() => handleQuickDemoFill("admin", "admin123")}
+              className={`p-2.5 rounded-xl border text-left transition-colors font-medium flex items-center gap-2 ${
+                username === "admin"
+                  ? "bg-white border-[#4B1835] shadow-xs text-[#4B1835] font-bold"
+                  : "bg-white/70 hover:bg-white border-[#E8DFD1] text-gray-700"
+              }`}
             >
-              👑 Store Owner
+              <ShieldCheck className="w-4 h-4 text-[#4B1835] shrink-0" />
+              <div>
+                <div className="font-bold text-xs">Admin / Owner</div>
+                <div className="text-[10px] text-gray-500 font-mono">admin / admin123</div>
+              </div>
             </button>
             <button
-              onClick={() => handleQuickDemoEnter("manager")}
-              className="p-2 bg-white hover:bg-[#F3EFE7] border border-[#E8DFD1] rounded-xl font-bold text-gray-800 text-left transition-colors"
+              type="button"
+              onClick={() => handleQuickDemoFill("staff", "staff123")}
+              className={`p-2.5 rounded-xl border text-left transition-colors font-medium flex items-center gap-2 ${
+                username === "staff"
+                  ? "bg-white border-[#4B1835] shadow-xs text-[#4B1835] font-bold"
+                  : "bg-white/70 hover:bg-white border-[#E8DFD1] text-gray-700"
+              }`}
             >
-              💼 Store Manager
-            </button>
-            <button
-              onClick={() => handleQuickDemoEnter("sales_staff")}
-              className="p-2 bg-white hover:bg-[#F3EFE7] border border-[#E8DFD1] rounded-xl font-bold text-gray-800 text-left transition-colors"
-            >
-              🏷️ Counter Staff
-            </button>
-            <button
-              onClick={() => handleQuickDemoEnter("accountant")}
-              className="p-2 bg-white hover:bg-[#F3EFE7] border border-[#E8DFD1] rounded-xl font-bold text-gray-800 text-left transition-colors"
-            >
-              📊 Accountant
+              <User className="w-4 h-4 text-slate-600 shrink-0" />
+              <div>
+                <div className="font-bold text-xs">Counter Staff</div>
+                <div className="text-[10px] text-gray-500 font-mono">staff / staff123</div>
+              </div>
             </button>
           </div>
         </div>
+
+        {/* Error Alert */}
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
         {/* Standard Form */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-              Registered Staff Email / Phone
+              Username
             </label>
-            <input
-              type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                autoComplete="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="e.g. admin or staff"
+                className="w-full p-2.5 pl-9 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold text-slate-800 focus:outline-none focus:border-[#4B1835]"
+              />
+              <User className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
+            </div>
           </div>
 
           <div>
@@ -133,14 +175,18 @@ export default function LoginPage() {
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl pr-10"
+                placeholder="Enter password"
+                className="w-full p-2.5 pl-9 pr-10 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold text-slate-800 focus:outline-none focus:border-[#4B1835]"
               />
+              <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 p-0.5"
+                aria-label="Toggle password visibility"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -149,10 +195,20 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-[#4B1835] hover:bg-[#320F23] text-white font-bold py-3 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 text-xs"
+            disabled={loading}
+            className="w-full bg-[#4B1835] hover:bg-[#320F23] disabled:opacity-70 text-white font-bold py-3 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 text-xs"
           >
-            <span>Enter Barnali ERP Dashboard</span>
-            <ArrowRight className="w-4 h-4 text-[#D4B67F]" />
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" />
+                <span>Verifying credentials...</span>
+              </>
+            ) : (
+              <>
+                <span>Enter Barnali ERP Dashboard</span>
+                <ArrowRight className="w-4 h-4 text-[#D4B67F]" />
+              </>
+            )}
           </button>
         </form>
 

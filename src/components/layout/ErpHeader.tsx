@@ -23,15 +23,20 @@ import {
   MapPin,
   Phone,
   Check,
+  LogOut,
 } from "lucide-react";
 import { DataStore } from "@/lib/dataStore";
 import { NotificationItem, UserRole } from "@/types";
 
+import { useAuth } from "@/context/AuthContext";
+import { alertsApi } from "@/lib/api";
+import type { AlertDto } from "@/types/api";
+
 export function ErpHeader() {
   const router = useRouter();
   const pathname = usePathname();
-  const [role, setRole] = useState<UserRole>("owner");
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const { user, isAdmin, isStaff, logout } = useAuth();
+  const [alerts, setAlerts] = useState<AlertDto[]>([]);
   const [showNotifMenu, setShowNotifMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileDrawer, setShowMobileDrawer] = useState(false);
@@ -42,9 +47,15 @@ export function ErpHeader() {
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setRole(DataStore.getCurrentRole());
-    setNotifications(DataStore.getNotifications());
-  }, []);
+    alertsApi
+      .list()
+      .then((res) => {
+        setAlerts(res.alerts || []);
+      })
+      .catch(() => {
+        setAlerts([]);
+      });
+  }, [pathname]);
 
   // Keyboard shortcut for Cmd+K / Ctrl+K
   useEffect(() => {
@@ -77,24 +88,7 @@ export function ErpHeader() {
     setShowMobileDrawer(false);
   }, [pathname]);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const handleRoleChange = (newRole: UserRole) => {
-    setRole(newRole);
-    DataStore.setCurrentRole(newRole);
-    setShowUserMenu(false);
-  };
-
-  const handleResetData = () => {
-    if (
-      confirm(
-        "Reset prototype data to default initial state? All changes made during this session will be refreshed."
-      )
-    ) {
-      DataStore.resetAll();
-      window.location.reload();
-    }
-  };
+  const unreadCount = alerts.length;
 
   // Clean page titles for header
   const getPageTitle = () => {
@@ -251,7 +245,7 @@ export function ErpHeader() {
                 aria-label="Delivery Alerts & Alarms"
               >
                 <Bell className="w-4 h-4 text-slate-700" />
-                {unreadCount > 0 && (
+                {alerts.length > 0 && (
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-600 rounded-full ring-2 ring-white animate-pulse" />
                 )}
               </button>
@@ -261,48 +255,50 @@ export function ErpHeader() {
                   <div className="px-3.5 py-2.5 border-b border-[#EFECE6] flex items-center justify-between">
                     <div>
                       <span className="font-semibold text-slate-900 text-sm">
-                        Delivery Alerts &amp; Alarms
+                        Operational Alerts
                       </span>
                       <p className="text-[10px] text-slate-400 mt-0.5">
-                        4-day &amp; 3-day notifications
+                        Pickups, Overdue Returns &amp; Pending Care
                       </p>
                     </div>
                     <span className="text-[11px] bg-rose-50 text-rose-800 border border-rose-200 px-2 py-0.5 rounded-full font-semibold">
-                      {unreadCount} Due
+                      {alerts.length} Due
                     </span>
                   </div>
 
                   <div className="max-h-80 overflow-y-auto divide-y divide-[#EFECE6]">
-                    {notifications.length === 0 ? (
-                      <div className="p-6 text-center text-slate-400">No new alerts</div>
+                    {alerts.length === 0 ? (
+                      <div className="p-6 text-center text-slate-400">All operations up to date</div>
                     ) : (
-                      notifications.map((n) => (
+                      alerts.map((a, idx) => (
                         <div
-                          key={n.id}
+                          key={idx}
                           onClick={() => {
-                            DataStore.markNotificationRead(n.id);
-                            setNotifications(DataStore.getNotifications());
-                            if (n.actionUrl) router.push(n.actionUrl);
+                            if (a.type === "PICKUP_SOON" || a.type === "RETURN_DUE" || a.type === "RETURN_OVERDUE") {
+                              router.push(`/erp/bookings?orderId=${a.refId}`);
+                            } else if (a.type === "CARE_OVERDUE") {
+                              router.push(`/erp/operations/laundry`);
+                            }
                             setShowNotifMenu(false);
                           }}
-                          className={`p-3 hover:bg-slate-50 cursor-pointer transition-colors ${
-                            !n.read ? "bg-amber-50/40" : ""
-                          }`}
+                          className="p-3 hover:bg-slate-50 cursor-pointer transition-colors"
                         >
                           <div className="flex items-start gap-2.5">
-                            {n.type === "RETURN_OVERDUE" ? (
+                            {a.type.includes("OVERDUE") ? (
                               <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                             ) : (
                               <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                             )}
                             <div className="min-w-0 flex-1">
-                              <div className="font-semibold text-slate-900">{n.title}</div>
+                              <div className="font-semibold text-slate-900">{a.title}</div>
                               <p className="text-slate-600 text-[11px] mt-0.5 leading-snug">
-                                {n.message}
+                                {a.message}
                               </p>
-                              <span className="text-[10px] text-slate-400 mt-1 block font-mono">
-                                {n.timestamp}
-                              </span>
+                              {a.date && (
+                                <span className="text-[10px] text-slate-400 mt-1 block font-mono">
+                                  {a.date}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -313,22 +309,22 @@ export function ErpHeader() {
               )}
             </div>
 
-            {/* Minimal User / Studio Avatar Pill with Role Dropdown */}
+            {/* Minimal User / Studio Avatar Pill */}
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-2 p-1.5 pr-2.5 bg-white hover:bg-slate-50 border border-[#E6E4DF] rounded-lg transition-colors shadow-2xs"
-                aria-label="User Account & Role Menu"
+                aria-label="User Account Menu"
               >
                 <div className="w-7 h-7 rounded-lg bg-[#6B1D2F] text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
-                  BF
+                  {isAdmin ? "AD" : "ST"}
                 </div>
                 <div className="text-left hidden lg:block">
                   <div className="text-xs font-semibold text-slate-900 leading-none">
-                    Barnali Studio
+                    {user?.name || "Barnali User"}
                   </div>
-                  <div className="text-[10px] text-slate-500 font-medium leading-none mt-1">
-                    {getRoleLabel(role)}
+                  <div className="text-[10px] text-slate-500 font-medium leading-none mt-1 capitalize font-mono">
+                    {user?.role || "Staff"}
                   </div>
                 </div>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
@@ -339,46 +335,15 @@ export function ErpHeader() {
                   {/* Studio Info Header */}
                   <div className="p-2.5 bg-[#FAF9F6] rounded-lg border border-[#EFECE6]">
                     <div className="font-semibold text-slate-900 text-xs">
-                      Barnali Fashion Studio
+                      {user?.name || "Barnali User"}
                     </div>
-                    <div className="text-[10px] text-slate-500 mt-0.5">
-                      Bargarh, Odisha · Demo Environment
-                    </div>
-                  </div>
-
-                  {/* Role Selector List */}
-                  <div>
-                    <div className="px-2 pb-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                      Switch Role
-                    </div>
-                    <div className="space-y-0.5">
-                      {(
-                        [
-                          { id: "owner", label: "Owner (Full Access)" },
-                          { id: "sales_staff", label: "Counter Operator" },
-                          { id: "admin", label: "Admin" },
-                          { id: "laundry_staff", label: "Care / Laundry Staff" },
-                          { id: "viewer", label: "Viewer" },
-                        ] as const
-                      ).map((r) => (
-                        <button
-                          key={r.id}
-                          onClick={() => handleRoleChange(r.id)}
-                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors ${
-                            role === r.id
-                              ? "bg-[#6B1D2F]/10 text-[#6B1D2F] font-semibold"
-                              : "text-slate-700 hover:bg-slate-50"
-                          }`}
-                        >
-                          <span>{r.label}</span>
-                          {role === r.id && <Check className="w-3.5 h-3.5 text-[#6B1D2F]" />}
-                        </button>
-                      ))}
+                    <div className="text-[10px] text-slate-500 mt-0.5 font-mono">
+                      @{user?.username} · Role: {user?.role}
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="pt-1.5 border-t border-[#EFECE6] space-y-1">
+                  <div className="pt-1 border-t border-[#EFECE6] space-y-1">
                     <Link
                       href="/"
                       target="_blank"
@@ -390,11 +355,14 @@ export function ErpHeader() {
                     </Link>
 
                     <button
-                      onClick={handleResetData}
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        logout();
+                      }}
                       className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-rose-700 hover:bg-rose-50 font-medium transition-colors"
                     >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>Reset Demo Data</span>
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Log Out</span>
                     </button>
                   </div>
                 </div>
@@ -493,35 +461,42 @@ export function ErpHeader() {
                 </Link>
               </div>
 
-              {/* Switch Role on Mobile */}
+              {/* Active User on Mobile Drawer */}
               <div className="pt-2 border-t border-[#EFECE6]">
                 <div className="px-2 pb-1.5 text-[10px] font-semibold uppercase text-slate-400 tracking-wider">
-                  Active Role
+                  Logged In Account
                 </div>
-                <div className="grid grid-cols-2 gap-1.5 text-xs">
-                  {[
-                    { id: "owner", label: "Owner" },
-                    { id: "sales_staff", label: "Counter" },
-                    { id: "admin", label: "Admin" },
-                    { id: "laundry_staff", label: "Care Staff" },
-                  ].map((r) => (
+                {user ? (
+                  <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                    <div>
+                      <div className="font-bold text-xs text-slate-800">{user.name}</div>
+                      <div className="text-[10px] text-slate-500 font-mono capitalize">
+                        {user.role} · @{user.username}
+                      </div>
+                    </div>
                     <button
-                      key={r.id}
-                      onClick={() => handleRoleChange(r.id as UserRole)}
-                      className={`py-1.5 px-2 rounded-lg border text-center font-medium transition-colors text-[11px] ${
-                        role === r.id
-                          ? "bg-[#6B1D2F] text-white border-[#6B1D2F] font-semibold"
-                          : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
-                      }`}
+                      onClick={() => {
+                        setShowMobileDrawer(false);
+                        logout();
+                      }}
+                      className="px-2.5 py-1 text-xs bg-rose-50 text-rose-700 hover:bg-rose-100 font-semibold rounded-lg border border-rose-200"
                     >
-                      {r.label}
+                      Sign Out
                     </button>
-                  ))}
-                </div>
+                  </div>
+                ) : (
+                  <Link
+                    href="/erp/login"
+                    onClick={() => setShowMobileDrawer(false)}
+                    className="block text-center py-2 bg-[#6B1D2F] text-white rounded-lg font-semibold text-xs"
+                  >
+                    Staff Login
+                  </Link>
+                )}
               </div>
             </div>
 
-            {/* Drawer Footer: Studio Address & Reset Demo Data */}
+            {/* Drawer Footer: Studio Address */}
             <div className="pt-3 border-t border-[#EFECE6] space-y-2 text-xs">
               <div className="p-2.5 bg-[#FAF9F6] rounded-xl border border-[#EFECE6] text-[11px] text-slate-600 leading-snug">
                 <div className="font-semibold text-slate-800 flex items-center gap-1.5">
@@ -531,14 +506,6 @@ export function ErpHeader() {
                 <div className="text-[10px] text-slate-500 mt-0.5">LIC Office Rd, Bargarh</div>
                 <div className="text-[10px] text-slate-500 font-mono mt-0.5">+91 7978256488</div>
               </div>
-
-              <button
-                onClick={handleResetData}
-                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-rose-50 text-rose-800 font-medium border border-rose-200 text-xs transition-colors"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset Demo Data</span>
-              </button>
             </div>
           </div>
         </div>

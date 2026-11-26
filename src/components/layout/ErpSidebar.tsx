@@ -11,33 +11,39 @@ import {
   ClipboardList,
   Sparkles,
   ExternalLink,
-  ChevronRight,
+  ShieldCheck,
+  User,
+  LogOut,
+  IndianRupee,
+  Receipt,
+  BarChart3,
+  Settings,
   Shield,
+  Coins,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DataStore } from "@/lib/dataStore";
-import { UserRole } from "@/types";
+import { useAuth } from "@/context/AuthContext";
+import { alertsApi } from "@/lib/api";
 
 export function ErpSidebar() {
   const pathname = usePathname();
+  const { user, isAdmin, isStaff, logout } = useAuth();
   const [alertCount, setAlertCount] = useState<number>(0);
-  const [role, setRole] = useState<UserRole>("owner");
 
   useEffect(() => {
-    const alerts = DataStore.getDeliveryAlerts();
-    const count =
-      alerts.alerts4Days.length + alerts.alerts3Days.length + alerts.overdueReturns.length;
-    setAlertCount(count);
-    setRole(DataStore.getCurrentRole());
+    alertsApi
+      .list()
+      .then((res) => {
+        setAlertCount(res.alerts?.length || 0);
+      })
+      .catch(() => {
+        setAlertCount(0);
+      });
   }, [pathname]);
 
-  const handleRoleChange = (newRole: UserRole) => {
-    setRole(newRole);
-    DataStore.setCurrentRole(newRole);
-    window.location.reload();
-  };
+  if (pathname === "/erp/login") return null;
 
-  const navItems = [
+  const coreNavItems = [
     {
       label: "Dashboard",
       href: "/erp/dashboard",
@@ -45,12 +51,12 @@ export function ErpSidebar() {
       badge: alertCount > 0 ? alertCount : undefined,
     },
     {
-      label: "Orders",
+      label: "Orders & Billing",
       href: "/erp/bookings",
       icon: ClipboardList,
     },
     {
-      label: "Inventory",
+      label: "Inventory Assets",
       href: "/erp/inventory",
       icon: Shirt,
     },
@@ -60,14 +66,47 @@ export function ErpSidebar() {
       icon: Sparkles,
     },
     {
-      label: "Calendar",
+      label: "Calendar Matrix",
       href: "/erp/calendar",
       icon: CalendarDays,
     },
     {
-      label: "Customers",
+      label: "Customer Records",
       href: "/erp/customers",
       icon: Users,
+    },
+  ];
+
+  const adminNavItems = [
+    {
+      label: "Daily Cash Closing",
+      href: "/erp/billing/cash-closing",
+      icon: Coins,
+    },
+    {
+      label: "Shop Expenses",
+      href: "/erp/billing/expenses",
+      icon: IndianRupee,
+    },
+    {
+      label: "Deposit Register",
+      href: "/erp/billing/deposits",
+      icon: Receipt,
+    },
+    {
+      label: "Financial Reports",
+      href: "/erp/reports",
+      icon: BarChart3,
+    },
+    {
+      label: "Staff Accounts",
+      href: "/erp/staff",
+      icon: Shield,
+    },
+    {
+      label: "Store Settings",
+      href: "/erp/settings",
+      icon: Settings,
     },
   ];
 
@@ -91,90 +130,133 @@ export function ErpSidebar() {
       </div>
 
       {/* Navigation List */}
-      <div className="flex-1 overflow-y-auto px-4 py-5 space-y-1">
-        <div className="px-3 pb-2 text-[11px] font-medium uppercase tracking-wider text-slate-400">
-          Workspace
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+        {/* Core Workspace */}
+        <div className="space-y-1">
+          <div className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Counter Operations
+          </div>
+
+          {coreNavItems.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/erp/dashboard" && pathname.startsWith(item.href));
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors group",
+                  isActive
+                    ? "bg-[#6B1D2F]/8 text-[#6B1D2F] font-semibold"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon
+                    className={cn(
+                      "w-4 h-4 shrink-0 transition-colors",
+                      isActive ? "text-[#6B1D2F]" : "text-slate-400 group-hover:text-slate-600"
+                    )}
+                  />
+                  <span>{item.label}</span>
+                </div>
+
+                {item.badge !== undefined && (
+                  <span className="bg-rose-50 text-rose-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-rose-200/60">
+                    {item.badge}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
         </div>
 
-        {navItems.map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/erp/dashboard" && pathname.startsWith(item.href));
-          const Icon = item.icon;
+        {/* Admin Financials (Hidden for Staff) */}
+        {isAdmin && (
+          <div className="space-y-1 pt-2 border-t border-slate-100">
+            <div className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Admin &amp; Financials
+            </div>
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors group",
-                isActive
-                  ? "bg-[#6B1D2F]/8 text-[#6B1D2F] font-semibold"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <Icon
+            {adminNavItems.map((item) => {
+              const isActive = pathname.startsWith(item.href);
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
                   className={cn(
-                    "w-4 h-4 shrink-0 transition-colors",
-                    isActive ? "text-[#6B1D2F]" : "text-slate-400 group-hover:text-slate-600"
+                    "flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors group",
+                    isActive
+                      ? "bg-[#6B1D2F]/8 text-[#6B1D2F] font-semibold"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   )}
-                />
-                <span>{item.label}</span>
-              </div>
-
-              {item.badge !== undefined && (
-                <span className="bg-rose-50 text-rose-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-rose-200/60">
-                  {item.badge}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      className={cn(
+                        "w-4 h-4 shrink-0 transition-colors",
+                        isActive ? "text-[#6B1D2F]" : "text-slate-400 group-hover:text-slate-600"
+                      )}
+                    />
+                    <span>{item.label}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Footer Info */}
-      <div className="p-4 border-t border-[#E6E4DF] space-y-2">
-        {/* Role Selector */}
-        <div className="px-3 py-2 bg-[#FAF9F6] rounded-lg border border-[#EFECE6]">
-          <div className="flex items-center justify-between text-[10px] uppercase font-bold text-slate-400 mb-1">
-            <span className="flex items-center gap-1">
-              <Shield className="w-3 h-3 text-[#6B1D2F]" />
-              <span>Role</span>
-            </span>
-            <span className="text-[10px] font-semibold text-slate-600 capitalize">
-              {role.replace("_", " ")}
-            </span>
+      {/* Footer Info & Active User Profile */}
+      <div className="p-3.5 border-t border-[#E6E4DF] space-y-2.5">
+        {user ? (
+          <div className="p-2.5 bg-[#FAF9F6] rounded-xl border border-[#EFECE6] flex items-center justify-between">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div
+                className={cn(
+                  "w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs",
+                  isAdmin ? "bg-[#6B1D2F] text-white" : "bg-slate-700 text-white"
+                )}
+              >
+                {isAdmin ? <ShieldCheck className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-slate-800 truncate leading-tight">
+                  {user.name}
+                </div>
+                <div className="text-[10px] text-slate-500 font-mono capitalize">
+                  {user.role} · @{user.username}
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={logout}
+              title="Logout"
+              className="p-1.5 text-slate-400 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           </div>
-          <select
-            value={role}
-            onChange={(e) => handleRoleChange(e.target.value as UserRole)}
-            className="w-full bg-white border border-[#E6E4DF] rounded-md text-xs font-semibold text-slate-800 p-1.5 focus:outline-hidden cursor-pointer"
+        ) : (
+          <Link
+            href="/erp/login"
+            className="w-full py-2 bg-[#6B1D2F] text-white rounded-lg text-xs font-bold text-center block"
           >
-            <option value="owner">Owner (Full Access)</option>
-            <option value="sales_staff">Counter Operator</option>
-            <option value="admin">Admin</option>
-            <option value="laundry_staff">Care / Laundry Staff</option>
-            <option value="viewer">Viewer</option>
-          </select>
-        </div>
+            Staff Login
+          </Link>
+        )}
 
-        <Link
-          href="/"
-          target="_blank"
-          className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80 transition-colors"
-        >
-          <span className="flex items-center gap-2">
-            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-            <span>Storefront</span>
-          </span>
-          <ChevronRight className="w-3 h-3 text-slate-400" />
-        </Link>
-
-        <div className="px-3 py-2 bg-slate-50 rounded-lg text-[11px] text-slate-500 border border-slate-200/60 leading-snug">
-          <div className="font-medium text-slate-700">Studio Location</div>
-          <div className="truncate mt-0.5">LIC Office Rd, Bargarh</div>
-          <div className="font-mono text-slate-400 text-[10px] mt-0.5">+91 7978256488</div>
+        <div className="px-2.5 py-1.5 bg-slate-50 rounded-lg text-[10px] text-slate-500 border border-slate-200/60 flex items-center justify-between">
+          <span className="truncate">LIC Office Rd, Bargarh</span>
+          <Link href="/" target="_blank" className="text-slate-400 hover:text-slate-700">
+            <ExternalLink className="w-3 h-3" />
+          </Link>
         </div>
       </div>
     </aside>
