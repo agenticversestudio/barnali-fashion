@@ -10,7 +10,7 @@ export async function cleanup() {
   const ids = "id LIKE 'ZT%'";
   await c.batch(
     [
-      "DELETE FROM audit_log WHERE entity_id LIKE 'ZT%' OR user_id LIKE 'ZT%'",
+      "DELETE FROM audit_log WHERE entity_id LIKE 'ZT%' OR user_id LIKE 'ZT%' OR entity_id IN (SELECT id FROM users WHERE username LIKE 'zt!_%' ESCAPE '!')",
       "DELETE FROM photos WHERE garment_id LIKE 'ZT%'",
       "DELETE FROM care_jobs WHERE garment_id LIKE 'ZT%'",
       "DELETE FROM payments WHERE booking_id LIKE 'ZT%' OR recorded_by LIKE 'ZT%'",
@@ -18,8 +18,8 @@ export async function cleanup() {
       `DELETE FROM bookings WHERE ${ids}`,
       `DELETE FROM customers WHERE ${ids}`,
       `DELETE FROM garments WHERE ${ids}`,
-      "DELETE FROM sessions WHERE user_id LIKE 'ZT%'",
-      `DELETE FROM users WHERE ${ids}`,
+      "DELETE FROM sessions WHERE user_id LIKE 'ZT%' OR user_id IN (SELECT id FROM users WHERE username LIKE 'zt!_%' ESCAPE '!')",
+      `DELETE FROM users WHERE ${ids} OR username LIKE 'zt!_%' ESCAPE '!'`,
       "DELETE FROM expenses WHERE id LIKE 'ZT%'",
       "DELETE FROM cash_closings WHERE id LIKE 'ZT%'",
     ],
@@ -53,4 +53,44 @@ export async function addItem(bookingId: string, garmentId: string, pickup: stri
           VALUES (?,?,1,1,?,?,?)`,
     args: [bookingId, garmentId, pickup, due, active],
   });
+}
+
+import { hashPassword } from "@/server/password";
+import type { Role } from "@/types/api";
+
+export async function mkUser(id: string, username: string, role: Role, password = "TestPass#1", extra = "") {
+  await db().execute({
+    sql: "INSERT INTO users(id,name,username,password_hash,role) VALUES (?,?,?,?,?)",
+    args: [id, `Test ${username}`, username, await hashPassword(password), role],
+  });
+  void extra;
+}
+
+type Handler = (req: Request, ctx: { params: Promise<Record<string, string>> }) => Promise<Response>;
+
+/** Call a route handler directly (no HTTP server). */
+export async function call(
+  handler: Handler,
+  method: string,
+  path: string,
+  opts: { body?: unknown; cookie?: string; params?: Record<string, string>; headers?: Record<string, string> } = {},
+) {
+  const headers: Record<string, string> = { ...(opts.headers ?? {}) };
+  if (opts.cookie) headers.cookie = opts.cookie;
+  if (opts.body !== undefined) headers["content-type"] = "application/json";
+  const req = new Request(`http://localhost${path}`, {
+    method,
+    headers,
+    body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
+  });
+  const res = await handler(req, { params: Promise.resolve(opts.params ?? {}) });
+  let data: any = null;
+  try {
+    data = await res.json();
+  } catch {}
+  return { status: res.status, data, headers: res.headers };
+}
+
+export function cookieOf(res: { headers: Headers }): string {
+  return (res.headers.get("set-cookie") ?? "").split(";")[0];
 }

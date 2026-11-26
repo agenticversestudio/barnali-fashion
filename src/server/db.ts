@@ -1,4 +1,9 @@
-import { createClient, type Client, type Transaction } from "@tursodatabase/serverless/compat";
+import { createClient, type Client, type Transaction, type ResultSet, type InStatement } from "@tursodatabase/serverless/compat";
+
+/** Anything that can run SQL: the client or an open transaction. */
+export interface Exec {
+  execute(stmt: InStatement): Promise<ResultSet>;
+}
 
 let client: Client | undefined;
 
