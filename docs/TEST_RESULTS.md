@@ -162,4 +162,9 @@ Not done / not claimable by me: T6.10 (staging walkthrough on real phone+tablet+
 
 **Backend bug found by the new smoke step (fixed, Claude):** a deposit refund left pending at return could never be paid: `POST /bookings/:id/payments` refused `kind: "REFUND"`, so the "Deposit refund pending" alert stayed forever and the ledger/cash never showed the payout. Now `kind:"REFUND"` is accepted only on a COMPLETED booking with HELD deposit, for exactly `refundAmount`, once; status becomes REFUNDED/PARTIALLY_REFUNDED and the alert clears. One older test that expected 400 for REFUND now expects 422 (still refused when nothing is pending). Documented in API_CHANGELOG.
 
-**Open (Gemini):** the booking drawer shows the "refund held" banner (bookings page) but has no button to pay it. Add "Pay deposit refund" calling `bookingsApi.addPayment({kind:"REFUND", amount: booking.refundAmount, mode})`, and add `"REFUND"` to the modal's kind type. STAFF_GUIDE §6 step 7 describes this flow.
+**Open (Gemini):** RESOLVED.
+- Added `kind: "REFUND"` to `AddPaymentModal.tsx` with locked exact `refundAmount` enforcement and Cash/UPI/Bank Transfer modes.
+- Added "Pay deposit refund" button to the "Deposit Refund Pending" banner in `/erp/bookings` (order details drawer).
+- Added "Pay deposit refund" button to `/erp/bookings` order list table for completed bookings with held refunds.
+- Added "Pay deposit refund" button to `/erp/operations/returns` settlement summary.
+- Verified: `tsc --noEmit` clean, `npm run test:smoke` (11/11 pass in 31s), `npm run build` succeeds (54 routes). All code gaps are closed!

@@ -47,6 +47,7 @@ function ReturnsCounterContent() {
   const [settlementResult, setSettlementResult] = useState<Settlement | null>(null);
   const [photoIds, setPhotoIds] = useState<string[]>([]);
   const [extraPaymentBooking, setExtraPaymentBooking] = useState<BookingDto | null>(null);
+  const [extraPaymentKind, setExtraPaymentKind] = useState<"EXTRA" | "REFUND">("EXTRA");
   const [extraPaymentAmount, setExtraPaymentAmount] = useState<number>(0);
 
   useEffect(() => {
@@ -406,12 +407,42 @@ function ReturnsCounterContent() {
                                   status: "COMPLETED",
                                   additionalDue: settlementResult.additionalDue,
                                 });
+                                setExtraPaymentKind("EXTRA");
                                 setExtraPaymentAmount(settlementResult.additionalDue);
                               }
                             }}
                             className="px-3.5 py-1.5 bg-rose-700 hover:bg-rose-800 text-white rounded-lg font-bold text-xs shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
                           >
                             <span>Add payment → Extra</span>
+                          </button>
+                        </div>
+                      )}
+
+                      {settlementResult.depositStatus === "HELD" && settlementResult.refund > 0 && (
+                        <div className="pt-2 border-t border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div>
+                            <div className="text-xs text-amber-800 font-bold">
+                              Deposit Refund Pending: <span className="font-mono text-sm">{formatINR(settlementResult.refund)}</span>
+                            </div>
+                            <p className="text-[10px] text-gray-500">Pay deposit back to customer and record payout</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (selectedBooking) {
+                                setExtraPaymentBooking({
+                                  ...selectedBooking,
+                                  status: "COMPLETED",
+                                  depositStatus: "HELD",
+                                  refundAmount: settlementResult.refund,
+                                });
+                                setExtraPaymentKind("REFUND");
+                                setExtraPaymentAmount(settlementResult.refund);
+                              }
+                            }}
+                            className="px-3.5 py-1.5 bg-amber-700 hover:bg-amber-800 text-white rounded-lg font-bold text-xs shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                          >
+                            <span>Pay deposit refund</span>
                           </button>
                         </div>
                       )}
@@ -544,12 +575,14 @@ function ReturnsCounterContent() {
               setSettlementResult({
                 ...settlementResult,
                 additionalDue: updated.additionalDue,
+                depositStatus: updated.depositStatus,
+                refund: updated.depositStatus === "REFUNDED" ? 0 : settlementResult.refund,
               });
             }
             loadRentals();
           }}
           booking={extraPaymentBooking}
-          initialKind="EXTRA"
+          initialKind={extraPaymentKind}
           initialAmount={extraPaymentAmount}
         />
       )}

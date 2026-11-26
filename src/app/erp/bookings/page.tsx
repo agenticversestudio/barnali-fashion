@@ -74,7 +74,7 @@ function BookingsContent() {
 
   // Add Payment Modal State
   const [paymentModalBooking, setPaymentModalBooking] = useState<BookingDto | null>(null);
-  const [paymentModalKind, setPaymentModalKind] = useState<"BALANCE" | "DEPOSIT" | "EXTRA">("BALANCE");
+  const [paymentModalKind, setPaymentModalKind] = useState<"BALANCE" | "DEPOSIT" | "EXTRA" | "REFUND">("BALANCE");
 
   const loadBookings = useCallback(async () => {
     setLoading(true);
@@ -443,6 +443,18 @@ function BookingsContent() {
                               className="px-2.5 py-1.5 bg-rose-700 hover:bg-rose-800 text-white font-semibold rounded-lg text-[11px] shadow-xs"
                             >
                               Add payment → Extra
+                            </button>
+                          )}
+
+                          {b.status === "COMPLETED" && b.depositStatus === "HELD" && b.refundAmount > 0 && (
+                            <button
+                              onClick={() => {
+                                setPaymentModalBooking(b);
+                                setPaymentModalKind("REFUND");
+                              }}
+                              className="px-2.5 py-1.5 bg-amber-700 hover:bg-amber-800 text-white font-semibold rounded-lg text-[11px] shadow-xs"
+                            >
+                              Pay deposit refund
                             </button>
                           )}
 
@@ -883,11 +895,23 @@ function BookingsContent() {
                 )}
 
                 {selectedOrder.depositStatus === "HELD" && selectedOrder.refundAmount > 0 && (
-                  <div className="col-span-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl mt-1">
-                    <span className="text-amber-900 font-bold block text-xs">Deposit Refund Pending</span>
-                    <span className="text-[11px] text-amber-800">
-                      Refund of <strong className="font-mono">{formatINR(selectedOrder.refundAmount)}</strong> is held in shop vault awaiting handover to customer.
-                    </span>
+                  <div className="col-span-2 p-3 bg-amber-50 border border-amber-200 rounded-xl mt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <span className="text-amber-900 font-bold block text-xs">Deposit Refund Pending</span>
+                      <span className="text-[11px] text-amber-800">
+                        Refund of <strong className="font-mono text-sm">{formatINR(selectedOrder.refundAmount)}</strong> is held in shop vault awaiting handover to customer.
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentModalBooking(selectedOrder);
+                        setPaymentModalKind("REFUND");
+                      }}
+                      className="px-3.5 py-1.5 bg-amber-700 hover:bg-amber-800 text-white rounded-lg font-bold text-xs shadow-xs shrink-0 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>Pay deposit refund</span>
+                    </button>
                   </div>
                 )}
               </div>
@@ -960,7 +984,9 @@ function BookingsContent() {
           booking={paymentModalBooking}
           initialKind={paymentModalKind}
           initialAmount={
-            paymentModalKind === "EXTRA"
+            paymentModalKind === "REFUND"
+              ? paymentModalBooking.refundAmount
+              : paymentModalKind === "EXTRA"
               ? paymentModalBooking.additionalDue
               : paymentModalBooking.balanceDue
           }

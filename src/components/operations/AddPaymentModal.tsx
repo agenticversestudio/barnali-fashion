@@ -4,14 +4,14 @@ import React, { useState, useEffect } from "react";
 import { X, CheckCircle2, Loader2, IndianRupee, AlertCircle } from "lucide-react";
 import { bookingsApi } from "@/lib/api";
 import { formatINR } from "@/lib/utils";
-import type { BookingDto, PayMode, PaymentKind } from "@/types/api";
+import type { BookingDto, PayMode } from "@/types/api";
 
 interface AddPaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (updated: BookingDto) => void;
   booking: BookingDto;
-  initialKind?: "BALANCE" | "DEPOSIT" | "EXTRA";
+  initialKind?: "BALANCE" | "DEPOSIT" | "EXTRA" | "REFUND";
   initialAmount?: number;
 }
 
@@ -24,43 +24,64 @@ export function AddPaymentModal({
   initialAmount,
 }: AddPaymentModalProps) {
   const isCompleted = booking.status === "COMPLETED";
-  const defaultKind: "BALANCE" | "DEPOSIT" | "EXTRA" =
-    initialKind || (isCompleted ? "EXTRA" : "BALANCE");
+  const defaultKind: "BALANCE" | "DEPOSIT" | "EXTRA" | "REFUND" =
+    initialKind || (isCompleted ? (booking.depositStatus === "HELD" && booking.refundAmount > 0 ? "REFUND" : "EXTRA") : "BALANCE");
 
-  const [kind, setKind] = useState<"BALANCE" | "DEPOSIT" | "EXTRA">(defaultKind);
+  const [kind, setKind] = useState<"BALANCE" | "DEPOSIT" | "EXTRA" | "REFUND">(defaultKind);
   const [mode, setMode] = useState<PayMode>("CASH");
   const [amount, setAmount] = useState<number>(0);
   const [note, setNote] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Maximum allowable amount for this payment
-  const maxAllowed = isCompleted ? booking.additionalDue : booking.balanceDue;
+  const isRefund = kind === "REFUND";
+  const isExtra = kind === "EXTRA";
+
+  // Maximum allowable amount for this transaction
+  const maxAllowed = isRefund
+    ? booking.refundAmount
+    : isCompleted
+    ? booking.additionalDue
+    : booking.balanceDue;
 
   useEffect(() => {
-    if (initialAmount !== undefined && initialAmount > 0) {
+    const targetKind = initialKind || (isCompleted ? (booking.depositStatus === "HELD" && booking.refundAmount > 0 ? "REFUND" : "EXTRA") : "BALANCE");
+    setKind(targetKind);
+
+    if (targetKind === "REFUND") {
+      setAmount(booking.refundAmount);
+      setNote("Deposit refund paid to customer");
+    } else if (initialAmount !== undefined && initialAmount > 0) {
       setAmount(initialAmount);
+      setNote(
+        isCompleted
+          ? "Extra amount collected after return settlement"
+          : "Balance payment collected at counter"
+      );
     } else {
-      setAmount(maxAllowed);
+      setAmount(targetKind === "EXTRA" ? booking.additionalDue : booking.balanceDue);
+      setNote(
+        isCompleted
+          ? "Extra amount collected after return settlement"
+          : "Balance payment collected at counter"
+      );
     }
-    setKind(initialKind || (isCompleted ? "EXTRA" : "BALANCE"));
-    setNote(
-      isCompleted
-        ? "Extra amount collected after return settlement"
-        : "Balance payment collected at counter"
-    );
     setError(null);
-  }, [booking, initialAmount, initialKind, isCompleted, maxAllowed]);
+  }, [booking, initialAmount, initialKind, isCompleted]);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (amount <= 0) {
-      setError("Payment amount must be greater than ₹0");
+      setError("Amount must be greater than ₹0");
       return;
     }
-    if (amount > maxAllowed) {
+    if (isRefund && amount !== booking.refundAmount) {
+      setError(`Refund amount must match the exact pending refund of ${formatINR(booking.refundAmount)}`);
+      return;
+    }
+    if (!isRefund && amount > maxAllowed) {
       setError(`Amount cannot exceed the remaining due of ${formatINR(maxAllowed)}`);
       return;
     }
@@ -76,12 +97,16 @@ export function AddPaymentModal({
         note: note.trim() || undefined,
       });
 
-      alert(`Payment of ${formatINR(amount)} recorded successfully via ${mode}!`);
+      if (isRefund) {
+        alert(`Deposit refund of ${formatINR(amount)} paid successfully via ${mode}!`);
+      } else {
+        alert(`Payment of ${formatINR(amount)} recorded successfully via ${mode}!`);
+      }
       onSuccess(updated);
       onClose();
     } catch (err: any) {
-      console.error("Failed to add payment:", err);
-      setError(err?.message || "Failed to record payment");
+      console.error("Failed to record payment/refund:", err);
+      setError(err?.message || "Failed to process payment");
     } finally {
       setSubmitting(false);
     }
@@ -97,7 +122,11 @@ export function AddPaymentModal({
               {booking.id}
             </span>
             <h3 className="font-serif font-bold text-lg text-slate-900">
-              {kind === "EXTRA" ? "Add payment → Extra" : "Record Customer Payment"}
+              {isRefund
+                ? "Pay Deposit Refund"
+                : isExtra
+                ? "Add payment → Extra"
+                : "Record Customer Payment"}
             </h3>
           </div>
           <button
@@ -126,8 +155,18 @@ export function AddPaymentModal({
               Status: <strong className="font-mono text-[#6B1D2F]">{booking.status}</strong>
             </div>
             <div className="pt-1 flex items-center justify-between border-t border-slate-200 text-slate-900 font-semibold">
-              <span>{isCompleted ? "Total Amount Client Owes:" : "Current Balance Due:"}</span>
-              <span className="font-mono font-bold text-rose-700 text-sm">
+              <span>
+                {isRefund
+                  ? "Pending Deposit Refund to Customer:"
+                  : isCompleted
+                  ? "Total Amount Client Owes:"
+                  : "Current Balance Due:"}
+              </span>
+              <span
+                className={`font-mono font-bold text-sm ${
+                  isRefund ? "text-amber-800" : "text-rose-700"
+                }`}
+              >
                 {formatINR(maxAllowed)}
               </span>
             </div>
@@ -136,9 +175,16 @@ export function AddPaymentModal({
           {/* Payment Kind */}
           <div>
             <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
-              Payment Kind *
+              Transaction Kind *
             </label>
-            {isCompleted ? (
+            {isRefund ? (
+              <div className="p-2.5 bg-amber-50/70 border border-amber-200 rounded-xl text-amber-900 font-bold text-xs flex items-center justify-between">
+                <span>REFUND (Payout of held security deposit)</span>
+                <span className="text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded font-mono">
+                  REFUND
+                </span>
+              </div>
+            ) : isExtra ? (
               <div className="p-2.5 bg-rose-50/70 border border-rose-200 rounded-xl text-rose-900 font-bold text-xs flex items-center justify-between">
                 <span>EXTRA (Amount owed after return settlement)</span>
                 <span className="text-[10px] bg-rose-600 text-white px-2 py-0.5 rounded font-mono">
@@ -160,16 +206,16 @@ export function AddPaymentModal({
           {/* Payment Mode */}
           <div>
             <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
-              Payment Mode Received *
+              {isRefund ? "Refund Payment Mode Given *" : "Payment Mode Received *"}
             </label>
             <select
               value={mode}
               onChange={(e) => setMode(e.target.value as PayMode)}
               className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-semibold"
             >
-              <option value="CASH">Cash in Till / Drawer</option>
+              <option value="CASH">Cash (From Till / Counter Drawer)</option>
               <option value="UPI">UPI (GPay / PhonePe / Paytm)</option>
-              <option value="CARD">Card POS Swiped</option>
+              {!isRefund && <option value="CARD">Card POS Swiped</option>}
               <option value="BANK_TRANSFER">Bank Transfer / IMPS / NEFT</option>
             </select>
           </div>
@@ -178,15 +224,17 @@ export function AddPaymentModal({
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-[11px] font-bold text-slate-700 uppercase">
-                Amount Received (₹) *
+                {isRefund ? "Refund Amount (₹) *" : "Amount Received (₹) *"}
               </label>
-              <button
-                type="button"
-                onClick={() => setAmount(maxAllowed)}
-                className="text-[10px] text-[#8C6F3B] hover:underline font-semibold cursor-pointer"
-              >
-                Fill Full Amount ({formatINR(maxAllowed)})
-              </button>
+              {!isRefund && (
+                <button
+                  type="button"
+                  onClick={() => setAmount(maxAllowed)}
+                  className="text-[10px] text-[#8C6F3B] hover:underline font-semibold cursor-pointer"
+                >
+                  Fill Full Amount ({formatINR(maxAllowed)})
+                </button>
+              )}
             </div>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">
@@ -198,11 +246,21 @@ export function AddPaymentModal({
                 max={maxAllowed}
                 value={amount || ""}
                 onChange={(e) => setAmount(Number(e.target.value) || 0)}
+                readOnly={isRefund}
                 placeholder="0"
-                className="w-full pl-7 pr-3 py-2.5 bg-white border border-[#E6E4DF] rounded-xl font-mono font-bold text-sm text-gray-900 focus:outline-hidden focus:border-[#6B1D2F]"
+                className={`w-full pl-7 pr-3 py-2.5 border rounded-xl font-mono font-bold text-sm text-gray-900 focus:outline-hidden ${
+                  isRefund
+                    ? "bg-amber-50/50 border-amber-300 cursor-not-allowed text-amber-900"
+                    : "bg-white border-[#E6E4DF] focus:border-[#6B1D2F]"
+                }`}
                 required
               />
             </div>
+            {isRefund && (
+              <p className="text-[10px] text-amber-800 mt-1">
+                Server requires exact pending refund of {formatINR(booking.refundAmount)}.
+              </p>
+            )}
           </div>
 
           {/* Note Input */}
@@ -214,7 +272,11 @@ export function AddPaymentModal({
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="e.g. Received by counter manager, settled in full"
+              placeholder={
+                isRefund
+                  ? "e.g. Deposit refunded to customer via UPI"
+                  : "e.g. Received by counter manager, settled in full"
+              }
               className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
             />
           </div>
@@ -232,14 +294,18 @@ export function AddPaymentModal({
             <button
               type="submit"
               disabled={submitting || amount <= 0}
-              className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+              className={`flex-1 py-2.5 text-white font-bold rounded-xl text-xs shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 ${
+                isRefund
+                  ? "bg-amber-700 hover:bg-amber-800"
+                  : "bg-emerald-600 hover:bg-emerald-700"
+              }`}
             >
               {submitting ? (
                 <Loader2 className="w-4 h-4 animate-spin text-white" />
               ) : (
                 <CheckCircle2 className="w-4 h-4 text-white" />
               )}
-              <span>Record Payment</span>
+              <span>{isRefund ? "Pay Deposit Refund" : "Record Payment"}</span>
             </button>
           </div>
         </form>
