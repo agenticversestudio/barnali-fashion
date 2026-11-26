@@ -24,3 +24,9 @@ Spike: Next 16.4.5 + `@opennextjs/cloudflare` 1.20.19, run in workerd (`wrangler
 - Hello-world bundle already 956 KiB gzip of 3 MiB free cap; real app likely close to cap.
 - `proxy.ts` not supported by the OpenNext adapter (unverified issue #1277). Already avoided by design.
 **Decision:** deploy on Vercel Hobby (Node runtime: native scrypt/PBKDF2, no CPU cap issue). **Known risk:** Hobby ToS = non-commercial use; client must be told (PRD O2). Mitigation: keep code portable (DB client = `@tursodatabase/serverless/compat`, no Vercel-only APIs) so a move to a ~$5/mo plan or VPS is a config change.
+
+## 2026-11-26 — Types: new contract in `src/types/api.ts`, legacy `index.ts` kept (T1.5 deviation)
+Rewriting `src/types/index.ts` in place would break `npm run build` for every prototype screen Gemini still has on `DataStore`. New contract lives in `src/types/api.ts` (Claude-owned). Legacy file is deleted in T8.5 once all `/erp/**` screens are migrated. Gemini imports new types only from `@/types/api`.
+
+## 2026-11-26 — Dev admin account
+Seed created a dev admin (`admin`) with a throwaway password given only in the chat session, never stored in the repo. **Must be rotated / replaced before any real data (T9.1).** Demo data (40 garments, 12 customers) is in the shared Turso DB; T9.1 wipes it. Tests use `ZT-*` ids and clean up after themselves.

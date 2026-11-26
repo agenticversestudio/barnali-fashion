@@ -18,8 +18,8 @@ Milestones (Agreement Art. 2/4): **Week 1** = Phases 0–3 · **Week 2** = Phase
 - [x] **T1.1 [C]** Add dep `@tursodatabase/serverless` (import `/compat`); `src/server/db.ts` (client, `tx()` helper). *Verify:* `/api/v1/health` returns `{db:"ok"}` locally. (verified vs Turso Mumbai; note: `cacheComponents` is on, so no `export const dynamic` in routes)
 - [x] **T1.2 [C]** `db/migrations/001_init.sql` (ARCHITECTURE §3 incl. triggers) + `scripts/migrate.ts` with `_migrations` table. *Verify:* run twice, second is no-op; `.schema` matches. (run: `npm run db:migrate`; applied to Turso, 14 tables + 2 triggers; 2nd run no-op)
 - [x] **T1.3 [C]** Trigger test (SQL-only): insert overlapping `booking_items` → `GARMENT_CONFLICT`; non-overlap ok; buffer edge days ok; inactive ignored. (`npm test`, 11 tests green; NOTE run tests from PowerShell/D: path casing, Git-Bash d: path breaks vitest)
-- [ ] **T1.4 [C]** `scripts/seed.ts`: settings, counters, 1 admin (password from env, prompted), demo garments/customers from `mockData.ts` **behind `--demo` flag only**. *Verify:* seed twice idempotent.
-- [ ] **T1.5 [C]** Rewrite `src/types/index.ts` to the new contract (2 roles, 6 statuses, DTOs); list breaking changes in `docs/API_CHANGELOG.md` for Gemini. *Verify:* typecheck errors only in files Gemini owns.
+- [x] **T1.4 [C]** `scripts/seed.ts`: settings, counters, 1 admin (password from env, prompted), demo garments/customers from `mockData.ts` **behind `--demo` flag only**. *Verify:* seed twice idempotent. (`npm run db:seed -- --demo`; idempotent)
+- [x] **T1.5 [C]** Rewrite `src/types/index.ts` to the new contract (2 roles, 6 statuses, DTOs); list breaking changes in `docs/API_CHANGELOG.md` for Gemini. *Verify:* typecheck errors only in files Gemini owns. (contract in `src/types/api.ts`, legacy index.ts kept until T8.5; see DECISIONS)
 
 ## Phase 2 — Auth & Roles
 - [ ] **T2.1 [C]** `src/server/auth.ts`: PBKDF2 hash/verify, session create/lookup/revoke, `requireRole()`.
