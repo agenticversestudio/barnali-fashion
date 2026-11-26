@@ -22,11 +22,11 @@ Milestones (Agreement Art. 2/4): **Week 1** = Phases 0–3 · **Week 2** = Phase
 - [x] **T1.5 [C]** Rewrite `src/types/index.ts` to the new contract (2 roles, 6 statuses, DTOs); list breaking changes in `docs/API_CHANGELOG.md` for Gemini. *Verify:* typecheck errors only in files Gemini owns. (contract in `src/types/api.ts`, legacy index.ts kept until T8.5; see DECISIONS)
 
 ## Phase 2 — Auth & Roles
-- [ ] **T2.1 [C]** `src/server/auth.ts`: PBKDF2 hash/verify, session create/lookup/revoke, `requireRole()`.
-- [ ] **T2.2 [C]** `POST /auth/login|logout`, `GET /auth/me` + lockout after 5 fails. *Verify:* curl matrix (good, bad pass, locked, disabled user).
-- [ ] **T2.3 [C]** Route guard for `/erp/*` pages (middleware/proxy per T0.3). *Verify:* unauth → redirect; `/erp/login` open.
-- [ ] **T2.4 [C]** Users API (create staff, disable, reset password, revoke sessions) + `audit_log` writer. *Verify:* staff token → 403.
-- [ ] **T2.5 [C]** Security checklist: Origin check on mutations, cookie flags, no secrets in responses.
+- [x] **T2.1 [C]** `src/server/auth.ts`: PBKDF2 hash/verify, session create/lookup/revoke, `requireRole()`.
+- [x] **T2.2 [C]** `POST /auth/login|logout`, `GET /auth/me` + lockout after 5 fails. *Verify:* curl matrix (good, bad pass, locked, disabled user).
+- [x] **T2.3 [C]** Route guard for `/erp/*` pages (middleware/proxy per T0.3). *Verify:* unauth → redirect; `/erp/login` open. (`src/proxy.ts`, flag `ERP_AUTH_GUARD=1`, off until T6.2 so prototype keeps working)
+- [x] **T2.4 [C]** Users API (create staff, disable, reset password, revoke sessions) + `audit_log` writer. *Verify:* staff token → 403.
+- [x] **T2.5 [C]** Security checklist: Origin check on mutations, cookie flags, no secrets in responses.
 
 ## Phase 3 — Core Rental Domain (money-critical)
 - [ ] **T3.1 [C]** Add `vitest`. `pricing.ts`: `quote`, `lateDays`, `settle`. ≥ 15 table tests (late 0/1/3 days, damage > deposit, zero deposit, dry-clean+transit, partial advance, date-string edge: month end, leap day). *Verify:* tests green.

@@ -35,8 +35,8 @@ Legend: ✅ live · ⏳ planned (phase). Staff = `S`, admin = `A`.
 | Endpoint | Role | Status |
 |----------|------|--------|
 | `GET /health` | public | ✅ |
-| `POST /auth/login`, `POST /auth/logout`, `GET /auth/me` | public/S | ⏳ P2 |
-| `GET/POST /users`, `PATCH /users/:id`, `POST /users/:id/reset-password`, `DELETE /users/:id/sessions` | A | ⏳ P2 |
+| `POST /auth/login`, `POST /auth/logout`, `GET /auth/me` | public/S | ✅ |
+| `GET/POST /users`, `PATCH /users/:id`, `POST /users/:id/reset-password`, `DELETE /users/:id/sessions` | A | ✅ |
 | garments (list/detail/create/edit/location/status/availability) | S/A | ⏳ P3 |
 | customers | S | ⏳ P3 |
 | `POST /bookings/quote`, `POST /bookings`, list/detail, `pickup`, `return`, `payments`, `cancel`, `PATCH` | S/A | ⏳ P3 |
