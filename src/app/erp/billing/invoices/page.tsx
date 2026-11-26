@@ -213,7 +213,7 @@ function InvoiceContent() {
                 Standard Rental Terms
               </div>
               <div>• Garment security deposit is 100% refundable upon undamaged return.</div>
-              <div>• Strict return due deadline applies. Late fees: ₹300 per day.</div>
+              <div>• Strict return due deadline applies. Late fee: 15% of rental per day.</div>
               <div>• Do not machine wash or iron directly on metallic zari or stone embroidery.</div>
               <div>• Minor food stains are covered by standard dry clean; heavy rips or burns attract deduction.</div>
             </div>
