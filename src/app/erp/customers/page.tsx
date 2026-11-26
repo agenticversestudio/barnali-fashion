@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Users,
@@ -16,479 +16,507 @@ import {
   ShieldCheck,
   ChevronRight,
   ClipboardList,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
-import { DataStore } from "@/lib/dataStore";
+import { customersApi } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
-import { Customer, Booking } from "@/types";
+import type { CustomerDto } from "@/types/api";
+import { useAuth } from "@/context/AuthContext";
 
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const { isAdmin } = useAuth();
+  const [customers, setCustomers] = useState<CustomerDto[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Selected customer for Full Details Bottom Sheet
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  // Selected customer for Full Details Bottom Sheet / Modal
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerDto | null>(null);
 
   // New Customer Form State
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("Bargarh");
   const [pincode, setPincode] = useState("768028");
   const [notes, setNotes] = useState("");
 
-  useEffect(() => {
-    setCustomers(DataStore.getCustomers());
-    setBookings(DataStore.getBookings());
-  }, []);
+  const loadCustomers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await customersApi.list(searchTerm.trim() || undefined);
+      setCustomers(res.items || []);
+    } catch (err) {
+      console.error("Failed to load customers:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchTerm]);
 
-  const handleAddCustomer = (e: React.FormEvent) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadCustomers();
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [loadCustomers]);
+
+  const handleAddCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !phone) {
-      alert("Name and Phone are mandatory");
+    if (!name.trim() || !phone.trim()) {
+      setError("Name and Phone are mandatory");
       return;
     }
 
-    const newCust: Customer = {
-      id: `CUST-${String(customers.length + 13).padStart(3, "0")}`,
-      name,
-      phone,
-      whatsapp: phone,
-      address,
-      city,
-      pincode,
-      notes,
-      totalBookings: 0,
-      totalSpent: 0,
-      activeRentalsCount: 0,
-      refundableDepositsHeld: 0,
-      createdAt: new Date().toISOString().split("T")[0],
-    };
+    setSaving(true);
+    setError(null);
 
-    DataStore.saveCustomer(newCust);
-    setCustomers(DataStore.getCustomers());
-    setShowAddModal(false);
-    setName("");
-    setPhone("");
-    setAddress("");
-    alert(`Customer ${name} added successfully!`);
+    try {
+      await customersApi.createOrUpdate({
+        name: name.trim(),
+        phone: phone.trim(),
+        whatsapp: whatsapp.trim() || phone.trim(),
+        address: address.trim() || undefined,
+        city: city.trim() || "Bargarh",
+        pincode: pincode.trim() || undefined,
+        notes: notes.trim() || undefined,
+      });
+
+      setShowAddModal(false);
+      setName("");
+      setPhone("");
+      setWhatsapp("");
+      setAddress("");
+      setNotes("");
+      await loadCustomers();
+    } catch (err: any) {
+      setError(err?.message || "Failed to save customer");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const filteredCustomers = customers.filter(
-    (c) =>
-      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.phone.includes(searchTerm) ||
-      c.city.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const getCleanPhone = (p: string) => p.replace(/\D/g, "").slice(-10);
 
   return (
-    <div className="space-y-3.5 md:space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E6E4DF] shadow-2xs">
         <div>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-slate-900">
-            Customers
-          </h1>
-          <p className="text-[11px] md:text-xs text-slate-500 mt-0.5">
-            Verified client profiles, contact numbers, and security deposit ledger.
+          <div className="flex items-center gap-2">
+            <h1 className="font-serif font-bold text-xl md:text-2xl text-slate-900 tracking-tight">
+              Customer Directory
+            </h1>
+            <span className="text-xs font-mono font-semibold bg-[#6B1D2F]/10 text-[#6B1D2F] px-2.5 py-0.5 rounded-full">
+              {customers.length} Clients
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mt-1">
+            Verified rental profiles, contact information, and security deposit ledgers.
           </p>
         </div>
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 md:px-3.5 md:py-2 bg-[#6B1D2F] hover:bg-[#551624] text-white text-xs font-semibold rounded-lg shadow-xs transition-colors self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Customer</span>
         </button>
       </div>
 
-      {/* Search Bar */}
-      <div className="bg-white p-3 md:p-4 rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      {/* Search Input Bar */}
+      <div className="bg-white p-3 md:p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
         <div className="relative">
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
           <input
             type="text"
-            placeholder="Search by customer name, mobile number, or city..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full text-xs pl-8 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-[#6B1D2F] text-slate-800"
+            placeholder="Search by customer name, 10-digit mobile number, or address..."
+            className="w-full pl-9 pr-4 py-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#6B1D2F]"
           />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* ========================================================= */}
-      {/* MOBILE CUSTOMER CARDS (< 768px): ZERO HORIZONTAL SCROLL   */}
-      {/* ========================================================= */}
-      <div className="block md:hidden space-y-3">
-        {filteredCustomers.length === 0 ? (
-          <div className="bg-white p-8 rounded-xl border border-[#E6E4DF] text-center text-xs text-slate-500 shadow-2xs">
-            No customers found matching your search.
+      {/* Customer Grid */}
+      {loading ? (
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center">
+          <Loader2 className="w-6 h-6 animate-spin text-[#6B1D2F] mx-auto mb-2" />
+          <div className="text-xs text-slate-500">Loading customer records from Turso database...</div>
+        </div>
+      ) : customers.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+            <Users className="w-6 h-6" />
           </div>
-        ) : (
-          filteredCustomers.map((c) => (
-            <div
-              key={c.id}
-              className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] space-y-2.5"
-            >
-              {/* Top Row: Name + ID */}
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-semibold text-slate-900 text-xs">{c.name}</h3>
-                  <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                    <MapPin className="w-3 h-3 text-[#6B1D2F]" />
-                    <span>
-                      {c.city}, Odisha • PIN {c.pincode}
-                    </span>
-                  </div>
-                </div>
-                <span className="font-mono text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-semibold border border-slate-200">
-                  {c.id}
-                </span>
-              </div>
-
-              {/* Contact strip with 1-tap call & WhatsApp */}
-              <div className="p-2.5 bg-[#FAF9F6] rounded-lg border border-[#EFECE6] flex items-center justify-between text-xs">
-                <span className="font-mono font-bold text-slate-800">+91 {c.phone}</span>
-                <div className="flex items-center gap-2">
-                  <a
-                    href={`tel:${c.phone}`}
-                    className="min-w-[36px] min-h-[36px] flex items-center justify-center bg-white border border-[#E6E4DF] rounded-md text-slate-700 hover:text-slate-900 shadow-2xs"
-                    title="Call"
-                  >
-                    <Phone className="w-3.5 h-3.5" />
-                  </a>
-                  <a
-                    href={`https://wa.me/91${c.whatsapp}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="min-w-[36px] min-h-[36px] flex items-center justify-center bg-emerald-50 border border-emerald-300 rounded-md text-emerald-800 hover:text-emerald-950 shadow-2xs"
-                    title="WhatsApp"
-                  >
-                    <MessageCircle className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-
-              {/* 3-Stat Metric Strip */}
-              <div className="grid grid-cols-3 gap-2 text-center text-xs p-2 bg-[#FAF9F6] border border-[#EFECE6] rounded-lg">
-                <div>
-                  <div className="text-[10px] text-slate-500 uppercase">Orders</div>
-                  <div className="font-bold text-slate-900 mt-0.5">{c.totalBookings}</div>
-                </div>
-                <div>
-                  <div className="text-[10px] text-slate-500 uppercase">Spent</div>
-                  <div className="font-bold text-[#6B1D2F] mt-0.5 truncate">{formatINR(c.totalSpent)}</div>
-                </div>
-                <div>
-                  <div className="text-[10px] text-slate-500 uppercase">Deposit Held</div>
-                  <div className="font-bold text-emerald-800 mt-0.5 truncate">
-                    {formatINR(c.refundableDepositsHeld)}
-                  </div>
-                </div>
-              </div>
-
-              {/* Details Trigger */}
-              <button
-                onClick={() => setSelectedCustomer(c)}
-                className="w-full min-h-[40px] flex items-center justify-center text-center text-xs font-semibold text-slate-700 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors shadow-2xs"
+          <div className="text-sm font-bold text-slate-800">No customers found</div>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            Try searching a different mobile number or add a new customer directly.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {customers.map((c) => {
+            const cleanPhone = getCleanPhone(c.phone);
+            return (
+              <div
+                key={c.id}
+                className="bg-white rounded-2xl border border-[#E6E4DF] p-4 shadow-2xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-3"
               >
-                View Full Profile &amp; History &rarr;
-              </button>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* ========================================================= */}
-      {/* DESKTOP CUSTOMERS GRID (>= 768px)                         */}
-      {/* ========================================================= */}
-      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredCustomers.map((c) => (
-          <div
-            key={c.id}
-            className="bg-white rounded-xl border border-[#E6E4DF] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-xs transition-all flex flex-col justify-between"
-          >
-            <div>
-              <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="font-semibold text-slate-900 text-sm">{c.name}</h3>
-                  <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                    <MapPin className="w-3 h-3 text-[#6B1D2F]" />
-                    <span>
-                      {c.city}, Odisha • PIN {c.pincode}
-                    </span>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="font-mono text-[10px] text-slate-400 font-semibold">
+                        {c.id}
+                      </span>
+                      <h3 className="font-serif font-bold text-base text-slate-900 leading-tight">
+                        {c.name}
+                      </h3>
+                    </div>
+
+                    {c.activeRentals > 0 && (
+                      <span className="text-[10px] bg-blue-50 text-blue-800 border border-blue-200 px-2 py-0.5 rounded-full font-semibold">
+                        {c.activeRentals} Active Rental{c.activeRentals > 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5 mt-3 text-xs text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <a href={`tel:${cleanPhone}`} className="font-mono font-semibold hover:text-[#6B1D2F]">
+                        +91 {cleanPhone}
+                      </a>
+                    </div>
+
+                    {c.address && (
+                      <div className="flex items-start gap-2">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                        <span className="line-clamp-1">
+                          {c.address}, {c.city}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <span className="font-mono text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">
-                  {c.id}
-                </span>
-              </div>
 
-              {/* Contact info */}
-              <div className="mt-3 p-2.5 bg-slate-50 rounded-lg border border-slate-200/80 flex items-center justify-between text-xs">
-                <span className="font-mono font-bold text-slate-800">+91 {c.phone}</span>
-                <div className="flex items-center gap-1.5">
-                  <a
-                    href={`tel:${c.phone}`}
-                    className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-md text-slate-600 hover:text-slate-900 shadow-2xs"
-                    title="Call"
-                  >
-                    <Phone className="w-3.5 h-3.5" />
-                  </a>
-                  <a
-                    href={`https://wa.me/91${c.whatsapp}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-8 h-8 flex items-center justify-center bg-emerald-50 border border-emerald-200 rounded-md text-emerald-700 hover:text-emerald-900 shadow-2xs"
-                    title="WhatsApp"
-                  >
-                    <MessageCircle className="w-3.5 h-3.5" />
-                  </a>
+                {/* Metrics Footer */}
+                <div className="pt-3 border-t border-slate-100 space-y-2.5">
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs bg-slate-50 p-2 rounded-xl">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Orders</span>
+                      <span className="font-bold text-slate-800 font-mono">{c.totalBookings}</span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Deposit</span>
+                      <span className="font-bold text-amber-900 font-mono">
+                        {formatINR(c.depositsHeld)}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Spent</span>
+                      <span className="font-bold text-slate-800 font-mono">
+                        {isAdmin && c.totalSpent !== undefined ? formatINR(c.totalSpent) : "—"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`https://wa.me/91${cleanPhone}?text=${encodeURIComponent(
+                        `Namaste ${c.name} ji, Barnali Fashion Bargarh se aapka swagat hai.`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl transition-colors flex items-center justify-center shrink-0"
+                      title="Open WhatsApp chat"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </a>
+
+                    <button
+                      onClick={() => setSelectedCustomer(c)}
+                      className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-center font-semibold rounded-xl text-xs transition-colors"
+                    >
+                      View Profile
+                    </button>
+
+                    <Link
+                      href={`/erp/bookings/new?customerId=${c.id}&name=${encodeURIComponent(
+                        c.name
+                      )}&phone=${cleanPhone}`}
+                      className="flex-1 py-1.5 bg-[#6B1D2F] hover:bg-[#521624] text-white text-center font-semibold rounded-xl text-xs transition-colors"
+                    >
+                      New Booking
+                    </Link>
+                  </div>
                 </div>
               </div>
+            );
+          })}
+        </div>
+      )}
 
-              {c.notes && (
-                <p className="text-[11px] text-slate-500 mt-2 italic bg-slate-50 p-2 rounded-lg">
-                  &ldquo;{c.notes}&rdquo;
-                </p>
-              )}
-            </div>
-
-            {/* Metrics Footer */}
-            <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center text-xs">
-              <div>
-                <div className="text-[10px] text-slate-400">Total Orders</div>
-                <div className="font-bold text-slate-900 mt-0.5">{c.totalBookings}</div>
-              </div>
-              <div>
-                <div className="text-[10px] text-slate-400">Total Spent</div>
-                <div className="font-bold text-[#6B1D2F] mt-0.5 truncate">{formatINR(c.totalSpent)}</div>
-              </div>
-              <div>
-                <div className="text-[10px] text-slate-400">Deposit Held</div>
-                <div className="font-bold text-emerald-700 mt-0.5 truncate">
-                  {formatINR(c.refundableDepositsHeld)}
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setSelectedCustomer(c)}
-              className="mt-3.5 w-full min-h-[38px] flex items-center justify-center text-center text-xs font-semibold text-slate-700 bg-[#FAF9F6] border border-[#E6E4DF] hover:bg-slate-100 rounded-lg transition-colors shadow-2xs"
-            >
-              View Full Profile &amp; History &rarr;
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {/* ========================================================= */}
-      {/* FULL CUSTOMER DETAILS BOTTOM SHEET                        */}
-      {/* ========================================================= */}
+      {/* Customer Detail Bottom Sheet / Modal */}
       {selectedCustomer && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-2xl border border-slate-200 max-w-lg w-full p-4 sm:p-6 text-xs max-h-[88vh] overflow-y-auto animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
-            <div className="sm:hidden w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3" />
-
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm text-slate-900">
-                  {selectedCustomer.name}
-                </span>
-                <span className="font-mono text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">
+              <div>
+                <span className="font-mono text-xs text-[#6B1D2F] font-bold">
                   {selectedCustomer.id}
                 </span>
+                <h3 className="font-serif font-bold text-lg text-slate-900">
+                  {selectedCustomer.name}
+                </h3>
               </div>
               <button
                 onClick={() => setSelectedCustomer(null)}
-                className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-lg"
+                className="text-slate-400 hover:text-slate-600"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="mt-3 space-y-3">
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60 space-y-1">
-                <span className="text-[10px] text-slate-400 uppercase font-semibold">Address</span>
-                <div className="text-slate-800 font-medium">
-                  {selectedCustomer.address || "LIC Office Road vicinity"}
+            <div className="space-y-3 text-xs">
+              <div className="p-3 bg-slate-50 rounded-xl space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Phone:</span>
+                  <a
+                    href={`tel:${selectedCustomer.phone}`}
+                    className="font-mono font-bold text-[#6B1D2F]"
+                  >
+                    +91 {getCleanPhone(selectedCustomer.phone)}
+                  </a>
                 </div>
-                <div className="text-slate-500 text-[11px]">
-                  {selectedCustomer.city}, Odisha • PIN {selectedCustomer.pincode}
+                {selectedCustomer.address && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500">Address:</span>
+                    <span className="font-medium text-slate-800">
+                      {selectedCustomer.address}, {selectedCustomer.city} {selectedCustomer.pincode}
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Member Since:</span>
+                  <span className="font-mono text-slate-700">
+                    {formatDate(selectedCustomer.createdAt)}
+                  </span>
                 </div>
               </div>
 
-              {/* Quick Contact Buttons */}
-              <div className="grid grid-cols-2 gap-2">
-                <a
-                  href={`tel:${selectedCustomer.phone}`}
-                  className="min-h-[42px] py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg font-medium flex items-center justify-center gap-1.5 transition-colors"
-                >
-                  <Phone className="w-3.5 h-3.5" />
-                  <span>Call +91 {selectedCustomer.phone}</span>
-                </a>
-                <a
-                  href={`https://wa.me/91${selectedCustomer.whatsapp}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="min-h-[42px] py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg font-medium flex items-center justify-center gap-1.5 transition-colors border border-emerald-200"
-                >
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  <span>WhatsApp Chat</span>
-                </a>
-              </div>
+              <div className="grid grid-cols-2 gap-2 text-center">
+                <div className="p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl">
+                  <span className="text-[10px] text-amber-800 font-bold uppercase">
+                    Security Deposit Held
+                  </span>
+                  <div className="font-mono font-bold text-base text-amber-950 mt-0.5">
+                    {formatINR(selectedCustomer.depositsHeld)}
+                  </div>
+                </div>
 
-              {/* Financial Summary */}
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <div className="text-[10px] text-slate-400">Orders</div>
-                  <div className="font-bold text-slate-900 mt-0.5">
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase">
+                    Total Bookings
+                  </span>
+                  <div className="font-mono font-bold text-base text-slate-800 mt-0.5">
                     {selectedCustomer.totalBookings}
                   </div>
                 </div>
-                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <div className="text-[10px] text-slate-400">Total Spent</div>
-                  <div className="font-bold text-[#6B1D2F] mt-0.5">
-                    {formatINR(selectedCustomer.totalSpent)}
-                  </div>
-                </div>
-                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <div className="text-[10px] text-slate-400">Deposit Held</div>
-                  <div className="font-bold text-emerald-700 mt-0.5">
-                    {formatINR(selectedCustomer.refundableDepositsHeld)}
-                  </div>
-                </div>
               </div>
 
-              {/* Client Notes */}
               {selectedCustomer.notes && (
-                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <span className="text-[10px] text-slate-400 font-semibold uppercase">Notes</span>
-                  <p className="text-slate-700 mt-0.5">{selectedCustomer.notes}</p>
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Customer Notes</span>
+                  <p className="text-slate-700 mt-0.5 bg-[#FAF9F6] p-2.5 rounded-xl border border-slate-200/60">
+                    {selectedCustomer.notes}
+                  </p>
                 </div>
               )}
+            </div>
 
-              {/* Actions */}
-              <div className="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedCustomer(null)}
-                  className="min-h-[40px] px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
-                >
-                  Close
-                </button>
-                <Link
-                  href={`/erp/bookings?new=1`}
-                  className="min-h-[40px] inline-flex items-center px-4 py-2 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg font-semibold shadow-xs"
-                >
-                  New Order for Client
-                </Link>
-              </div>
+            <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+              <Link
+                href={`/erp/bookings?q=${selectedCustomer.phone}`}
+                onClick={() => setSelectedCustomer(null)}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded-xl text-center text-xs"
+              >
+                Booking History
+              </Link>
+              <Link
+                href={`/erp/bookings/new?customerId=${selectedCustomer.id}&name=${encodeURIComponent(
+                  selectedCustomer.name
+                )}&phone=${getCleanPhone(selectedCustomer.phone)}`}
+                onClick={() => setSelectedCustomer(null)}
+                className="flex-1 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-semibold rounded-xl text-center text-xs"
+              >
+                Create Booking
+              </Link>
             </div>
           </div>
         </div>
       )}
 
-      {/* --- ADD CUSTOMER MODAL --- */}
+      {/* Add New Customer Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-2xl border border-slate-200 max-w-lg w-full p-4 sm:p-6 text-xs max-h-[88vh] overflow-y-auto animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
-            <div className="sm:hidden w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3" />
-
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <span className="font-semibold text-sm text-slate-900">Add Customer Profile</span>
+              <div>
+                <h3 className="font-serif font-bold text-slate-900 text-base">Register New Customer</h3>
+                <p className="text-[11px] text-slate-500">Saves customer profile into live database</p>
+              </div>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-lg"
+                className="text-slate-400 hover:text-slate-600"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleAddCustomer} className="mt-4 space-y-3">
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleAddCustomer} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                  Full Name *
+                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  Customer Full Name *
                 </label>
                 <input
                   type="text"
-                  required
-                  placeholder="e.g. Minati Meher"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-900"
+                  placeholder="e.g. Smt. Priyadarshini Meher"
+                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium text-slate-800"
+                  required
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                    Mobile / WhatsApp *
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Phone Number (10-Digit) *
                   </label>
                   <input
                     type="tel"
-                    required
-                    placeholder="10-digit number"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg font-mono font-bold"
+                    placeholder="9876543210"
+                    maxLength={10}
+                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-semibold text-slate-800"
+                    required
                   />
                 </div>
+
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                    City / Town *
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    WhatsApp Number
                   </label>
                   <input
-                    type="text"
-                    required
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg font-medium"
+                    type="tel"
+                    value={whatsapp}
+                    onChange={(e) => setWhatsapp(e.target.value)}
+                    placeholder="Same as phone"
+                    maxLength={10}
+                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono text-slate-800"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                  Street Address / Landmark
+                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  Local Address / Landmark
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Near Bhatli Chowk, Bargarh"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg"
+                  placeholder="e.g. Near Bhatli Chowk, Ward 4"
+                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    City / Town
+                  </label>
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    PIN Code
+                  </label>
+                  <input
+                    type="text"
+                    value={pincode}
+                    onChange={(e) => setPincode(e.target.value)}
+                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium font-mono"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                  Notes
+                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  Customer Notes (Optional)
                 </label>
-                <textarea
-                  rows={2}
-                  placeholder="e.g. Prefers bridal red, daughter getting married in Dec"
+                <input
+                  type="text"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg"
+                  placeholder="e.g. VIP client, preferred size L"
+                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
                 />
               </div>
 
-              <div className="pt-2 border-t border-slate-100 flex justify-end gap-2">
+              <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="min-h-[40px] px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="min-h-[40px] px-4 py-2 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg font-semibold shadow-xs"
+                  disabled={saving}
+                  className="flex-1 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white rounded-xl font-semibold shadow-xs flex items-center justify-center gap-1.5"
                 >
-                  Save Profile
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Save Customer</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>
