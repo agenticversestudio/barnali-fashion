@@ -20,6 +20,7 @@ import { formatINR, formatDate } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { BookingDto, PayMode } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
+import { PhotoCapture } from "@/components/operations/PhotoCapture";
 
 function PickupOperationsContent() {
   const { user } = useAuth();
@@ -32,6 +33,10 @@ function PickupOperationsContent() {
   const [accessoriesChecked, setAccessoriesChecked] = useState(true);
   const [conditionChecked, setConditionChecked] = useState(true);
   const [balancePayMode, setBalancePayMode] = useState<PayMode>("CASH");
+  const [handoverCondition, setHandoverCondition] = useState(
+    "Fitting checked with client, zari intact, wooden hanger & dust cover bag verified"
+  );
+  const [photoIds, setPhotoIds] = useState<string[]>([]);
 
   const loadPickups = useCallback(async () => {
     setLoading(true);
@@ -74,11 +79,13 @@ function PickupOperationsContent() {
       }
 
       await bookingsApi.pickup(selectedBooking.id, {
-        handoverCondition: "Accessories and condition verified at store counter",
+        handoverCondition: handoverCondition.trim() || undefined,
+        photoIds: photoIds.length > 0 ? photoIds : undefined,
         payments: payments.length > 0 ? payments : undefined,
       });
 
       alert(`Handover completed! Garments are now OUT ON RENT to ${selectedBooking.customer?.name}.`);
+      setPhotoIds([]);
       await loadPickups();
     } catch (err: any) {
       alert(err?.message || "Failed to complete pickup handover");
@@ -124,7 +131,10 @@ function PickupOperationsContent() {
                 {bookings.map((b) => (
                   <div
                     key={b.id}
-                    onClick={() => setSelectedBooking(b)}
+                    onClick={() => {
+                      setSelectedBooking(b);
+                      setPhotoIds([]);
+                    }}
                     className={`p-3 rounded-xl border cursor-pointer transition-all text-xs ${
                       selectedBooking?.id === b.id
                         ? "bg-[#FAF5EB] border-[#B89558] shadow-xs"
@@ -250,6 +260,37 @@ function PickupOperationsContent() {
                   )}
                 </div>
 
+                {/* Handover Condition Remarks & Evidence Photos */}
+                <div className="space-y-3 border-t border-[#EFE9DD] pt-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-800 uppercase mb-1">
+                      Handover Condition Remarks *
+                    </label>
+                    <input
+                      type="text"
+                      value={handoverCondition}
+                      onChange={(e) => setHandoverCondition(e.target.value)}
+                      placeholder="e.g. Small stain on left sleeve, zari intact, hanger & bag given"
+                      className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-medium text-xs text-gray-900 focus:outline-hidden focus:border-[#4B1835]"
+                    />
+                    <p className="text-[10px] text-gray-500 mt-1">
+                      Inspect garment with customer and note any pre-existing marks, loose threads, or accessories handed over.
+                    </p>
+                  </div>
+
+                  <div className="p-3 bg-[#FAF5EB] rounded-xl border border-[#E8DFD1]">
+                    <PhotoCapture
+                      kind="HANDOVER"
+                      bookingId={selectedBooking.id}
+                      photoIds={photoIds}
+                      onChangePhotoIds={setPhotoIds}
+                      label="Handover Verification Photos"
+                      sublabel="Photograph any pre-existing marks, accessories, or fitting before client leaves (auto-compressed <400KB)"
+                      disabled={submitting}
+                    />
+                  </div>
+                </div>
+
                 {/* Physical Checks */}
                 <div className="space-y-2 border-t border-[#EFE9DD] pt-3">
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -301,7 +342,7 @@ function PickupOperationsContent() {
                       ) : (
                         <CheckCircle2 className="w-4 h-4 text-[#D4B67F]" />
                       )}
-                      <span>Confirm Handover &amp; Issue</span>
+                      <span>Confirm Pickup</span>
                     </button>
                   </div>
                 </div>

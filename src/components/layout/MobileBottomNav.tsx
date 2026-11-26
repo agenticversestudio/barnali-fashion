@@ -42,7 +42,7 @@ export function MobileBottomNav() {
       badge: alertCount > 0 ? alertCount : undefined,
     },
     {
-      label: "Booking",
+      label: "Orders",
       sublabel: "5-Step Counter",
       href: "/erp/bookings",
       icon: ClipboardList,

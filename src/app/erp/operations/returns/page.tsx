@@ -22,6 +22,7 @@ import { formatINR, formatDate } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { BookingDto, NextAction, Settlement } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
+import { PhotoCapture } from "@/components/operations/PhotoCapture";
 
 function ReturnsCounterContent() {
   const { user } = useAuth();
@@ -43,6 +44,7 @@ function ReturnsCounterContent() {
   const [vendorName, setVendorName] = useState("Royal Dry Cleaners, Bargarh");
   const [refundPayMode, setRefundPayMode] = useState<"CASH" | "UPI" | "BANK_TRANSFER">("CASH");
   const [settlementResult, setSettlementResult] = useState<Settlement | null>(null);
+  const [photoIds, setPhotoIds] = useState<string[]>([]);
 
   useEffect(() => {
     setActualReturnDate(new Date().toISOString().split("T")[0]);
@@ -91,9 +93,11 @@ function ReturnsCounterContent() {
           pay: true,
           mode: refundPayMode,
         },
+        photoIds: photoIds.length > 0 ? photoIds : undefined,
       });
 
       setSettlementResult(res.settlement);
+      setPhotoIds([]);
       alert(
         `Return processed successfully! Late Fee: ${formatINR(res.settlement.lateFee)} (${res.settlement.lateDays} days). Net Refund: ${formatINR(res.settlement.refund)}. Deposit Status: ${res.settlement.depositStatus}.`
       );
@@ -147,6 +151,7 @@ function ReturnsCounterContent() {
                     onClick={() => {
                       setSelectedBooking(b);
                       setSettlementResult(null);
+                      setPhotoIds([]);
                     }}
                     className={`p-3 rounded-xl border cursor-pointer transition-all text-xs ${
                       selectedBooking?.id === b.id
@@ -296,6 +301,19 @@ function ReturnsCounterContent() {
                         className="w-full p-2 bg-white border border-[#E8DFD1] rounded-lg"
                       />
                     </div>
+                  </div>
+
+                  {/* Damage & Defect Evidence Photos */}
+                  <div className="p-3 bg-white rounded-xl border border-[#E8DFD1] mt-2">
+                    <PhotoCapture
+                      kind="DAMAGE"
+                      bookingId={selectedBooking.id}
+                      photoIds={photoIds}
+                      onChangePhotoIds={setPhotoIds}
+                      label="Damage / Defect Evidence Photos"
+                      sublabel="Take photos of stains, tears, missing latkans, or zip damage before settling deposit (auto-compressed <400KB)"
+                      disabled={submitting}
+                    />
                   </div>
                 </div>
 

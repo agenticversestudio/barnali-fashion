@@ -51,7 +51,7 @@ export function ErpSidebar() {
       badge: alertCount > 0 ? alertCount : undefined,
     },
     {
-      label: "Orders & Billing",
+      label: "Orders",
       href: "/erp/bookings",
       icon: ClipboardList,
     },

@@ -29,6 +29,7 @@ import { formatINR, formatDate } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { BookingDto, BookingStatus, PayMode, Settlement, NextAction } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
+import { PhotoCapture } from "@/components/operations/PhotoCapture";
 
 function BookingsContent() {
   const router = useRouter();
@@ -48,6 +49,7 @@ function BookingsContent() {
   const [handoverCondition, setHandoverCondition] = useState("Excellent condition, fitting verified");
   const [handoverPayMode, setHandoverPayMode] = useState<PayMode>("CASH");
   const [submittingHandover, setSubmittingHandover] = useState(false);
+  const [handoverPhotoIds, setHandoverPhotoIds] = useState<string[]>([]);
 
   // --- RETURN & SETTLEMENT MODAL STATE ---
   const [returnBooking, setReturnBooking] = useState<BookingDto | null>(null);
@@ -64,6 +66,7 @@ function BookingsContent() {
   const [refundPayMode, setRefundPayMode] = useState<"CASH" | "UPI" | "BANK_TRANSFER">("CASH");
   const [settlementResult, setSettlementResult] = useState<Settlement | null>(null);
   const [submittingReturn, setSubmittingReturn] = useState(false);
+  const [returnPhotoIds, setReturnPhotoIds] = useState<string[]>([]);
 
   // WhatsApp Slip Preview Modal
   const [whatsappReceipt, setWhatsappReceipt] = useState<string | null>(null);
@@ -100,7 +103,7 @@ function BookingsContent() {
       setStatusFilter("CONFIRMED");
     }
     if (orderIdParam) {
-      bookingsApi.getById(orderIdParam).then((b) => setSelectedOrder(b)).catch(() => {});
+      bookingsApi.getById(orderIdParam).then((b) => setSelectedOrder(b)).catch(() => { });
     }
   }, [searchParams]);
 
@@ -113,20 +116,22 @@ function BookingsContent() {
       const payments =
         handoverBooking.balanceDue > 0
           ? [
-              {
-                kind: "BALANCE" as const,
-                amount: handoverBooking.balanceDue,
-                mode: handoverPayMode,
-                note: "Balance collected at store handover",
-              },
-            ]
+            {
+              kind: "BALANCE" as const,
+              amount: handoverBooking.balanceDue,
+              mode: handoverPayMode,
+              note: "Balance collected at store handover",
+            },
+          ]
           : undefined;
 
       const updated = await bookingsApi.pickup(handoverBooking.id, {
         handoverCondition,
+        photoIds: handoverPhotoIds.length > 0 ? handoverPhotoIds : undefined,
         payments,
       });
 
+      setHandoverPhotoIds([]);
       setHandoverBooking(null);
       await loadBookings();
 
@@ -175,8 +180,10 @@ function BookingsContent() {
           pay: true,
           mode: refundPayMode,
         },
+        photoIds: returnPhotoIds.length > 0 ? returnPhotoIds : undefined,
       });
 
+      setReturnPhotoIds([]);
       setSettlementResult(res.settlement);
       setReturnBooking(null);
       await loadBookings();
@@ -280,11 +287,10 @@ function BookingsContent() {
               <button
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${
-                  statusFilter === tab.id
-                    ? "bg-[#6B1D2F] text-white font-semibold"
-                    : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80"
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${statusFilter === tab.id
+                  ? "bg-[#6B1D2F] text-white font-semibold"
+                  : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80"
+                  }`}
               >
                 {tab.label}
               </button>
@@ -402,6 +408,7 @@ function BookingsContent() {
                             <button
                               onClick={() => {
                                 setHandoverBooking(b);
+                                setHandoverPhotoIds([]);
                               }}
                               className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-[11px] shadow-xs"
                             >
@@ -413,6 +420,7 @@ function BookingsContent() {
                             <button
                               onClick={() => {
                                 setReturnBooking(b);
+                                setReturnPhotoIds([]);
                                 setActualReturnDate(new Date().toISOString().split("T")[0]);
                               }}
                               className="px-2.5 py-1.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-semibold rounded-lg text-[11px] shadow-xs"
@@ -501,6 +509,19 @@ function BookingsContent() {
                   className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
                 />
               </div>
+
+              {/* Handover Photos */}
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <PhotoCapture
+                  kind="HANDOVER"
+                  bookingId={handoverBooking.id}
+                  photoIds={handoverPhotoIds}
+                  onChangePhotoIds={setHandoverPhotoIds}
+                  label="Handover Photos (Optional)"
+                  sublabel="Document any pre-existing marks or accessories before client leaves (auto-compressed <400KB)"
+                  disabled={submittingHandover}
+                />
+              </div>
             </div>
 
             <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
@@ -516,7 +537,7 @@ function BookingsContent() {
                 className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs flex items-center justify-center gap-1.5"
               >
                 {submittingHandover ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                <span>Confirm Handover</span>
+                <span>Confirm Pickup</span>
               </button>
             </div>
           </div>
@@ -651,6 +672,19 @@ function BookingsContent() {
                 </select>
               </div>
 
+              {/* Damage & Defect Photos */}
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <PhotoCapture
+                  kind="DAMAGE"
+                  bookingId={returnBooking.id}
+                  photoIds={returnPhotoIds}
+                  onChangePhotoIds={setReturnPhotoIds}
+                  label="Damage / Defect Evidence Photos (Optional)"
+                  sublabel="Photograph stains, tears or missing accessories for settlement record (auto-compressed <400KB)"
+                  disabled={submittingReturn}
+                />
+              </div>
+
               <div className="p-3 bg-amber-50/60 border border-amber-200/80 rounded-xl text-amber-900 text-[11px] space-y-1">
                 <div className="font-bold">Automated Server Settlement Engine:</div>
                 <div>• Late fees are calculated at 15% of rental per day by server.</div>
@@ -671,7 +705,7 @@ function BookingsContent() {
                 className="flex-1 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-bold rounded-xl text-xs shadow-xs flex items-center justify-center gap-1.5"
               >
                 {submittingReturn ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                <span>Settle &amp; Release Garments</span>
+                <span>Settle Deposit &amp; Complete Return</span>
               </button>
             </div>
           </div>

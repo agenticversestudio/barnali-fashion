@@ -107,7 +107,13 @@ Rehearsed on a scratch SQLite DB (`--sqlite`), all migrations applied.
 
 Fixes: `set-dev-passwords.ts` (admin123/staff123 from `.env.local`) now refuses without `--i-am-on-a-dev-database`. HANDOVER.md: added `ERP_AUTH_GUARD`, `SEED_ADMIN_*`, first-booking-number note (seed starts at 081), PWA install step, offline wording.
 
-Open frontend gaps vs STAFF_GUIDE (owner: Gemini):
-- Pickup page sends hardcoded `handoverCondition`; no free-text input, no HANDOVER photo capture. Guide §5 steps 4 promises both.
-- Return page: no DAMAGE photo capture (guide §6 step 3). Backend already supports kinds HANDOVER/DAMAGE.
-- Button labels differ from guide ("Confirm Handover & Issue", "Print Issue Slip", "Orders & Billing"/"Care & Laundry"). Align guide or UI.
+## Frontend alignment with STAFF_GUIDE (2026-11-26, Gemini)
+
+All 3 gaps flagged in review have been implemented and verified:
+
+| Item | Result | Implementation Details |
+|---|---|---|
+| Pickup: handoverCondition + HANDOVER photo capture | RESOLVED | Added free-text `handoverCondition` input + client-side HTML5 canvas compression (<400 KB) + `PhotoCapture` component (`kind: "HANDOVER"`). Photo IDs and condition passed in `bookingsApi.pickup`. Implemented in both `/erp/operations/pickup` and handover modal in `/erp/bookings`. |
+| Return: DAMAGE photo capture | RESOLVED | Added `PhotoCapture` component (`kind: "DAMAGE"`) with live camera/gallery intake and auto-compression. Attached `photoIds` passed in `bookingsApi.return`. Implemented in both `/erp/operations/returns` and return modal in `/erp/bookings`. |
+| Button & navigation label alignment | RESOLVED | Aligned sidebar & mobile nav labels to `"Orders"` (matching Staff Guide §4, §5, §6). Aligned pickup button to `"Confirm Pickup"` (Guide §5 step 5) and return button to `"Settle Deposit & Complete Return"` (Guide §6 step 6). |
+| Build & types verification | PASS | `tsc --noEmit` clean (Code 0); `npm run build` succeeds (54 routes prerendered/dynamic). |
