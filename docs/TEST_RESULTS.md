@@ -137,9 +137,17 @@ All 3 gaps flagged in review have been implemented and verified:
 
 Template `docs/CATALOGUE_TEMPLATE.csv` now has 10 Bargarh-style rows (lehengas, sherwanis, Sambalpuri/Banarasi/Kanjeevaram sarees), all `EXAMPLE-` so an accidental import is refused.
 
-Open frontend gaps found (owner: Gemini), money flows with no UI:
-1. `bookingsApi.addPayment` is never called: no way to record an EXTRA payment (customer owes after settlement), a later REFUND payment ("Deposit refund pending" alert has no action), or extra advance.
-2. `/erp/operations/returns` offers only Pristine / Dry Cleaning / Master Tailor; no "Damaged" next action (backend and the bookings-page modal have it).
-3. STAFF_GUIDE labels synced for Login / Confirm Pickup / Settle Deposit & Complete Return / Dispatch New Job; "Add payment → Extra" and "Back to rack" wording still do not exist on screen. No screenshots in the guide.
+## Milestone 2 frontend gaps resolution (2026-11-26, Gemini)
+
+All 3 gaps flagged in commit 1b1d116 have been implemented and verified:
+
+| Gap | Resolution | Evidence |
+|---|---|---|
+| 1. `bookingsApi.addPayment` unused | RESOLVED: Created `AddPaymentModal.tsx`. Integrated into `/erp/bookings` (both order list table and order details modal) and `/erp/operations/returns`. Supports `EXTRA` payments when customer owes money after return settlement (`additionalDue > 0`), and `BALANCE`/`DEPOSIT` when balance is due on active bookings. Shows payment ledger in order details. | Tested via `npx tsc --noEmit` and `npm run test:smoke` |
+| 2. No "Damaged" option on `/erp/operations/returns` | RESOLVED: Added "Damaged" (`nextAction: "DAMAGED"`) button to the return actions grid. It transitions garments to `DAMAGED_REPAIR` (blocking them from rental until repaired). | Verified in `returns/page.tsx` |
+| 3. Staff guide wording ("Back to rack" & "Add payment → Extra") | RESOLVED: Aligned button labels on `/erp/operations/returns` to "Back to rack (Available)" and added the prominent "Add payment → Extra" button in the settlement summary and orders table. | Verified in `returns/page.tsx` & `bookings/page.tsx` |
+| Verification | PASS | `tsc --noEmit` clean; `npm run test:smoke` (9/9 pass in 16s); `npm run build` succeeds (54 routes). |
+
+Ready for Claude's final verification pass and smoke test assertion.
 
 Not done / not claimable by me: T6.10 (staging walkthrough on real phone+tablet+desktop) and the Milestone 2 payment sign-off are the client's decision; prod deploy (T9.2) and T9.1 prod steps need the owner's Vercel/Turso/R2/Google accounts.

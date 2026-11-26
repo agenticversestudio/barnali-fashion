@@ -30,6 +30,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { BookingDto, BookingStatus, PayMode, Settlement, NextAction } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 import { PhotoCapture } from "@/components/operations/PhotoCapture";
+import { AddPaymentModal } from "@/components/operations/AddPaymentModal";
 
 function BookingsContent() {
   const router = useRouter();
@@ -70,6 +71,10 @@ function BookingsContent() {
 
   // WhatsApp Slip Preview Modal
   const [whatsappReceipt, setWhatsappReceipt] = useState<string | null>(null);
+
+  // Add Payment Modal State
+  const [paymentModalBooking, setPaymentModalBooking] = useState<BookingDto | null>(null);
+  const [paymentModalKind, setPaymentModalKind] = useState<"BALANCE" | "DEPOSIT" | "EXTRA">("BALANCE");
 
   const loadBookings = useCallback(async () => {
     setLoading(true);
@@ -426,6 +431,30 @@ function BookingsContent() {
                               className="px-2.5 py-1.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-semibold rounded-lg text-[11px] shadow-xs"
                             >
                               Return &amp; Settle
+                            </button>
+                          )}
+
+                          {b.status === "COMPLETED" && b.additionalDue > 0 && (
+                            <button
+                              onClick={() => {
+                                setPaymentModalBooking(b);
+                                setPaymentModalKind("EXTRA");
+                              }}
+                              className="px-2.5 py-1.5 bg-rose-700 hover:bg-rose-800 text-white font-semibold rounded-lg text-[11px] shadow-xs"
+                            >
+                              Add payment → Extra
+                            </button>
+                          )}
+
+                          {(isConfirmed || isOut) && b.balanceDue > 0 && (
+                            <button
+                              onClick={() => {
+                                setPaymentModalBooking(b);
+                                setPaymentModalKind("BALANCE");
+                              }}
+                              className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg text-[11px] shadow-xs"
+                            >
+                              Add Payment
                             </button>
                           )}
 
@@ -815,9 +844,85 @@ function BookingsContent() {
                 </div>
                 <div>
                   <span className="text-slate-400 text-[10px] block">Balance Due</span>
-                  <span className="font-mono font-bold text-rose-800">{formatINR(selectedOrder.balanceDue)}</span>
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono font-bold text-rose-800">{formatINR(selectedOrder.balanceDue)}</span>
+                    {(selectedOrder.status === "CONFIRMED" || selectedOrder.status === "OUT_ON_RENT") && selectedOrder.balanceDue > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPaymentModalBooking(selectedOrder);
+                          setPaymentModalKind("BALANCE");
+                        }}
+                        className="px-2 py-0.5 bg-amber-600 hover:bg-amber-700 text-white rounded font-bold text-[10px] shadow-xs cursor-pointer"
+                      >
+                        Add Payment
+                      </button>
+                    )}
+                  </div>
                 </div>
+
+                {selectedOrder.additionalDue > 0 && (
+                  <div className="col-span-2 p-2.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center justify-between mt-1">
+                    <div>
+                      <span className="text-rose-900 font-bold block text-xs">Amount Client Still Owes</span>
+                      <span className="font-mono font-bold text-rose-700 text-sm">
+                        {formatINR(selectedOrder.additionalDue)}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentModalBooking(selectedOrder);
+                        setPaymentModalKind("EXTRA");
+                      }}
+                      className="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white rounded-lg font-bold text-xs shadow-xs cursor-pointer"
+                    >
+                      Add payment → Extra
+                    </button>
+                  </div>
+                )}
+
+                {selectedOrder.depositStatus === "HELD" && selectedOrder.refundAmount > 0 && (
+                  <div className="col-span-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl mt-1">
+                    <span className="text-amber-900 font-bold block text-xs">Deposit Refund Pending</span>
+                    <span className="text-[11px] text-amber-800">
+                      Refund of <strong className="font-mono">{formatINR(selectedOrder.refundAmount)}</strong> is held in shop vault awaiting handover to customer.
+                    </span>
+                  </div>
+                )}
               </div>
+
+              {/* Payment Ledger / History */}
+              {selectedOrder.payments && selectedOrder.payments.length > 0 && (
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
+                    Payment Ledger ({selectedOrder.payments.length})
+                  </span>
+                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl bg-white p-2 text-[11px]">
+                    {selectedOrder.payments.map((p) => (
+                      <div key={p.id} className="flex items-center justify-between py-1 font-mono">
+                        <div>
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold mr-2 ${
+                            p.kind === "EXTRA"
+                              ? "bg-rose-100 text-rose-800"
+                              : p.kind === "REFUND"
+                              ? "bg-purple-100 text-purple-800"
+                              : "bg-emerald-100 text-emerald-800"
+                          }`}>
+                            {p.kind}
+                          </span>
+                          <span className="text-slate-600">{p.mode}</span>
+                          {p.note && <span className="text-slate-400 text-[10px] ml-1">({p.note})</span>}
+                        </div>
+                        <div className="text-right">
+                          <span className="font-bold text-slate-900">{formatINR(p.amount)}</span>
+                          <span className="text-slate-400 text-[9px] block">{p.paidOn}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center justify-between pt-3 border-t border-slate-100">
@@ -840,6 +945,26 @@ function BookingsContent() {
             </div>
           </div>
         </div>
+      )}
+      {/* Add Payment Modal */}
+      {paymentModalBooking && (
+        <AddPaymentModal
+          isOpen={Boolean(paymentModalBooking)}
+          onClose={() => setPaymentModalBooking(null)}
+          onSuccess={(updated) => {
+            loadBookings();
+            if (selectedOrder?.id === updated.id) {
+              setSelectedOrder(updated);
+            }
+          }}
+          booking={paymentModalBooking}
+          initialKind={paymentModalKind}
+          initialAmount={
+            paymentModalKind === "EXTRA"
+              ? paymentModalBooking.additionalDue
+              : paymentModalBooking.balanceDue
+          }
+        />
       )}
     </div>
   );

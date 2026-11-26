@@ -23,6 +23,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { BookingDto, NextAction, Settlement } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 import { PhotoCapture } from "@/components/operations/PhotoCapture";
+import { AddPaymentModal } from "@/components/operations/AddPaymentModal";
 
 function ReturnsCounterContent() {
   const { user } = useAuth();
@@ -45,6 +46,8 @@ function ReturnsCounterContent() {
   const [refundPayMode, setRefundPayMode] = useState<"CASH" | "UPI" | "BANK_TRANSFER">("CASH");
   const [settlementResult, setSettlementResult] = useState<Settlement | null>(null);
   const [photoIds, setPhotoIds] = useState<string[]>([]);
+  const [extraPaymentBooking, setExtraPaymentBooking] = useState<BookingDto | null>(null);
+  const [extraPaymentAmount, setExtraPaymentAmount] = useState<number>(0);
 
   useEffect(() => {
     setActualReturnDate(new Date().toISOString().split("T")[0]);
@@ -80,7 +83,7 @@ function ReturnsCounterContent() {
       const itemsPayload = selectedBooking.items.map((item) => ({
         garmentId: item.garmentId,
         nextAction,
-        vendorName: nextAction === "DRY_CLEAN" ? vendorName : undefined,
+        vendorName: nextAction === "DRY_CLEAN" || nextAction === "REPAIR" ? vendorName : undefined,
       }));
 
       const res = await bookingsApi.return(selectedBooking.id, {
@@ -98,6 +101,7 @@ function ReturnsCounterContent() {
 
       setSettlementResult(res.settlement);
       setPhotoIds([]);
+      setSelectedBooking(res.booking);
       alert(
         `Return processed successfully! Late Fee: ${formatINR(res.settlement.lateFee)} (${res.settlement.lateDays} days). Net Refund: ${formatINR(res.settlement.refund)}. Deposit Status: ${res.settlement.depositStatus}.`
       );
@@ -386,9 +390,29 @@ function ReturnsCounterContent() {
                         <strong className="text-emerald-700 font-mono text-sm">{formatINR(settlementResult.refund)}</strong>
                       </div>
                       {settlementResult.additionalDue > 0 && (
-                        <div className="flex justify-between text-xs text-rose-700 font-bold">
-                          <span>Amount Client Still Owes:</span>
-                          <strong className="font-mono">{formatINR(settlementResult.additionalDue)}</strong>
+                        <div className="pt-2 border-t border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div>
+                            <div className="text-xs text-rose-800 font-bold">
+                              Amount Client Still Owes: <span className="font-mono text-sm">{formatINR(settlementResult.additionalDue)}</span>
+                            </div>
+                            <p className="text-[10px] text-gray-500">Collect difference from client and record immediately</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (selectedBooking) {
+                                setExtraPaymentBooking({
+                                  ...selectedBooking,
+                                  status: "COMPLETED",
+                                  additionalDue: settlementResult.additionalDue,
+                                });
+                                setExtraPaymentAmount(settlementResult.additionalDue);
+                              }
+                            }}
+                            className="px-3.5 py-1.5 bg-rose-700 hover:bg-rose-800 text-white rounded-lg font-bold text-xs shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                          >
+                            <span>Add payment → Extra</span>
+                          </button>
                         </div>
                       )}
                     </div>
@@ -400,7 +424,7 @@ function ReturnsCounterContent() {
                   <label className="block text-[10px] font-bold text-gray-700 uppercase">
                     Route Garment to Next Operational State *
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                     <button
                       type="button"
                       onClick={() => setNextAction("AVAILABLE")}
@@ -411,12 +435,16 @@ function ReturnsCounterContent() {
                       }`}
                     >
                       <CheckCircle2 className="w-4 h-4 mx-auto mb-1 text-[#D4B67F]" />
-                      <span>Pristine (AVAILABLE)</span>
+                      <span className="block text-xs font-bold leading-tight">Back to rack</span>
+                      <span className="text-[10px] opacity-80">(Available)</span>
                     </button>
 
                     <button
                       type="button"
-                      onClick={() => setNextAction("DRY_CLEAN")}
+                      onClick={() => {
+                        setNextAction("DRY_CLEAN");
+                        if (!vendorName) setVendorName("Royal Dry Cleaners, Bargarh");
+                      }}
                       className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                         nextAction === "DRY_CLEAN"
                           ? "bg-[#4B1835] text-white border-[#4B1835] font-bold shadow-xs"
@@ -424,12 +452,16 @@ function ReturnsCounterContent() {
                       }`}
                     >
                       <Sparkles className="w-4 h-4 mx-auto mb-1 text-[#D4B67F]" />
-                      <span>Send to Dry Cleaning</span>
+                      <span className="block text-xs font-bold leading-tight">Dry clean</span>
+                      <span className="text-[10px] opacity-80">(In care job)</span>
                     </button>
 
                     <button
                       type="button"
-                      onClick={() => setNextAction("REPAIR")}
+                      onClick={() => {
+                        setNextAction("REPAIR");
+                        if (!vendorName) setVendorName("Master Tailor, Bargarh");
+                      }}
                       className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                         nextAction === "REPAIR"
                           ? "bg-[#4B1835] text-white border-[#4B1835] font-bold shadow-xs"
@@ -437,9 +469,40 @@ function ReturnsCounterContent() {
                       }`}
                     >
                       <Wrench className="w-4 h-4 mx-auto mb-1 text-[#D4B67F]" />
-                      <span>Send to Master Tailor</span>
+                      <span className="block text-xs font-bold leading-tight">Repair</span>
+                      <span className="text-[10px] opacity-80">(Tailor / Stitch)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setNextAction("DAMAGED")}
+                      className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                        nextAction === "DAMAGED"
+                          ? "bg-rose-800 text-white border-rose-800 font-bold shadow-xs"
+                          : "bg-rose-50/50 text-rose-800 border-rose-200"
+                      }`}
+                    >
+                      <AlertTriangle className="w-4 h-4 mx-auto mb-1 text-rose-300" />
+                      <span className="block text-xs font-bold leading-tight">Damaged</span>
+                      <span className="text-[10px] opacity-80">(Block / Repair)</span>
                     </button>
                   </div>
+
+                  {(nextAction === "DRY_CLEAN" || nextAction === "REPAIR") && (
+                    <div className="pt-2">
+                      <label className="block text-[10px] font-bold text-gray-600 uppercase mb-1">
+                        Assigned Vendor Name ({nextAction === "DRY_CLEAN" ? "Dry Cleaner" : "Master Tailor"}) *
+                      </label>
+                      <input
+                        type="text"
+                        value={vendorName}
+                        onChange={(e) => setVendorName(e.target.value)}
+                        placeholder={nextAction === "DRY_CLEAN" ? "e.g. Royal Dry Cleaners, Bargarh" : "e.g. Master Salim Tailor"}
+                        className="w-full p-2 bg-white border border-[#E8DFD1] rounded-lg font-medium text-xs"
+                        required
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Action Buttons */}
@@ -469,6 +532,26 @@ function ReturnsCounterContent() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Extra Payment Modal */}
+      {extraPaymentBooking && (
+        <AddPaymentModal
+          isOpen={Boolean(extraPaymentBooking)}
+          onClose={() => setExtraPaymentBooking(null)}
+          onSuccess={(updated) => {
+            if (settlementResult) {
+              setSettlementResult({
+                ...settlementResult,
+                additionalDue: updated.additionalDue,
+              });
+            }
+            loadRentals();
+          }}
+          booking={extraPaymentBooking}
+          initialKind="EXTRA"
+          initialAmount={extraPaymentAmount}
+        />
       )}
     </div>
   );
