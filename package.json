@@ -12,6 +12,7 @@
     "db:migrate": "node --env-file=.env.local scripts/migrate.ts",
     "db:backup": "node --env-file=.env.local scripts/backup.ts",
     "db:restore": "node --env-file=.env.local scripts/restore.ts",
+    "db:import": "node --env-file=.env.local scripts/import-csv.ts",
     "perf:audit": "node --env-file=.env.local scripts/perf-run.ts"
   },
   "dependencies": {

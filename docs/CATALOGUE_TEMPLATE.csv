@@ -1,0 +1,4 @@
+SKU,Category,Name,Rental Price,Deposit,Rack,Shelf,Size,Colour,Fabric,Purchase Cost,Notes
+EXAMPLE-001,Lehenga,Red Bridal Lehenga with Zari Work,3500,2000,Rack A-03,Shelf 2,M,Red,Silk,18000,Delete these 3 example rows before importing
+EXAMPLE-002,Saree,Banarasi Silk Saree Maroon,1500,1000,Rack B-01,Shelf 1,Free Size,Maroon,Banarasi Silk,7000,
+EXAMPLE-003,Sherwani,Cream Sherwani with Stole,2500,1500,Rack C-02,Shelf 3,L,Cream,Brocade,12000,
