@@ -74,7 +74,7 @@ Per screen: swap `DataStore` → `src/lib/api`, add loading/error/empty states, 
 
 ## Phase 8 — PWA, Hardening, Test Pass
 - [ ] **T8.1 [G]** `manifest.ts`, icons, minimal SW, install prompt hint; check Android Chrome + iOS Safari.
-- [ ] **T8.2 [C]** Backup script (SQL dump → R2) + restore drill on scratch DB.
+- [x] **T8.2 [C]** Backup script (SQL dump → R2) + restore drill on scratch DB.
 - [ ] **T8.3 [C]** Performance check: p95 < 500 ms on key endpoints (AC6); add indexes if needed; no full-table scans on `bookings`.
 - [ ] **T8.4 [C]** Full AC1–AC11 checklist run; results in `docs/TEST_RESULTS.md`.
 - [ ] **T8.5 [C]** Remove dead `DataStore`/mock usage from `/erp/**`; keep public pages untouched.
