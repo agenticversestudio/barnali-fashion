@@ -16,6 +16,8 @@ import { POST as quote } from "@/app/api/v1/bookings/quote/route";
 import { POST as createB } from "@/app/api/v1/bookings/route";
 import { POST as pickup } from "@/app/api/v1/bookings/[id]/pickup/route";
 import { POST as ret } from "@/app/api/v1/bookings/[id]/return/route";
+import { POST as addPayment } from "@/app/api/v1/bookings/[id]/payments/route";
+import { GET as alerts } from "@/app/api/v1/alerts/route";
 import { POST as presign } from "@/app/api/v1/photos/presign/route";
 import { POST as register } from "@/app/api/v1/photos/route";
 import { GET as cashToday } from "@/app/api/v1/cash/today/route";
@@ -140,6 +142,59 @@ describe("boutique lifecycle smoke", () => {
     const c = await H("POST", closeCash, "/api/v1/cash/closing", { cookie: A, body: { actualCash: t.data.expectedCash - 50, notes: "smoke" } });
     if (c.status === 201) expect(c.data.closing).toMatchObject({ expectedCash: t.data.expectedCash, variance: -50 });
     else expect(c.status).toBe(422); // a real closing already exists for today
+  });
+
+  // ---- money that arrives after the return: the two flows staff use the "Add payment" screen for
+  async function outOnRent(garmentId: string, phone: string) {
+    await H("POST", createG, "/api/v1/garments", { cookie: A, body: { id: garmentId, name: "Smoke Sherwani", category: "Sherwani", size: "L", rack: "Rack C-01", rentalPrice: 4000, securityDeposit: 2500 } });
+    const b = await H("POST", createB, "/api/v1/bookings", {
+      cookie: A,
+      body: { customer: { name: "Zt Late", phone }, eventName: "E", eventDate: due, garmentIds: [garmentId], pickupDate: today, returnDueDate: due, advance: { amount: 1000, mode: "CASH" } },
+    });
+    expect(b.status).toBe(201);
+    const bid = b.data.booking.id as string;
+    expect((await H("POST", pickup, `/api/v1/bookings/${bid}/pickup`, { cookie: A, params: { id: bid }, body: { payments: [{ kind: "BALANCE", amount: 5500, mode: "CASH" }] } })).status).toBe(200);
+    return bid;
+  }
+  const pay = (bid: string, body: unknown) => H("POST", addPayment, `/api/v1/bookings/${bid}/payments`, { cookie: A, params: { id: bid }, body });
+
+  it("EXTRA: customer owes after settlement; over-pay refused, exact amount clears it, nothing left to pay", async () => {
+    const bid = await outOnRent("ZT-SMOKE-2", "7999300003");
+    await db().execute({ sql: "UPDATE bookings SET pickup_date=?, return_due_date=? WHERE id=?", args: [addDays(today, -6), addDays(today, -3), bid] });
+    await db().execute({ sql: "UPDATE booking_items SET pickup_date=?, return_due_date=? WHERE booking_id=?", args: [addDays(today, -6), addDays(today, -3), bid] });
+    const r = await H("POST", ret, `/api/v1/bookings/${bid}/return`, {
+      cookie: A, params: { id: bid },
+      body: { actualReturnDate: today, damageCharge: 1000, cleaningCharge: 0, items: [{ garmentId: "ZT-SMOKE-2", nextAction: "DAMAGED" }] },
+    });
+    // late 3 x 600 = 1800 + damage 1000 = 2800 > deposit 2500 -> customer owes 300, deposit forfeited
+    expect(r.data.settlement).toMatchObject({ lateFee: 1800, deductions: 2800, refund: 0, additionalDue: 300 });
+    expect(r.data.booking.status).toBe("COMPLETED");
+    expect((await pay(bid, { kind: "EXTRA", amount: 301, mode: "CASH" })).status).toBe(422);
+    const ok = await pay(bid, { kind: "EXTRA", amount: 300, mode: "UPI", note: "paid at counter" });
+    expect(ok.status).toBe(201);
+    expect(ok.data.booking.additionalDue).toBe(0);
+    expect(ok.data.booking.payments.find((p: any) => p.kind === "EXTRA")).toMatchObject({ amount: 300, mode: "UPI" });
+    expect((await pay(bid, { kind: "EXTRA", amount: 1, mode: "CASH" })).status).toBe(422);
+  });
+
+  it("REFUND left pending at return is paid later: exact amount only, once, status becomes REFUNDED, alert clears", async () => {
+    const bid = await outOnRent("ZT-SMOKE-3", "7999300004");
+    const r = await H("POST", ret, `/api/v1/bookings/${bid}/return`, {
+      cookie: A, params: { id: bid },
+      body: { actualReturnDate: today, damageCharge: 0, cleaningCharge: 0, items: [{ garmentId: "ZT-SMOKE-3", nextAction: "AVAILABLE" }] }, // refund not paid now
+    });
+    expect(r.data.settlement).toMatchObject({ refund: 2500, depositStatus: "HELD" });
+    const alertsBefore = await H("GET", alerts, "/api/v1/alerts", { cookie: A });
+    expect(JSON.stringify(alertsBefore.data)).toContain(bid);
+    expect((await pay(bid, { kind: "REFUND", amount: 2000, mode: "CASH" })).status).toBe(422); // must be the exact pending amount
+    const ok = await pay(bid, { kind: "REFUND", amount: 2500, mode: "CASH" });
+    expect(ok.status).toBe(201);
+    expect(ok.data.booking.depositStatus).toBe("REFUNDED");
+    expect(ok.data.booking.payments.filter((p: any) => p.kind === "REFUND")).toHaveLength(1);
+    expect((await pay(bid, { kind: "REFUND", amount: 2500, mode: "CASH" })).status).toBe(422); // no double payout
+    const alertsAfter = await H("GET", alerts, "/api/v1/alerts", { cookie: A });
+    expect(JSON.stringify(alertsAfter.data)).not.toContain(`"refId":"${bid}"`);
+    expect((await pay(bid, { kind: "BALANCE", amount: 1, mode: "CASH" })).status).toBe(422);
   });
 
   it("reports summary + CSV exports work and include the booking", async () => {

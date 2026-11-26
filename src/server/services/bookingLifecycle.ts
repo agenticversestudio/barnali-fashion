@@ -73,14 +73,19 @@ export async function pickupBooking(user: SessionUser, id: string, b: Record<str
 
 // ---------------------------------------------------------------- extra payments
 export async function addPayment(user: SessionUser, id: string, b: Record<string, unknown>): Promise<BookingDto> {
-  const kind = reqOneOf(b, "kind", ["BALANCE", "DEPOSIT", "EXTRA"] as const);
+  const kind = reqOneOf(b, "kind", ["BALANCE", "DEPOSIT", "EXTRA", "REFUND"] as const);
   const amount = reqInt(b, "amount", { min: 1, max: 10_000_000 });
   const mode = reqOneOf(b, "mode", PAY_MODES);
   const note = str(b, "note", { optional: true, max: 200 }) ?? null;
   await tx(async (x) => {
     const row = await getBookingRow(id, x);
     const status = String(row.status);
-    if (kind === "EXTRA") {
+    if (kind === "REFUND") {
+      // pay a deposit refund that was left pending at return (clears the "Deposit refund pending" alert)
+      if (status !== "COMPLETED" || row.deposit_status !== "HELD" || Number(row.refund_amount) <= 0) fail("RULE", "No deposit refund is pending on this booking");
+      if (amount !== Number(row.refund_amount)) fail("RULE", `The pending refund is exactly ₹${Number(row.refund_amount)}`, { remaining: Number(row.refund_amount) });
+      await x.execute({ sql: "UPDATE bookings SET deposit_status=?, updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?", args: [depositStatusAfter(Number(row.deposit_total), Number(row.refund_amount), true), id] });
+    } else if (kind === "EXTRA") {
       if (status !== "COMPLETED") fail("RULE", "EXTRA payments are only for the extra amount owed after return");
       const extraPaid = Number((await x.execute({ sql: "SELECT COALESCE(SUM(amount),0) s FROM payments WHERE booking_id=? AND kind='EXTRA'", args: [id] })).rows[0].s);
       const remaining = Number(row.additional_due) - extraPaid;

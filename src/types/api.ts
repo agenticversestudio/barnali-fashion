@@ -177,7 +177,7 @@ export interface PickupRequest {
   payments?: { kind: "BALANCE" | "DEPOSIT"; amount: number; mode: PayMode; note?: string }[];
   photoIds?: string[];
 }
-export interface AddPaymentRequest { kind: "BALANCE" | "DEPOSIT" | "EXTRA"; amount: number; mode: PayMode; note?: string }
+export interface AddPaymentRequest { kind: "BALANCE" | "DEPOSIT" | "EXTRA" | "REFUND"; amount: number; mode: PayMode; note?: string }
 
 export type NextAction = "AVAILABLE" | "DRY_CLEAN" | "REPAIR" | "DAMAGED";
 export interface ReturnRequest {

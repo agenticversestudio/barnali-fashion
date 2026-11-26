@@ -95,7 +95,7 @@ describe("pickup + payments", () => {
     expect(ok.data.booking.amountPaid).toBe(3000);
     expect(ok.data.booking.balanceDue).toBe(5000);
     expect((await act(pay, b.id, { kind: "EXTRA", amount: 10, mode: "CASH" })).status).toBe(422); // not completed
-    expect((await act(pay, b.id, { kind: "REFUND", amount: 10, mode: "CASH" })).status).toBe(400); // kind not allowed here
+    expect((await act(pay, b.id, { kind: "REFUND", amount: 10, mode: "CASH" })).status).toBe(422); // REFUND only exists for a pending deposit refund on a completed booking
   });
 });
 

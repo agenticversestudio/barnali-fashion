@@ -151,3 +151,15 @@ All 3 gaps flagged in commit 1b1d116 have been implemented and verified:
 Ready for Claude's final verification pass and smoke test assertion.
 
 Not done / not claimable by me: T6.10 (staging walkthrough on real phone+tablet+desktop) and the Milestone 2 payment sign-off are the client's decision; prod deploy (T9.2) and T9.1 prod steps need the owner's Vercel/Turso/R2/Google accounts.
+
+## Re-verification after 846a6ea (2026-11-26, Claude)
+
+| Check | Result |
+|---|---|
+| `npm test` | 312 passed, 12 opt-in skipped (16 files green after one test updated, see below); `tsc` clean; `next build` OK |
+| Smoke suite | 11 tests: added **EXTRA** (customer owes ₹300 after 3-day-late + damage return; over-pay 422, exact clears, nothing left) and **REFUND** (pending deposit refund paid later) |
+| Gemini fixes confirmed | `addPayment` wired (EXTRA / balance / deposit), "Damaged" return action, "Add payment → Extra", "Back to rack" labels present in the UI |
+
+**Backend bug found by the new smoke step (fixed, Claude):** a deposit refund left pending at return could never be paid: `POST /bookings/:id/payments` refused `kind: "REFUND"`, so the "Deposit refund pending" alert stayed forever and the ledger/cash never showed the payout. Now `kind:"REFUND"` is accepted only on a COMPLETED booking with HELD deposit, for exactly `refundAmount`, once; status becomes REFUNDED/PARTIALLY_REFUNDED and the alert clears. One older test that expected 400 for REFUND now expects 422 (still refused when nothing is pending). Documented in API_CHANGELOG.
+
+**Open (Gemini):** the booking drawer shows the "refund held" banner (bookings page) but has no button to pay it. Add "Pay deposit refund" calling `bookingsApi.addPayment({kind:"REFUND", amount: booking.refundAmount, mode})`, and add `"REFUND"` to the modal's kind type. STAFF_GUIDE §6 step 7 describes this flow.
