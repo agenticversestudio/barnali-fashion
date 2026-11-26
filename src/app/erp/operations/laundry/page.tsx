@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Scissors,
@@ -14,738 +14,432 @@ import {
   MapPin,
   Calendar,
   RotateCcw,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react";
-import { DataStore } from "@/lib/dataStore";
-import { StitchingCareJob, DryCleanCareJob, GarmentUnit } from "@/types";
+import { careApi, garmentsApi } from "@/lib/api";
+import { formatINR, formatDate } from "@/lib/utils";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import type { CareJobDto, CareKind, GarmentDto } from "@/types/api";
 
 export default function StitchingAndDryCleanPage() {
-  const [activeTab, setActiveTab] = useState<"stitching" | "dryclean">("stitching");
-  const [stitchingJobs, setStitchingJobs] = useState<StitchingCareJob[]>([]);
-  const [dryCleanJobs, setDryCleanJobs] = useState<DryCleanCareJob[]>([]);
-  const [garments, setGarments] = useState<GarmentUnit[]>([]);
+  const [activeTab, setActiveTab] = useState<"ALL" | "STITCHING" | "DRY_CLEAN" | "REPAIR">("ALL");
+  const [statusFilter, setStatusFilter] = useState<"OUT" | "RECEIVED">("OUT");
+  const [careJobs, setCareJobs] = useState<CareJobDto[]>([]);
+  const [garments, setGarments] = useState<GarmentDto[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Selected Care Job for Full Details Bottom Sheet
-  const [selectedCareJob, setSelectedCareJob] = useState<{
-    type: "stitching" | "dryclean";
-    job: StitchingCareJob | DryCleanCareJob;
-  } | null>(null);
+  // Selected Care Job for details bottom sheet
+  const [selectedCareJob, setSelectedCareJob] = useState<CareJobDto | null>(null);
 
-  // Add Stitching Modal
-  const [showStitchingModal, setShowStitchingModal] = useState(false);
-  const [stitchCostumeId, setStitchCostumeId] = useState("");
-  const [stitchTailor, setStitchTailor] = useState("Master Salim (Bargarh)");
-  const [stitchOutDate, setStitchOutDate] = useState("2026-11-08");
-  const [stitchNotes, setStitchNotes] = useState("Blouse alteration & hem tuck");
+  // Create Care Job Modal
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createKind, setCreateKind] = useState<CareKind>("DRY_CLEAN");
+  const [createGarmentId, setCreateGarmentId] = useState("");
+  const [vendorName, setVendorName] = useState("Bargarh Modern Dry Cleaners");
+  const [subType, setSubType] = useState("Steam Wash & Press");
+  const [outDate, setOutDate] = useState(new Date().toISOString().split("T")[0]);
+  const [expectedDate, setExpectedDate] = useState(
+    new Date(Date.now() + 86400000 * 3).toISOString().split("T")[0]
+  );
+  const [cost, setCost] = useState("350");
+  const [notes, setNotes] = useState("");
 
-  // Add Dry Clean Modal
-  const [showDryCleanModal, setShowDryCleanModal] = useState(false);
-  const [dryCostumeId, setDryCostumeId] = useState("");
-  const [dryVendor, setDryVendor] = useState("Maa Samleswari Dry Cleaners");
-  const [dryOutDate, setDryOutDate] = useState("2026-11-08");
-  const [dryNotes, setDryNotes] = useState("Post-rental steam clean & dry clean");
+  // Receive Modal
+  const [receiveJob, setReceiveJob] = useState<CareJobDto | null>(null);
+  const [receiving, setReceiving] = useState(false);
+  const [rcvDate, setRcvDate] = useState(new Date().toISOString().split("T")[0]);
+  const [nextStatus, setNextStatus] = useState<"AVAILABLE" | "RETURNED_CLEANING" | "DAMAGED_REPAIR">(
+    "AVAILABLE"
+  );
+  const [rcvCost, setRcvCost] = useState("");
 
-  // Rcv Date Action Modal
-  const [rcvItem, setRcvItem] = useState<{
-    type: "stitching" | "dryclean";
-    id: string;
-    costumeId: string;
-  } | null>(null);
-  const [rcvDate, setRcvDate] = useState("2026-11-08");
-
-  const loadData = () => {
-    setStitchingJobs(DataStore.getStitchingJobs());
-    setDryCleanJobs(DataStore.getDryCleanJobs());
-    const gList = DataStore.getGarments();
-    setGarments(gList);
-    if (gList.length > 0) {
-      setStitchCostumeId(gList[0].id);
-      setDryCostumeId(gList[0].id);
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [careRes, gRes] = await Promise.all([
+        careApi.list(statusFilter),
+        garmentsApi.list({ limit: 100 }),
+      ]);
+      setCareJobs(careRes.items || []);
+      setGarments(gRes.items || []);
+      if (gRes.items?.length && !createGarmentId) {
+        setCreateGarmentId(gRes.items[0].id);
+      }
+    } catch (err) {
+      console.error("Failed to load care jobs:", err);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [statusFilter, createGarmentId]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
-  const handleCreateStitching = (e: React.FormEvent) => {
+  const handleCreateJob = async (e: React.FormEvent) => {
     e.preventDefault();
-    const g = garments.find((item) => item.id === stitchCostumeId);
-    DataStore.addStitchingJob({
-      costumeId: stitchCostumeId,
-      costumeName: g ? g.productName : "Costume Item",
-      customerName: "Counter Walk-in",
-      tailorName: stitchTailor,
-      outDate: stitchOutDate,
-      notes: stitchNotes,
-    });
-    DataStore.updateGarmentStatus(stitchCostumeId, "DAMAGED_REPAIR", `Sent to ${stitchTailor}`);
-    loadData();
-    setShowStitchingModal(false);
-  };
-
-  const handleCreateDryClean = (e: React.FormEvent) => {
-    e.preventDefault();
-    const g = garments.find((item) => item.id === dryCostumeId);
-    DataStore.addDryCleanJob({
-      costumeId: dryCostumeId,
-      costumeName: g ? g.productName : "Costume Item",
-      vendorName: dryVendor,
-      outDate: dryOutDate,
-      notes: dryNotes,
-    });
-    DataStore.updateGarmentStatus(dryCostumeId, "RETURNED_CLEANING", `Sent to ${dryVendor}`);
-    loadData();
-    setShowDryCleanModal(false);
-  };
-
-  const handleConfirmRcv = () => {
-    if (!rcvItem) return;
-    if (rcvItem.type === "stitching") {
-      DataStore.markStitchingReceived(rcvItem.id, rcvDate);
-    } else {
-      DataStore.markDryCleanReceived(rcvItem.id, rcvDate);
+    if (!createGarmentId || !vendorName.trim()) {
+      alert("Please select garment and provide vendor name");
+      return;
     }
-    loadData();
-    setRcvItem(null);
+
+    setCreating(true);
+    try {
+      await careApi.create({
+        garmentId: createGarmentId,
+        kind: createKind,
+        vendorName: vendorName.trim(),
+        subType: subType.trim() || undefined,
+        outDate,
+        expectedDate: expectedDate || undefined,
+        cost: cost ? Number(cost) : undefined,
+        notes: notes.trim() || undefined,
+      });
+
+      setShowCreateModal(false);
+      setNotes("");
+      await loadData();
+    } catch (err: any) {
+      alert(err?.message || "Failed to dispatch care job");
+    } finally {
+      setCreating(false);
+    }
   };
+
+  const handleReceiveJob = async () => {
+    if (!receiveJob) return;
+    setReceiving(true);
+    try {
+      await careApi.receive(receiveJob.id, {
+        rcvDate,
+        nextStatus,
+        cost: rcvCost ? Number(rcvCost) : undefined,
+      });
+
+      setReceiveJob(null);
+      await loadData();
+    } catch (err: any) {
+      alert(err?.message || "Failed to mark care job as received");
+    } finally {
+      setReceiving(false);
+    }
+  };
+
+  const filteredJobs = careJobs.filter((j) => {
+    if (activeTab === "ALL") return true;
+    return j.kind === activeTab;
+  });
 
   return (
-    <div className="space-y-3.5 md:space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E6E4DF] shadow-2xs">
         <div>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-slate-900">
-            Return &amp; Care
-          </h1>
-          <p className="text-[11px] md:text-xs text-slate-500 mt-0.5">
-            After-return Stitching &amp; Washing tracker with Out Date and Rcv Date.
+          <div className="flex items-center gap-2">
+            <h1 className="font-serif font-bold text-xl md:text-2xl text-slate-900 tracking-tight">
+              Care &amp; Vendor Registers
+            </h1>
+            <span className="text-xs font-mono font-semibold bg-[#6B1D2F]/10 text-[#6B1D2F] px-2.5 py-0.5 rounded-full">
+              {filteredJobs.length} Jobs
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mt-1">
+            Track external commercial dry-cleaning, tailoring alterations &amp; repair turnaround.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Link
-            href="/erp/bookings?action=return"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 md:px-3.5 md:py-2 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 text-xs font-semibold rounded-lg transition-colors"
-          >
-            <RotateCcw className="w-3.5 h-3.5 text-rose-600" />
-            <span>Customer Return</span>
-          </Link>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Dispatch New Job</span>
+        </button>
+      </div>
 
-          {activeTab === "stitching" ? (
+      {/* Filter Tabs */}
+      <div className="bg-white p-3.5 md:p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+        {/* Kind Filter */}
+        <div className="flex items-center gap-1.5 overflow-x-auto text-xs no-scrollbar w-full sm:w-auto">
+          {[
+            { id: "ALL", label: "All Care" },
+            { id: "DRY_CLEAN", label: "Dry Cleaning" },
+            { id: "STITCHING", label: "Stitching & Fitting" },
+            { id: "REPAIR", label: "Repairs" },
+          ].map((tab) => (
             <button
-              onClick={() => setShowStitchingModal(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 md:px-3.5 md:py-2 bg-[#6B1D2F] hover:bg-[#551624] text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 ${
+                activeTab === tab.id
+                  ? "bg-[#6B1D2F] text-white font-semibold"
+                  : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80"
+              }`}
             >
-              <Scissors className="w-4 h-4" />
-              <span>Log Stitching Out</span>
+              {tab.label}
             </button>
-          ) : (
-            <button
-              onClick={() => setShowDryCleanModal(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 md:px-3.5 md:py-2 bg-[#6B1D2F] hover:bg-[#551624] text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Log Washing Out</span>
-            </button>
-          )}
+          ))}
+        </div>
+
+        {/* Status Filter: OUT vs RECEIVED */}
+        <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs">
+          <button
+            onClick={() => setStatusFilter("OUT")}
+            className={`px-3 py-1 rounded-lg font-semibold transition-colors ${
+              statusFilter === "OUT" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-500"
+            }`}
+          >
+            Currently Out ({careJobs.filter((j) => j.status === "OUT").length})
+          </button>
+          <button
+            onClick={() => setStatusFilter("RECEIVED")}
+            className={`px-3 py-1 rounded-lg font-semibold transition-colors ${
+              statusFilter === "RECEIVED" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-500"
+            }`}
+          >
+            Past Received
+          </button>
         </div>
       </div>
 
-      {/* Segmented Control Toggle */}
-      <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-[#E6E4DF] w-full sm:max-w-xs shadow-2xs">
-        <button
-          onClick={() => setActiveTab("stitching")}
-          className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-colors ${
-            activeTab === "stitching"
-              ? "bg-[#6B1D2F] text-white font-semibold shadow-2xs"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
-        >
-          Tailor Stitching ({stitchingJobs.length})
-        </button>
+      {/* Main Jobs List */}
+      {loading ? (
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center">
+          <Loader2 className="w-6 h-6 animate-spin text-[#6B1D2F] mx-auto mb-2" />
+          <div className="text-xs text-slate-500">Loading vendor care jobs...</div>
+        </div>
+      ) : filteredJobs.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <div className="text-sm font-bold text-slate-800">No care jobs found</div>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            {statusFilter === "OUT" ? "No garments currently at vendors." : "No completed care jobs recorded."}
+          </p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] shadow-2xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-[#FAF9F6] border-b border-[#E6E4DF] text-[11px] font-bold uppercase text-slate-500">
+                  <th className="py-3 px-4">Job ID &amp; Piece</th>
+                  <th className="py-3 px-4">Kind &amp; Vendor</th>
+                  <th className="py-3 px-4">Dispatched → Expected</th>
+                  <th className="py-3 px-4">Cost</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#EFECE6]">
+                {filteredJobs.map((j) => (
+                  <tr key={j.id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="py-3.5 px-4">
+                      <span className="font-mono font-bold text-xs text-[#6B1D2F]">{j.id}</span>
+                      <div className="font-semibold text-slate-900 mt-0.5">{j.garmentName}</div>
+                      <span className="font-mono text-[10px] text-slate-400">SKU: {j.garmentId}</span>
+                    </td>
 
-        <button
-          onClick={() => setActiveTab("dryclean")}
-          className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-colors ${
-            activeTab === "dryclean"
-              ? "bg-[#6B1D2F] text-white font-semibold shadow-2xs"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
-        >
-          Dry Cleaning ({dryCleanJobs.length})
-        </button>
-      </div>
-
-      {/* ========================================================= */}
-      {/* MOBILE & TABLET CARE CARDS (< 1024px): 2-COL ON TABLET     */}
-      {/* ========================================================= */}
-      <div className="block lg:hidden">
-        {activeTab === "stitching" ? (
-          stitchingJobs.length === 0 ? (
-            <div className="bg-white p-8 rounded-xl border border-[#E6E4DF] text-center text-xs text-slate-500 shadow-2xs">
-              No tailoring jobs in register.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              {stitchingJobs.map((job) => {
-                const isOut = job.status === "OUT" || !job.rcvDate;
-                return (
-                  <div
-                    key={job.id}
-                    className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col justify-between gap-3 min-w-0"
-                  >
-                    {/* Row 1: Header (Costume ID left, Status Badge right) */}
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono text-xs font-bold text-[#6B1D2F] bg-rose-50/60 px-2 py-0.5 rounded border border-rose-200/60">
-                        {job.costumeId}
+                    <td className="py-3.5 px-4">
+                      <span className="text-[10px] uppercase font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-700">
+                        {j.kind.replace("_", " ")}
                       </span>
-                      {isOut ? (
-                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-300">
-                          With Tailor
-                        </span>
+                      <div className="font-medium text-slate-800 mt-1">{j.vendorName}</div>
+                      {j.subType && <div className="text-[11px] text-slate-500">{j.subType}</div>}
+                    </td>
+
+                    <td className="py-3.5 px-4 font-mono text-slate-700">
+                      <div>Out: {j.outDate}</div>
+                      {j.status === "OUT" ? (
+                        <div className={j.isOverdue ? "text-rose-700 font-bold" : "text-slate-500"}>
+                          Exp: {j.expectedDate || "—"} {j.isOverdue && "(Overdue)"}
+                        </div>
                       ) : (
-                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
-                          Available
-                        </span>
+                        <div className="text-emerald-700 font-semibold">Rcv: {j.rcvDate}</div>
                       )}
-                    </div>
+                    </td>
 
-                    {/* Row 2: Body Block (Title on own line, vendor below, Out/Rcv date pairs) */}
-                    <div className="space-y-1.5 min-w-0">
-                      <div className="text-xs font-semibold text-slate-900 leading-snug line-clamp-2">
-                        {job.costumeName}
-                      </div>
-                      <div className="text-[11px] text-slate-600 flex items-center gap-1.5">
-                        <Scissors className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{job.tailorName}</span>
-                      </div>
+                    <td className="py-3.5 px-4 font-mono font-semibold text-slate-800">
+                      {formatINR(j.cost)}
+                    </td>
 
-                      <div className="grid grid-cols-2 gap-2 bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-xs mt-1">
-                        <div>
-                          <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Out Date</span>
-                          <span className="font-mono font-semibold text-slate-800">{job.outDate}</span>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Rcv Date</span>
-                          {job.rcvDate ? (
-                            <span className="font-mono font-semibold text-emerald-800">{job.rcvDate}</span>
-                          ) : (
-                            <span className="font-medium text-amber-800">Pending</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Row 3: Notes Box */}
-                    {job.notes && (
-                      <div className="bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-[11px] text-slate-700 italic">
-                        &ldquo;{job.notes}&rdquo;
-                      </div>
-                    )}
-
-                    {/* Row 4: Footer (Details left, Primary Action right) */}
-                    <div className="flex items-center justify-between pt-2.5 border-t border-[#EFECE6] gap-2 mt-auto">
-                      <button
-                        onClick={() => setSelectedCareJob({ type: "stitching", job })}
-                        className="min-h-[40px] px-3.5 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors flex items-center justify-center"
-                      >
-                        Details
-                      </button>
-
-                      {isOut && (
+                    <td className="py-3.5 px-4 text-right">
+                      {j.status === "OUT" ? (
                         <button
                           onClick={() => {
-                            setRcvItem({
-                              type: "stitching",
-                              id: job.id,
-                              costumeId: job.costumeId,
-                            });
-                            setRcvDate("2026-11-08");
+                            setReceiveJob(j);
+                            setRcvCost(String(j.cost || ""));
                           }}
-                          className="min-h-[40px] px-4 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors flex items-center justify-center"
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs shadow-xs"
                         >
                           Mark Received
                         </button>
+                      ) : (
+                        <span className="text-emerald-700 font-semibold text-xs flex items-center justify-end gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Received</span>
+                        </span>
                       )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )
-        ) : dryCleanJobs.length === 0 ? (
-          <div className="bg-white p-8 rounded-xl border border-[#E6E4DF] text-center text-xs text-slate-500 shadow-2xs">
-            No dry cleaning jobs in register.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            {dryCleanJobs.map((job) => {
-              const isOut = job.status === "OUT" || !job.rcvDate;
-              return (
-                <div
-                  key={job.id}
-                  className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col justify-between gap-3 min-w-0"
-                >
-                  {/* Row 1: Header (Costume ID left, Status Badge right) */}
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-xs font-bold text-[#6B1D2F] bg-rose-50/60 px-2 py-0.5 rounded border border-rose-200/60">
-                      {job.costumeId}
-                    </span>
-                    {isOut ? (
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-800 border border-purple-300">
-                        At Cleaner
-                      </span>
-                    ) : (
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
-                        Available
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Row 2: Body Block (Title on own line, vendor below, Out/Rcv date pairs) */}
-                  <div className="space-y-1.5 min-w-0">
-                    <div className="text-xs font-semibold text-slate-900 leading-snug line-clamp-2">
-                      {job.costumeName}
-                    </div>
-                    <div className="text-[11px] text-slate-600 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{job.vendorName}</span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-xs mt-1">
-                      <div>
-                        <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Out Date</span>
-                        <span className="font-mono font-semibold text-slate-800">{job.outDate}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-slate-500 uppercase tracking-wide block">Rcv Date</span>
-                        {job.rcvDate ? (
-                          <span className="font-mono font-semibold text-emerald-800">{job.rcvDate}</span>
-                        ) : (
-                          <span className="font-medium text-amber-800">Pending</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Row 3: Notes Box */}
-                  {job.notes && (
-                    <div className="bg-[#FAF9F6] border border-[#EFECE6] p-2.5 rounded-lg text-[11px] text-slate-700 italic">
-                      &ldquo;{job.notes}&rdquo;
-                    </div>
-                  )}
-
-                  {/* Row 4: Footer (Details left, Primary Action right) */}
-                  <div className="flex items-center justify-between pt-2.5 border-t border-[#EFECE6] gap-2 mt-auto">
-                    <button
-                      onClick={() => setSelectedCareJob({ type: "dryclean", job })}
-                      className="min-h-[40px] px-3.5 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-[#E6E4DF] hover:bg-slate-50 rounded-lg transition-colors flex items-center justify-center"
-                    >
-                      Details
-                    </button>
-
-                    {isOut && (
-                      <button
-                        onClick={() => {
-                          setRcvItem({
-                            type: "dryclean",
-                            id: job.id,
-                            costumeId: job.costumeId,
-                          });
-                          setRcvDate("2026-11-08");
-                        }}
-                        className="min-h-[40px] px-4 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors flex items-center justify-center"
-                      >
-                        Mark Received
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* ========================================================= */}
-      {/* DESKTOP PRESENTATION (>= 1024px): FULL TABLES             */}
-      {/* ========================================================= */}
-      <div className="hidden lg:block">
-        {activeTab === "stitching" && (
-          <div className="bg-white rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-[#FAF9F6] border-b border-[#E6E4DF] text-slate-600 uppercase text-[10px] tracking-wider font-semibold">
-                  <tr>
-                    <th className="py-3 px-4">Costume</th>
-                    <th className="py-3 px-3">Tailor</th>
-                    <th className="py-3 px-3">Out Date</th>
-                    <th className="py-3 px-3">Received Date</th>
-                    <th className="py-3 px-3">Fitting Notes</th>
-                    <th className="py-3 px-3">Status</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-[#EFECE6]">
-                  {stitchingJobs.map((job) => {
-                    const isOut = job.status === "OUT" || !job.rcvDate;
-                    return (
-                      <tr key={job.id} className="hover:bg-slate-50/60 transition-colors">
-                        <td className="py-3.5 px-4">
-                          <span className="font-mono text-xs font-bold text-[#6B1D2F]">
-                            {job.costumeId}
-                          </span>
-                          <div className="font-medium text-slate-900 mt-0.5">{job.costumeName}</div>
-                        </td>
-
-                        <td className="py-3 px-3 text-slate-700 font-medium">{job.tailorName}</td>
-
-                        <td className="py-3 px-3 font-mono text-slate-700 whitespace-nowrap">
-                          {job.outDate}
-                        </td>
-
-                        <td className="py-3 px-3 font-mono text-slate-700 whitespace-nowrap">
-                          {job.rcvDate ? (
-                            <span className="flex items-center gap-1.5 text-emerald-800 font-semibold">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                              <span>{job.rcvDate}</span>
-                            </span>
-                          ) : (
-                            <span className="text-slate-400 font-normal">Pending</span>
-                          )}
-                        </td>
-
-                        <td className="py-3 px-3 text-slate-600 max-w-xs">{job.notes || "—"}</td>
-
-                        <td className="py-3 px-3 whitespace-nowrap">
-                          {isOut ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-300">
-                              <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
-                              <span>With Tailor</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                              <span>Available</span>
-                            </span>
-                          )}
-                        </td>
-
-                        <td className="py-3 px-4 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => setSelectedCareJob({ type: "stitching", job })}
-                              className="px-2.5 py-1 text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-[#E6E4DF] rounded-lg text-[11px] font-medium transition-colors"
-                            >
-                              Details
-                            </button>
-                            {isOut ? (
-                              <button
-                                onClick={() => {
-                                  setRcvItem({
-                                    type: "stitching",
-                                    id: job.id,
-                                    costumeId: job.costumeId,
-                                  });
-                                  setRcvDate("2026-11-08");
-                                }}
-                                className="px-3 py-1 bg-[#6B1D2F] hover:bg-[#551624] text-white font-semibold rounded-lg text-xs transition-colors"
-                              >
-                                Mark Received
-                              </button>
-                            ) : (
-                              <span className="text-[11px] text-slate-400">Complete</span>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+        </div>
+      )}
 
-        {activeTab === "dryclean" && (
-          <div className="bg-white rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-[#FAF9F6] border-b border-[#E6E4DF] text-slate-600 uppercase text-[10px] tracking-wider font-semibold">
-                  <tr>
-                    <th className="py-3 px-4">Costume</th>
-                    <th className="py-3 px-3">Dry Cleaner</th>
-                    <th className="py-3 px-3">Out Date</th>
-                    <th className="py-3 px-3">Received Date</th>
-                    <th className="py-3 px-3">Care Notes</th>
-                    <th className="py-3 px-3">Status</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#EFECE6]">
-                  {dryCleanJobs.map((job) => {
-                    const isOut = job.status === "OUT" || !job.rcvDate;
-                    return (
-                      <tr key={job.id} className="hover:bg-slate-50/60 transition-colors">
-                        <td className="py-3.5 px-4">
-                          <span className="font-mono text-xs font-bold text-[#6B1D2F]">
-                            {job.costumeId}
-                          </span>
-                          <div className="font-medium text-slate-900 mt-0.5">{job.costumeName}</div>
-                        </td>
-
-                        <td className="py-3 px-3 text-slate-700 font-medium">{job.vendorName}</td>
-
-                        <td className="py-3 px-3 font-mono text-slate-700 whitespace-nowrap">
-                          {job.outDate}
-                        </td>
-
-                        <td className="py-3 px-3 font-mono text-slate-700 whitespace-nowrap">
-                          {job.rcvDate ? (
-                            <span className="flex items-center gap-1.5 text-emerald-800 font-semibold">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                              <span>{job.rcvDate}</span>
-                            </span>
-                          ) : (
-                            <span className="text-slate-400 font-normal">Pending</span>
-                          )}
-                        </td>
-
-                        <td className="py-3 px-3 text-slate-600 max-w-xs">{job.notes || "—"}</td>
-
-                        <td className="py-3 px-3 whitespace-nowrap">
-                          {isOut ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-800 border border-purple-300">
-                              <span className="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
-                              <span>At Cleaner</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                              <span>Available</span>
-                            </span>
-                          )}
-                        </td>
-
-                        <td className="py-3 px-4 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => setSelectedCareJob({ type: "dryclean", job })}
-                              className="px-2.5 py-1 text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-[#E6E4DF] rounded-lg text-[11px] font-medium transition-colors"
-                            >
-                              Details
-                            </button>
-                            {isOut ? (
-                              <button
-                                onClick={() => {
-                                  setRcvItem({
-                                    type: "dryclean",
-                                    id: job.id,
-                                    costumeId: job.costumeId,
-                                  });
-                                  setRcvDate("2026-11-08");
-                                }}
-                                className="px-3 py-1 bg-[#6B1D2F] hover:bg-[#551624] text-white font-semibold rounded-lg text-xs transition-colors"
-                              >
-                                Mark Received
-                              </button>
-                            ) : (
-                              <span className="text-[11px] text-slate-400">Complete</span>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ========================================================= */}
-      {/* CARE DETAILS BOTTOM SHEET                                 */}
-      {/* ========================================================= */}
-      {selectedCareJob && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center z-50 animate-in fade-in">
-          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-2xl border border-slate-200 max-w-md w-full p-4 sm:p-6 text-xs max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
-            <div className="sm:hidden w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3" />
-
+      {/* DISPATCH NEW JOB MODAL */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-sm font-bold text-[#6B1D2F]">
-                  {selectedCareJob.job.costumeId}
-                </span>
-                <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                  {selectedCareJob.type === "stitching" ? "Tailor Alteration" : "Dry Cleaning"}
-                </span>
+              <div>
+                <h3 className="font-serif font-bold text-slate-900 text-base">Dispatch to Vendor</h3>
+                <p className="text-[11px] text-slate-500">Record garment dispatch for care/alteration</p>
               </div>
               <button
-                onClick={() => setSelectedCareJob(null)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                onClick={() => setShowCreateModal(false)}
+                className="text-slate-400 hover:text-slate-600"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="mt-3 space-y-3">
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60 space-y-1">
-                <div className="text-sm font-semibold text-slate-900">
-                  {selectedCareJob.job.costumeName}
-                </div>
-                <div className="text-[11px] text-slate-500">
-                  Assigned Vendor:{" "}
-                  <strong className="text-slate-800">
-                    {"tailorName" in selectedCareJob.job
-                      ? selectedCareJob.job.tailorName
-                      : selectedCareJob.job.vendorName}
-                  </strong>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <span className="text-[10px] text-slate-400 block">Out Date (Dispatched)</span>
-                  <span className="font-bold text-slate-800">{selectedCareJob.job.outDate}</span>
-                </div>
-                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <span className="text-[10px] text-slate-400 block">Rcv Date (Received)</span>
-                  <span className="font-bold text-slate-800">
-                    {selectedCareJob.job.rcvDate ? (
-                      <span className="text-emerald-700">{selectedCareJob.job.rcvDate}</span>
-                    ) : (
-                      <span className="text-amber-700">Pending Return</span>
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              {selectedCareJob.job.notes && (
-                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
-                  <span className="text-[10px] text-slate-400 block font-semibold uppercase">
-                    Care &amp; Fitting Notes
-                  </span>
-                  <p className="text-slate-700 mt-0.5">{selectedCareJob.job.notes}</p>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedCareJob(null)}
-                  className="px-3.5 py-1.5 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
+            <form onSubmit={handleCreateJob} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  Select Garment *
+                </label>
+                <select
+                  value={createGarmentId}
+                  onChange={(e) => setCreateGarmentId(e.target.value)}
+                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                  required
                 >
-                  Close
-                </button>
-                {(!selectedCareJob.job.rcvDate || selectedCareJob.job.status === "OUT") && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRcvItem({
-                        type: selectedCareJob.type,
-                        id: selectedCareJob.job.id,
-                        costumeId: selectedCareJob.job.costumeId,
-                      });
-                      setRcvDate("2026-11-08");
-                      setSelectedCareJob(null);
-                    }}
-                    className="px-4 py-1.5 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg font-semibold shadow-xs"
+                  {garments.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.id} — {g.name} ({g.status})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Care Kind *
+                  </label>
+                  <select
+                    value={createKind}
+                    onChange={(e) => setCreateKind(e.target.value as CareKind)}
+                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-semibold"
                   >
-                    Mark Received
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+                    <option value="DRY_CLEAN">Commercial Dry Clean</option>
+                    <option value="STITCHING">Tailor Alteration</option>
+                    <option value="REPAIR">Embroidery / Repair</option>
+                  </select>
+                </div>
 
-      {/* --- ADD STITCHING MODAL --- */}
-      {showStitchingModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-3 sm:p-4 z-50">
-          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-4 sm:p-6 text-xs animate-in slide-in-from-bottom sm:zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <span className="font-semibold text-sm text-slate-900">Log Tailor Stitching Out</span>
-              <button
-                onClick={() => setShowStitchingModal(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateStitching} className="mt-3 space-y-3">
-              <div>
-                <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                  Select Costume Piece *
-                </label>
-                <select
-                  value={stitchCostumeId}
-                  onChange={(e) => setStitchCostumeId(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold"
-                >
-                  {garments.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.id} — {g.productName} ({g.size})
-                    </option>
-                  ))}
-                </select>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Vendor / Tailor *
+                  </label>
+                  <input
+                    type="text"
+                    value={vendorName}
+                    onChange={(e) => setVendorName(e.target.value)}
+                    placeholder="e.g. Salim Tailor"
+                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                    required
+                  />
+                </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Dispatch Date
+                  </label>
+                  <input
+                    type="date"
+                    value={outDate}
+                    onChange={(e) => setOutDate(e.target.value)}
+                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Expected Return Date
+                  </label>
+                  <input
+                    type="date"
+                    value={expectedDate}
+                    onChange={(e) => setExpectedDate(e.target.value)}
+                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Care Instructions / Sub-type
+                  </label>
+                  <input
+                    type="text"
+                    value={subType}
+                    onChange={(e) => setSubType(e.target.value)}
+                    placeholder="e.g. Hemline stitch, steam iron"
+                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Estimated Cost (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={cost}
+                    onChange={(e) => setCost(e.target.value)}
+                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                  Tailor Name *
+                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  Vendor Notes (Optional)
                 </label>
                 <input
                   type="text"
-                  required
-                  value={stitchTailor}
-                  onChange={(e) => setStitchTailor(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-medium"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="e.g. Handover invoice #341"
+                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl"
                 />
               </div>
 
-              <div>
-                <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                  Out Date (Dispatched to Tailor) *
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={stitchOutDate}
-                  onChange={(e) => setStitchOutDate(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-mono font-medium"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                  Fitting / Alteration Notes *
-                </label>
-                <textarea
-                  rows={2}
-                  required
-                  value={stitchNotes}
-                  onChange={(e) => setStitchNotes(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-medium"
-                />
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 flex justify-end gap-2">
+              <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setShowStitchingModal(false)}
-                  className="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
+                  onClick={() => setShowCreateModal(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg font-semibold shadow-xs"
+                  disabled={creating}
+                  className="flex-1 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-bold rounded-xl shadow-xs flex items-center justify-center gap-1.5"
                 >
-                  Save Dispatch
+                  {creating ? <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" /> : <CheckCircle2 className="w-4 h-4" />}
+                  <span>Confirm Dispatch</span>
                 </button>
               </div>
             </form>
@@ -753,148 +447,87 @@ export default function StitchingAndDryCleanPage() {
         </div>
       )}
 
-      {/* --- ADD DRY CLEAN MODAL --- */}
-      {showDryCleanModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-3 sm:p-4 z-50">
-          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-4 sm:p-6 text-xs animate-in slide-in-from-bottom sm:zoom-in-95">
+      {/* RECEIVE CARE MODAL */}
+      {receiveJob && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <span className="font-semibold text-sm text-slate-900">Log Washing / Dry Clean Out</span>
+              <div>
+                <span className="font-mono text-xs text-[#6B1D2F] font-bold">{receiveJob.id}</span>
+                <h3 className="font-serif font-bold text-base text-slate-900">
+                  Receive Piece from Vendor
+                </h3>
+              </div>
               <button
-                onClick={() => setShowDryCleanModal(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                onClick={() => setReceiveJob(null)}
+                className="text-slate-400 hover:text-slate-600"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateDryClean} className="mt-3 space-y-3">
-              <div>
-                <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                  Select Costume Piece *
-                </label>
-                <select
-                  value={dryCostumeId}
-                  onChange={(e) => setDryCostumeId(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold"
-                >
-                  {garments.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.id} — {g.productName} ({g.size})
-                    </option>
-                  ))}
-                </select>
+            <div className="space-y-3 text-xs">
+              <div className="p-2.5 bg-slate-50 rounded-xl space-y-1">
+                <div>Piece: <strong>{receiveJob.garmentName}</strong></div>
+                <div>Vendor: <strong>{receiveJob.vendorName}</strong></div>
               </div>
 
               <div>
-                <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                  Dry Cleaner Vendor *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={dryVendor}
-                  onChange={(e) => setDryVendor(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-medium"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                  Out Date (Dispatched to Cleaner) *
+                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  Received Date *
                 </label>
                 <input
                   type="date"
-                  required
-                  value={dryOutDate}
-                  onChange={(e) => setDryOutDate(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-mono font-medium"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                  Care &amp; Stain Notes
-                </label>
-                <textarea
-                  rows={2}
-                  value={dryNotes}
-                  onChange={(e) => setDryNotes(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-medium"
-                />
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowDryCleanModal(false)}
-                  className="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-1.5 bg-[#6B1D2F] hover:bg-[#551624] text-white rounded-lg font-semibold shadow-xs"
-                >
-                  Save Dispatch
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* --- RCV DATE CONFIRMATION MODAL --- */}
-      {rcvItem && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-3 sm:p-4 z-50">
-          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-xl border border-slate-200 max-w-sm w-full p-4 sm:p-6 text-xs animate-in slide-in-from-bottom sm:zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <span className="font-semibold text-sm text-slate-900">
-                Record Received (Rcv Date)
-              </span>
-              <button
-                onClick={() => setRcvItem(null)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="mt-3 space-y-3">
-              <p className="text-slate-600 text-xs">
-                Mark piece <strong className="text-[#6B1D2F]">{rcvItem.costumeId}</strong> as
-                received back in studio. It will automatically return to <strong>Available</strong>{" "}
-                state.
-              </p>
-
-              <div>
-                <label className="block text-[10px] font-semibold uppercase text-slate-500 mb-1">
-                  Received Date (Rcv Date) *
-                </label>
-                <input
-                  type="date"
-                  required
                   value={rcvDate}
                   onChange={(e) => setRcvDate(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg font-mono font-medium"
+                  className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-medium"
                 />
               </div>
 
-              <div className="pt-2 border-t border-slate-100 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setRcvItem(null)}
-                  className="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  New Garment Stock Status *
+                </label>
+                <select
+                  value={nextStatus}
+                  onChange={(e) => setNextStatus(e.target.value as any)}
+                  className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-semibold"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleConfirmRcv}
-                  className="px-4 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-semibold shadow-xs"
-                >
-                  Confirm Received
-                </button>
+                  <option value="AVAILABLE">Available for Rent</option>
+                  <option value="RETURNED_CLEANING">Still Needs Cleaning</option>
+                  <option value="DAMAGED_REPAIR">Needs More Repair</option>
+                </select>
               </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  Actual Service Cost Paid (₹)
+                </label>
+                <input
+                  type="number"
+                  value={rcvCost}
+                  onChange={(e) => setRcvCost(e.target.value)}
+                  placeholder="e.g. 350"
+                  className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-bold"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+              <button
+                onClick={() => setReceiveJob(null)}
+                className="flex-1 py-2 rounded-xl border border-slate-200 text-slate-700 font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReceiveJob}
+                disabled={receiving}
+                className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs flex items-center justify-center gap-1.5"
+              >
+                {receiving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                <span>Save to Stock</span>
+              </button>
             </div>
           </div>
         </div>

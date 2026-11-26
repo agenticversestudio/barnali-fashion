@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   CalendarDays,
@@ -14,370 +14,314 @@ import {
   X,
   Phone,
   MessageCircle,
+  Loader2,
+  Calendar,
 } from "lucide-react";
-import { DataStore } from "@/lib/dataStore";
-import { Booking, GarmentUnit } from "@/types";
+import { garmentsApi } from "@/lib/api";
 import { formatDate, formatINR } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import type { AvailabilityRow } from "@/types/api";
 
 export default function AvailabilityCalendarPage() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [garments, setGarments] = useState<GarmentUnit[]>([]);
-  const [selectedMonth, setSelectedMonth] = useState("November 2026");
+  const [rows, setRows] = useState<AvailabilityRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
 
-  // Mobile Day Selector state
-  const [selectedDay, setSelectedDay] = useState<number>(8);
-  const [selectedBookingDetails, setSelectedBookingDetails] = useState<Booking | null>(null);
+  // Date range navigation: Month / Year
+  const [year, setYear] = useState(2026);
+  const [month, setMonth] = useState(11); // 11 = November
+  const [selectedCell, setSelectedCell] = useState<{
+    garmentId: string;
+    garmentName: string;
+    date: string;
+    booking?: { bookingId: string; from: string; to: string; status: string };
+  } | null>(null);
+
+  // Calculate days in the selected month
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const dayNumbers = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+  const fromDateStr = `${year}-${String(month).padStart(2, "0")}-01`;
+  const toDateStr = `${year}-${String(month).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+
+  const loadAvailability = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await garmentsApi.getAvailability(
+        fromDateStr,
+        toDateStr,
+        selectedCategory !== "ALL" ? selectedCategory : undefined
+      );
+      setRows(res.items || []);
+    } catch (err) {
+      console.error("Failed to load availability matrix:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [fromDateStr, toDateStr, selectedCategory]);
 
   useEffect(() => {
-    setBookings(DataStore.getBookings());
-    setGarments(DataStore.getGarments());
-  }, []);
+    loadAvailability();
+  }, [loadAvailability]);
 
-  // Days in November 2026 (Nov 1 to Nov 30)
-  const daysInMonth = Array.from({ length: 30 }, (_, i) => i + 1);
-
-  // 7-day strip around today (Nov 5 to Nov 14)
-  const weekDays = [
-    { day: 5, weekday: "Thu", dateStr: "2026-11-05" },
-    { day: 6, weekday: "Fri", dateStr: "2026-11-06" },
-    { day: 7, weekday: "Sat", dateStr: "2026-11-07" },
-    { day: 8, weekday: "Sun", dateStr: "2026-11-08", isToday: true },
-    { day: 9, weekday: "Mon", dateStr: "2026-11-09" },
-    { day: 10, weekday: "Tue", dateStr: "2026-11-10" },
-    { day: 11, weekday: "Wed", dateStr: "2026-11-11" },
-    { day: 12, weekday: "Thu", dateStr: "2026-11-12" },
-    { day: 13, weekday: "Fri", dateStr: "2026-11-13" },
-    { day: 14, weekday: "Sat", dateStr: "2026-11-14" },
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
   ];
 
-  const selectedDateStr = `2026-11-${String(selectedDay).padStart(2, "0")}`;
+  const handlePrevMonth = () => {
+    if (month === 1) {
+      setMonth(12);
+      setYear((y) => y - 1);
+    } else {
+      setMonth((m) => m - 1);
+    }
+  };
 
-  // Find all bookings active on selectedDay
-  const activeBookingsForSelectedDay = bookings.filter((b) => {
-    return (
-      selectedDateStr >= b.pickupDate &&
-      selectedDateStr <= b.returnDueDate &&
-      b.status !== "CANCELLED"
-    );
-  });
+  const handleNextMonth = () => {
+    if (month === 12) {
+      setMonth(1);
+      setYear((y) => y + 1);
+    } else {
+      setMonth((m) => m + 1);
+    }
+  };
+
+  const categories = [
+    "ALL",
+    "Bridal Lehenga",
+    "Groom Sherwani",
+    "Party Gown",
+    "Silk Saree",
+    "Indo-Western",
+    "Kids Festive Wear",
+  ];
 
   return (
-    <div className="space-y-3.5 md:space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E6E4DF] shadow-2xs">
         <div>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-slate-900">
-            Calendar
-          </h1>
-          <p className="text-[11px] md:text-xs text-slate-500 mt-0.5">
-            Availability matrix across physical items with automatic post-event buffer.
+          <div className="flex items-center gap-2">
+            <h1 className="font-serif font-bold text-xl md:text-2xl text-slate-900 tracking-tight">
+              Calendar Availability Matrix
+            </h1>
+            <span className="text-xs font-mono font-semibold bg-[#6B1D2F]/10 text-[#6B1D2F] px-2.5 py-0.5 rounded-full">
+              {rows.length} Pieces
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mt-1">
+            Visual 30-day timeline to inspect garment availability and prevent double bookings.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button className="p-1.5 md:p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700">
+        {/* Month Selector Controls */}
+        <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
+          <button
+            onClick={handlePrevMonth}
+            className="p-1.5 hover:bg-white rounded-lg text-slate-600 transition-colors shadow-2xs"
+            title="Previous Month"
+          >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="font-semibold text-xs text-slate-900 bg-white px-3 py-1.5 rounded-lg border border-slate-200">
-            {selectedMonth}
+          <span className="font-serif font-bold text-xs text-slate-800 px-3 min-w-[130px] text-center">
+            {monthNames[month - 1]} {year}
           </span>
-          <button className="p-1.5 md:p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700">
+          <button
+            onClick={handleNextMonth}
+            className="p-1.5 hover:bg-white rounded-lg text-slate-600 transition-colors shadow-2xs"
+            title="Next Month"
+          >
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Legend & Instructions */}
-      <div className="bg-white p-3 md:p-4 rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-wrap items-center justify-between gap-2.5 text-xs">
-        <div className="flex items-center gap-3 md:gap-4 flex-wrap">
-          <span className="flex items-center gap-1.5 font-semibold text-slate-700 text-[11px] md:text-xs">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-600" /> Out on Rent
-          </span>
-          <span className="flex items-center gap-1.5 font-semibold text-slate-700 text-[11px] md:text-xs">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Confirmed Reservation
-          </span>
-          <span className="flex items-center gap-1.5 font-semibold text-slate-700 text-[11px] md:text-xs">
-            <span className="w-2.5 h-2.5 rounded-full bg-purple-500" /> Cleaning Buffer
-          </span>
-        </div>
-        <div className="text-[10px] md:text-[11px] text-slate-500 flex items-center gap-1">
-          <Info className="w-3.5 h-3.5 text-slate-400" />
-          <span>Bargarh Studio (9:30 AM – 8:30 PM IST)</span>
-        </div>
+      {/* Categories Filter Strip */}
+      <div className="bg-white p-3 md:p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+        {categories.map((c) => (
+          <button
+            key={c}
+            onClick={() => setSelectedCategory(c)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${
+              selectedCategory === c
+                ? "bg-[#6B1D2F] text-white font-semibold"
+                : "bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/80"
+            }`}
+          >
+            {c === "ALL" ? "All Categories" : c}
+          </button>
+        ))}
       </div>
 
-      {/* ========================================================= */}
-      {/* MOBILE AGENDA & DAY-STRIP VIEW (< 768px)                  */}
-      {/* ========================================================= */}
-      <div className="block md:hidden space-y-3">
-        {/* Horizontal Scrollable Day Strip */}
-        <div className="bg-white p-2.5 rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar select-none">
-            {weekDays.map((wd) => {
-              const isSelected = selectedDay === wd.day;
-              // Check if any bookings on this day
-              const count = bookings.filter(
-                (b) =>
-                  wd.dateStr >= b.pickupDate &&
-                  wd.dateStr <= b.returnDueDate &&
-                  b.status !== "CANCELLED"
-              ).length;
-
-              return (
-                <button
-                  key={wd.day}
-                  onClick={() => setSelectedDay(wd.day)}
-                  className={`min-w-[52px] py-2 px-1.5 rounded-xl text-center transition-all ${
-                    isSelected
-                      ? "bg-slate-900 text-white shadow-xs"
-                      : wd.isToday
-                      ? "bg-[#6B1D2F]/10 text-[#6B1D2F] border border-[#6B1D2F]/30"
-                      : "bg-[#FAF9F6] text-slate-700 hover:bg-slate-100 border border-[#EFECE6]"
-                  }`}
-                >
-                  <div
-                    className={`text-[9px] uppercase font-semibold ${
-                      isSelected ? "text-slate-300" : "text-slate-500"
-                    }`}
-                  >
-                    {wd.weekday}
-                  </div>
-                  <div className="text-sm font-bold mt-0.5">{wd.day}</div>
-                  <div className="mt-1 flex items-center justify-center gap-0.5">
-                    {count > 0 ? (
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          isSelected ? "bg-amber-400" : "bg-[#6B1D2F]"
+      {/* Main Sticky Calendar Matrix */}
+      {loading ? (
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center">
+          <Loader2 className="w-6 h-6 animate-spin text-[#6B1D2F] mx-auto mb-2" />
+          <div className="text-xs text-slate-500">Computing 30-day availability matrix from database...</div>
+        </div>
+      ) : rows.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center space-y-2">
+          <div className="text-slate-800 font-bold text-sm">No costumes found for this category</div>
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-[#E6E4DF] shadow-2xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-[#FAF9F6] border-b border-[#E6E4DF]">
+                  <th className="sticky left-0 bg-[#FAF9F6] z-20 w-52 py-3 px-3.5 border-r border-[#E6E4DF] shadow-[2px_0_4px_rgba(0,0,0,0.03)] font-bold text-slate-700 uppercase text-[10px]">
+                    Costume SKU / Piece
+                  </th>
+                  {dayNumbers.map((d) => {
+                    const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+                    const isToday = dateStr === new Date().toISOString().split("T")[0];
+                    return (
+                      <th
+                        key={d}
+                        className={`min-w-[36px] max-w-[40px] py-2 text-center font-mono border-r border-slate-100 text-[10px] ${
+                          isToday ? "bg-amber-100 text-amber-950 font-bold" : "text-slate-500"
                         }`}
-                      />
-                    ) : (
-                      <span className="w-1.5 h-1.5" />
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Selected Day Agenda Schedule List */}
-        <div className="bg-white rounded-xl border border-[#E6E4DF] p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-[#EFECE6] text-xs">
-            <span className="font-semibold text-slate-900">
-              Schedule for {selectedDay} Nov 2026 {selectedDay === 8 && "(Today)"}
-            </span>
-            <span className="text-[11px] text-slate-500">
-              {activeBookingsForSelectedDay.length} items scheduled
-            </span>
-          </div>
-
-          <div className="space-y-2.5">
-            {activeBookingsForSelectedDay.length === 0 ? (
-              <div className="p-6 text-center text-xs text-slate-400">
-                No active bookings or handovers on this date. Studio inventory is fully available.
-              </div>
-            ) : (
-              activeBookingsForSelectedDay.map((b) => (
-                <div
-                  key={b.id}
-                  onClick={() => setSelectedBookingDetails(b)}
-                  className="p-3 bg-[#FAF9F6] hover:bg-slate-100/80 rounded-xl border border-[#EFECE6] transition-colors flex items-center justify-between gap-3 text-xs cursor-pointer"
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-[#6B1D2F] bg-rose-50/60 px-1.5 py-0.2 rounded border border-rose-200/60">
-                        {b.costumeCode || b.items[0]?.garmentUnitId}
-                      </span>
-                      <StatusBadge status={b.status} />
-                    </div>
-                    <div className="text-slate-900 font-semibold mt-1">
-                      {b.items[0]?.productName}
-                    </div>
-                    <div className="text-[11px] text-slate-600 mt-0.5">
-                      Client: <strong className="text-slate-900">{b.customerName}</strong> · Pickup: {b.pickupDate} &rarr; Return:{" "}
-                      {b.returnDueDate}
-                    </div>
-                  </div>
-
-                  <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================================= */}
-      {/* 30-DAY TIMELINE MATRIX (MD+ & DESKTOP WITH STICKY SKU)     */}
-      {/* ========================================================= */}
-      <div className="hidden md:block bg-white rounded-xl border border-[#E6E4DF] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-        <div className="overflow-x-auto">
-          <div className="min-w-[1400px]">
-            {/* Days Header with Sticky Left Column */}
-            <div className="flex bg-[#FAF9F6] border-b border-[#E6E4DF] text-[10px] font-semibold text-slate-600">
-              <div className="sticky left-0 z-20 bg-[#FAF9F6] p-2.5 border-r border-[#E6E4DF] w-52 shrink-0 font-semibold text-slate-800 shadow-[2px_0_4px_rgba(0,0,0,0.03)]">
-                Piece SKU &amp; Garment
-              </div>
-              <div className="flex flex-1">
-                {daysInMonth.map((d) => (
-                  <div
-                    key={d}
-                    className={`min-w-[40px] flex-1 p-2 text-center border-r border-[#EFECE6] ${
-                      d === 8 ? "bg-slate-900 text-white font-bold" : ""
-                    }`}
-                  >
-                    {d}
-                    {d === 8 && <div className="text-[8px] uppercase tracking-tighter">Today</div>}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Garment Rows with Sticky SKU Column */}
-            <div className="divide-y divide-[#EFECE6] text-xs">
-              {garments.slice(0, 12).map((g) => {
-                const gBookings = bookings.filter(
-                  (b) =>
-                    b.items.some((item) => item.garmentUnitId === g.id) && b.status !== "CANCELLED"
-                );
-
-                return (
-                  <div key={g.id} className="flex items-center hover:bg-slate-50/60 transition-colors">
-                    {/* Sticky SKU Label */}
-                    <div className="sticky left-0 z-10 bg-white p-2.5 border-r border-[#E6E4DF] w-52 shrink-0 shadow-[2px_0_4px_rgba(0,0,0,0.03)]">
-                      <Link
-                        href={`/erp/inventory?sku=${g.id}`}
-                        className="font-mono font-bold text-xs text-[#6B1D2F] hover:underline"
                       >
-                        {g.id}
-                      </Link>
-                      <div className="text-[11px] text-slate-700 font-medium line-clamp-1 mt-0.5">{g.productName}</div>
-                    </div>
+                        {d}
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {rows.map((row) => (
+                  <tr key={row.garmentId} className="hover:bg-slate-50/70 transition-colors">
+                    {/* Sticky SKU & Name column */}
+                    <td className="sticky left-0 bg-white z-10 py-2.5 px-3.5 border-r border-[#E6E4DF] shadow-[2px_0_4px_rgba(0,0,0,0.02)]">
+                      <div className="flex items-center justify-between">
+                        <Link
+                          href={`/erp/inventory/${row.garmentId}`}
+                          className="font-mono font-bold text-xs text-[#6B1D2F] hover:underline"
+                        >
+                          {row.garmentId}
+                        </Link>
+                        <span className="text-[10px] text-slate-400 font-mono">{row.rack}</span>
+                      </div>
+                      <div className="font-semibold text-slate-800 text-[11px] truncate w-44">
+                        {row.name}
+                      </div>
+                    </td>
 
-                    {/* Day cells with min-w-[40px] */}
-                    <div className="flex flex-1">
-                      {daysInMonth.map((d) => {
-                        const dayDateStr = `2026-11-${String(d).padStart(2, "0")}`;
-                        const matchBooking = gBookings.find(
-                          (b) => dayDateStr >= b.pickupDate && dayDateStr <= b.returnDueDate
-                        );
+                    {/* Day Cells */}
+                    {dayNumbers.map((d) => {
+                      const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+                      const busyBooking = row.busy.find(
+                        (b) => dateStr >= b.from && dateStr <= b.to
+                      );
+                      const isUnavailable = row.status === "UNAVAILABLE" || row.status === "DAMAGED_REPAIR";
 
-                        return (
-                          <div
-                            key={d}
-                            className={`min-w-[40px] flex-1 h-12 border-r border-[#EFECE6] relative flex items-center justify-center ${
-                              d === 8 ? "bg-amber-50/40" : ""
-                            }`}
-                          >
-                            {matchBooking && (
-                              <div
-                                onClick={() => setSelectedBookingDetails(matchBooking)}
-                                title={`${matchBooking.customerName} (${matchBooking.pickupDate} to ${matchBooking.returnDueDate})`}
-                                className={`w-full h-7 mx-0.5 rounded text-[9px] font-semibold text-white flex items-center justify-center shadow-2xs overflow-hidden cursor-pointer transition-transform hover:scale-102 ${
-                                  matchBooking.status === "OUT_ON_RENT"
-                                    ? "bg-blue-600 hover:bg-blue-700"
-                                    : "bg-amber-600 hover:bg-amber-700"
-                                }`}
-                              >
-                                {d === parseInt(matchBooking.pickupDate.split("-")[2]) ? (
-                                  <span className="truncate px-1 font-bold">{matchBooking.customerName}</span>
-                                ) : (
-                                  "•"
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                      return (
+                        <td
+                          key={d}
+                          onClick={() => {
+                            setSelectedCell({
+                              garmentId: row.garmentId,
+                              garmentName: row.name,
+                              date: dateStr,
+                              booking: busyBooking,
+                            });
+                          }}
+                          className={`min-w-[36px] max-w-[40px] h-10 border-r border-slate-100 text-center cursor-pointer p-0.5 transition-colors ${
+                            busyBooking
+                              ? busyBooking.status === "OUT_ON_RENT"
+                                ? "bg-blue-500/80 hover:bg-blue-600 text-white"
+                                : "bg-amber-500/80 hover:bg-amber-600 text-white"
+                              : isUnavailable
+                              ? "bg-slate-200/60"
+                              : "hover:bg-emerald-50/60"
+                          }`}
+                          title={
+                            busyBooking
+                              ? `${row.name} — Booked (${busyBooking.bookingId})`
+                              : `${row.name} — Available on ${dateStr}`
+                          }
+                        >
+                          {busyBooking && (
+                            <div className="w-full h-full flex items-center justify-center font-mono text-[9px] font-bold">
+                              •
+                            </div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* ========================================================= */}
-      {/* FULL DETAILS BOTTOM SHEET / MODAL                         */}
-      {/* ========================================================= */}
-      {selectedBookingDetails && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center z-50 animate-in fade-in">
-          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-2xl border border-slate-200 max-w-md w-full p-4 sm:p-6 text-xs animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
-            <div className="sm:hidden w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3" />
-
+      {/* Cell Detail / Booking Popover Modal */}
+      {selectedCell && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-sm font-bold text-slate-900">
-                  {selectedBookingDetails.id}
+              <div>
+                <span className="font-mono text-xs font-bold text-[#6B1D2F]">
+                  {selectedCell.garmentId}
                 </span>
-                <StatusBadge status={selectedBookingDetails.status} />
+                <h3 className="font-serif font-bold text-base text-slate-900 line-clamp-1">
+                  {selectedCell.garmentName}
+                </h3>
               </div>
               <button
-                onClick={() => setSelectedBookingDetails(null)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                onClick={() => setSelectedCell(null)}
+                className="text-slate-400 hover:text-slate-600"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="mt-3 space-y-2.5">
-              <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200/60 space-y-1">
-                <span className="text-[10px] text-slate-400 uppercase font-semibold">Customer</span>
-                <div className="text-xs font-semibold text-slate-900">
-                  {selectedBookingDetails.customerName}
-                </div>
-                <div className="text-[11px] text-slate-600 font-mono">
-                  +91 {selectedBookingDetails.customerPhone}
-                </div>
-              </div>
-
-              <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200/60 space-y-1">
-                <span className="text-[10px] text-slate-400 uppercase font-semibold">Costume</span>
-                <div className="font-medium text-slate-900">
-                  <span className="font-mono text-[#6B1D2F] font-bold">
-                    {selectedBookingDetails.costumeCode ||
-                      selectedBookingDetails.items[0]?.garmentUnitId}
-                  </span>{" "}
-                  — {selectedBookingDetails.items[0]?.productName}
-                </div>
-                <div className="text-[11px] text-slate-600 mt-0.5">
-                  Pickup: <strong>{selectedBookingDetails.pickupDate}</strong> · Return Due:{" "}
-                  <strong>{selectedBookingDetails.returnDueDate}</strong>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-2 bg-slate-50 rounded-lg border border-slate-200/60">
-                  <span className="text-[10px] text-slate-400">Advance Paid</span>
-                  <div className="font-semibold text-emerald-700">
-                    {formatINR(selectedBookingDetails.advancePaid)}
+            <div className="space-y-3 text-xs">
+              <div className="p-3 bg-slate-50 rounded-xl space-y-1">
+                <div>Selected Date: <strong className="font-mono">{selectedCell.date}</strong></div>
+                {selectedCell.booking ? (
+                  <>
+                    <div className="pt-1 text-rose-800 font-bold flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-rose-600" />
+                      <span>Reserved / Out on Rent</span>
+                    </div>
+                    <div className="text-[11px] text-slate-600">
+                      Booking: <strong className="font-mono">{selectedCell.booking.bookingId}</strong>
+                    </div>
+                    <div className="text-[11px] text-slate-500 font-mono">
+                      Dates: {selectedCell.booking.from} → {selectedCell.booking.to}
+                    </div>
+                  </>
+                ) : (
+                  <div className="pt-1 text-emerald-700 font-bold flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-emerald-600" />
+                    <span>Piece is Available for Rent!</span>
                   </div>
-                </div>
-                <div className="p-2 bg-slate-50 rounded-lg border border-slate-200/60">
-                  <span className="text-[10px] text-slate-400">Security Deposit</span>
-                  <div className="font-semibold text-slate-900">
-                    {formatINR(selectedBookingDetails.securityDepositTotal)}
-                  </div>
-                </div>
+                )}
               </div>
+            </div>
 
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedBookingDetails(null)}
-                  className="px-3.5 py-1.5 border border-slate-200 rounded-lg font-medium text-slate-700 hover:bg-slate-50"
-                >
-                  Close
-                </button>
+            <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+              {selectedCell.booking ? (
                 <Link
-                  href={`/erp/bookings?orderId=${selectedBookingDetails.id}`}
-                  className="px-4 py-1.5 bg-[#6B1D2F] hover:bg-[#551624] text-white font-medium rounded-lg shadow-xs"
+                  href={`/erp/bookings?orderId=${selectedCell.booking.bookingId}`}
+                  onClick={() => setSelectedCell(null)}
+                  className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-center font-semibold rounded-xl text-xs"
                 >
-                  Open in Orders
+                  View Booking
                 </Link>
-              </div>
+              ) : (
+                <Link
+                  href={`/erp/bookings/new?sku=${selectedCell.garmentId}`}
+                  onClick={() => setSelectedCell(null)}
+                  className="w-full py-2 bg-[#6B1D2F] hover:bg-[#521624] text-white text-center font-semibold rounded-xl text-xs"
+                >
+                  Book Costume Now
+                </Link>
+              )}
             </div>
           </div>
         </div>
