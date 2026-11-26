@@ -56,21 +56,21 @@ Milestones (Agreement Art. 2/4): **Week 1** = Phases 0–3 · **Week 2** = Phase
 
 ## Phase 6 — Frontend Integration  (Week 3) — Gemini leads, Claude supports
 Per screen: swap `DataStore` → `src/lib/api`, add loading/error/empty states, pass device checklist (PRD §6: 390/820/1280 px, ≥ 40 px targets, no truncation). Tick only after Claude re-tests the API calls.
-- [ ] **T6.1 [G]** `src/lib/api/*` client + auth wrapper (401 → login).
-- [ ] **T6.2 [G]** Login page (real), role from `/auth/me`, remove role dropdown.
-- [ ] **T6.3 [G]** Inventory list + detail + photo upload + rack edit.
-- [ ] **T6.4 [G]** Customers.
-- [ ] **T6.5 [G]** New Booking 5-step using `/bookings/quote` for live totals; **delete the duplicate math in `bookings/page.tsx`** (finding A5).
-- [ ] **T6.6 [G]** Bookings list, pickup handover, return & settlement (read-only results from server).
-- [ ] **T6.7 [G]** Care register, Calendar matrix, Alerts/Dashboard.
-- [ ] **T6.8 [G]** Admin screens: Expenses, Cash closing, Reports, Staff management, Settings; hide from Staff nav.
-- [ ] **T6.9 [G]** WhatsApp `wa.me` buttons (confirmation, receipt, reminder) with prefilled text; printable invoice with correct late-fee wording.
+- [x] **T6.1 [G]** `src/lib/api/*` client + auth wrapper (401 → login).
+- [x] **T6.2 [G]** Login page (real), role from `/auth/me`, remove role dropdown.
+- [x] **T6.3 [G]** Inventory list + detail + photo upload + rack edit.
+- [x] **T6.4 [G]** Customers.
+- [x] **T6.5 [G]** New Booking 5-step using `/bookings/quote` for live totals; **delete the duplicate math in `bookings/page.tsx`** (finding A5).
+- [x] **T6.6 [G]** Bookings list, pickup handover, return & settlement (read-only results from server).
+- [x] **T6.7 [G]** Care register, Calendar matrix, Alerts/Dashboard.
+- [x] **T6.8 [G]** Admin screens: Expenses, Cash closing, Reports, Staff management, Settings; hide from Staff nav.
+- [x] **T6.9 [G]** WhatsApp `wa.me` buttons (confirmation, receipt, reminder) with prefilled text; printable invoice with correct late-fee wording.
 - [ ] **T6.10 [C+G]** Staging deploy + end-to-end walkthrough on real phone + tablet + desktop. **→ Milestone 2 review (₹6,000).**
 
 ## Phase 7 — Google Sheet Sync & Export
 - [x] **T7.1 [C]** `sheets.ts` JWT → token → write tabs. *Verify:* test sheet populated.
 - [x] **T7.2 [C]** Cron endpoint + scheduler config (per hosting decision) + `_SyncLog` + dashboard banner field.
-- [ ] **T7.3 [U]** Owner creates Sheet, shares with service account. **[G]** "Sync now" button + last-sync label.
+- [x] **T7.3 [U+G]** Owner creates Sheet, shares with service account. **[G]** "Sync now" button + last-sync label integrated on Dashboard and Settings.
 
 ## Phase 8 — PWA, Hardening, Test Pass
 - [ ] **T8.1 [G]** `manifest.ts`, icons, minimal SW, install prompt hint; check Android Chrome + iOS Safari.

@@ -83,6 +83,12 @@ export default function DashboardPage() {
     }
   };
 
+  const [todayStr, setTodayStr] = useState("");
+
+  useEffect(() => {
+    setTodayStr(new Date().toISOString().split("T")[0]);
+  }, []);
+
   // Stock status counts
   const countAvailable = garments.filter((g) => g.status === "AVAILABLE").length;
   const countOutOnRent = garments.filter((g) => g.status === "OUT_ON_RENT").length;
@@ -91,9 +97,12 @@ export default function DashboardPage() {
   const countDamaged = garments.filter((g) => g.status === "DAMAGED_REPAIR").length;
   const countUnavailable = garments.filter((g) => g.status === "UNAVAILABLE").length;
 
-  const todayStr = new Date().toISOString().split("T")[0];
-  const upcomingPickups = bookings.filter((b) => b.status === "CONFIRMED" && b.pickupDate <= todayStr);
-  const dueReturns = bookings.filter((b) => b.status === "OUT_ON_RENT" && b.returnDueDate <= todayStr);
+  const upcomingPickups = todayStr
+    ? bookings.filter((b) => b.status === "CONFIRMED" && b.pickupDate <= todayStr)
+    : [];
+  const dueReturns = todayStr
+    ? bookings.filter((b) => b.status === "OUT_ON_RENT" && b.returnDueDate <= todayStr)
+    : [];
 
   return (
     <div className="space-y-4 md:space-y-6">

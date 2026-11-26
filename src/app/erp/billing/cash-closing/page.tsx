@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   BadgeAlert,
   Wallet,
@@ -9,235 +9,260 @@ import {
   AlertTriangle,
   Calendar,
   Lock,
+  Loader2,
+  History,
 } from "lucide-react";
-import { DataStore } from "@/lib/dataStore";
+import { cashApi } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
-import { CashClosingRecord } from "@/types";
+import type { CashTodayDto, CashClosingDto } from "@/types/api";
+import { useAuth } from "@/context/AuthContext";
 
 export default function CashClosingPage() {
-  const [closings, setClosings] = useState<CashClosingRecord[]>([]);
+  const { user, isAdmin } = useAuth();
+  const [todayData, setTodayData] = useState<CashTodayDto | null>(null);
+  const [closings, setClosings] = useState<CashClosingDto[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Today's Drawer Calculations
-  const [openingCash, setOpeningCash] = useState<number>(5000);
-  const [cashRental, setCashRental] = useState<number>(3800);
-  const [cashDepositIn, setCashDepositIn] = useState<number>(5000);
-  const [cashDepositOut, setCashDepositOut] = useState<number>(3000);
-  const [cashExpenses, setCashExpenses] = useState<number>(1450);
-  const [actualCashCounted, setActualCashCounted] = useState<number>(9350);
-  const [verifiedBy, setVerifiedBy] = useState("Pooja Das (Manager)");
-  const [closingNotes, setClosingNotes] = useState("All 100, 200 and 500 currency bundles verified.");
+  // Form State
+  const [actualCash, setActualCash] = useState<string>("");
+  const [closingNotes, setClosingNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    setClosings(DataStore.getCashClosings());
+  const loadCashData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [today, history] = await Promise.all([
+        cashApi.getToday(),
+        cashApi.getClosings(30),
+      ]);
+      setTodayData(today);
+      setClosings(history.closings || []);
+      if (today.closed && today.closing) {
+        setActualCash(String(today.closing.actualCash));
+        setClosingNotes(today.closing.notes || "");
+      } else {
+        setActualCash(String(today.expectedCash));
+      }
+    } catch (err) {
+      console.error("Failed to load cash data:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const expectedCash =
-    openingCash + cashRental + cashDepositIn - cashDepositOut - cashExpenses;
-  const differenceVariance = actualCashCounted - expectedCash;
-  const isBalanced = differenceVariance === 0;
+  useEffect(() => {
+    loadCashData();
+  }, [loadCashData]);
 
-  const handleSaveClosing = () => {
-    const newRecord = DataStore.saveCashClosing({
-      date: new Date().toISOString().split("T")[0],
-      openingCash,
-      cashRentalReceipts: cashRental,
-      cashSecurityDepositsReceived: cashDepositIn,
-      cashDepositRefundsGiven: cashDepositOut,
-      cashExpensesPaid: cashExpenses,
-      expectedCashInDrawer: expectedCash,
-      actualCashCounted,
-      differenceVariance,
-      closingNotes,
-      verifiedBy,
-      status: isBalanced ? "BALANCED" : "VARIANCE_RECORDED",
-    });
+  const handleSaveClosing = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!actualCash) {
+      alert("Please enter the actual physical cash amount counted in the drawer.");
+      return;
+    }
 
-    setClosings(DataStore.getCashClosings());
-    alert(`Cash drawer closing for today saved! Status: ${newRecord.status}`);
+    setSubmitting(true);
+    try {
+      await cashApi.close({
+        actualCash: Number(actualCash),
+        notes: closingNotes.trim() || undefined,
+      });
+
+      alert("Cash closing saved and frozen for today!");
+      await loadCashData();
+    } catch (err: any) {
+      alert(err?.message || "Failed to save cash closing");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
+  const countedNum = Number(actualCash) || 0;
+  const variance = todayData ? countedNum - todayData.expectedCash : 0;
+  const isBalanced = variance === 0;
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center">
+        <Loader2 className="w-6 h-6 animate-spin text-[#6B1D2F] mx-auto mb-2" />
+        <div className="text-xs text-slate-500">Reconciling today&apos;s cash payments and drawer totals...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-2 text-xs text-[#8C6F3B] font-semibold uppercase tracking-wider mb-1">
-          <BadgeAlert className="w-4 h-4 text-[#4B1835]" />
-          <span>Daily Till Reconciliation &amp; Vault Handover</span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+        <div>
+          <span className="text-xs font-mono text-[#6B1D2F] font-bold">
+            Daily Financial Audit
+          </span>
+          <h1 className="font-serif font-bold text-xl md:text-2xl text-slate-900 tracking-tight mt-0.5">
+            Daily Cash Drawer Closing
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Automated reconciliation of counter cash in, security deposit refunds &amp; shop cash expenses.
+          </p>
         </div>
-        <h1 className="text-2xl font-serif font-bold text-[#27222A]">Daily Cash Closing</h1>
-        <p className="text-xs text-gray-500 mt-0.5">
-          Verify physical currency notes in the counter drawer against rentals collected, security deposits held/refunded, and cash expenses.
-        </p>
+
+        {todayData?.closed && (
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-semibold">
+            <Lock className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Today&apos;s Drawer Closed &amp; Frozen</span>
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Interactive Closing Calculator */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-5 text-xs">
-          <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD] flex items-center justify-between">
-            <span>Today&apos;s Cash Drawer Reconciliation (08 Nov 2026)</span>
-            <span className="text-[11px] text-[#B89558] font-bold">Counter #1</span>
+      {/* Drawer Breakdown Grid */}
+      {todayData && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+            <span className="text-[11px] text-slate-500 font-medium block">Opening Cash</span>
+            <div className="font-mono font-bold text-lg text-slate-900 mt-0.5">
+              {formatINR(todayData.openingCash)}
+            </div>
+            <span className="text-[10px] text-slate-400">from yesterday closing</span>
           </div>
 
+          <div className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+            <span className="text-[11px] text-emerald-700 font-medium block">Cash Inflows</span>
+            <div className="font-mono font-bold text-lg text-emerald-800 mt-0.5">
+              +{formatINR(todayData.cashIn)}
+            </div>
+            <span className="text-[10px] text-slate-400">rentals &amp; deposits in</span>
+          </div>
+
+          <div className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+            <span className="text-[11px] text-rose-700 font-medium block">Cash Outflows</span>
+            <div className="font-mono font-bold text-lg text-rose-800 mt-0.5">
+              −{formatINR(todayData.cashRefunds + todayData.cashExpenses)}
+            </div>
+            <span className="text-[10px] text-slate-400">refunds + expenses</span>
+          </div>
+
+          <div className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+            <span className="text-[11px] text-slate-600 font-bold block">Expected in Drawer</span>
+            <div className="font-mono font-bold text-lg text-[#6B1D2F] mt-0.5">
+              {formatINR(todayData.expectedCash)}
+            </div>
+            <span className="text-[10px] text-slate-400">system computed</span>
+          </div>
+        </div>
+      )}
+
+      {/* Form: Actual Cash Counted & Verification */}
+      <div className="bg-white rounded-2xl border border-[#E6E4DF] p-6 shadow-2xs space-y-4">
+        <h2 className="font-bold text-slate-900 text-sm border-b border-slate-100 pb-2">
+          Physical Currency Count &amp; Reconciliation
+        </h2>
+
+        <form onSubmit={handleSaveClosing} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                Opening Cash Balance (₹)
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Actual Physical Cash Counted (₹) *
               </label>
               <input
                 type="number"
-                value={openingCash}
-                onChange={(e) => setOpeningCash(Number(e.target.value) || 0)}
-                className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-bold font-mono"
+                value={actualCash}
+                disabled={todayData?.closed}
+                onChange={(e) => setActualCash(e.target.value)}
+                placeholder="Count all notes in drawer..."
+                className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-bold text-base text-slate-900 focus:outline-none focus:border-[#6B1D2F]"
+                required
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                (+) Cash Rental Receipts Today (₹)
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Variance / Discrepancy
               </label>
-              <input
-                type="number"
-                value={cashRental}
-                onChange={(e) => setCashRental(Number(e.target.value) || 0)}
-                className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-bold font-mono text-emerald-700"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                (+) Cash Deposits Collected (₹)
-              </label>
-              <input
-                type="number"
-                value={cashDepositIn}
-                onChange={(e) => setCashDepositIn(Number(e.target.value) || 0)}
-                className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-bold font-mono text-[#B89558]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                (−) Cash Deposits Refunded (₹)
-              </label>
-              <input
-                type="number"
-                value={cashDepositOut}
-                onChange={(e) => setCashDepositOut(Number(e.target.value) || 0)}
-                className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-bold font-mono text-amber-700"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                (−) Cash Expenses Paid Out (₹)
-              </label>
-              <input
-                type="number"
-                value={cashExpenses}
-                onChange={(e) => setCashExpenses(Number(e.target.value) || 0)}
-                className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-bold font-mono text-rose-700"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                Physical Cash Counted in Drawer (₹) *
-              </label>
-              <input
-                type="number"
-                value={actualCashCounted}
-                onChange={(e) => setActualCashCounted(Number(e.target.value) || 0)}
-                className="w-full p-2.5 bg-white border-2 border-[#4B1835] rounded-xl font-black font-mono text-base text-[#4B1835]"
-              />
-            </div>
-          </div>
-
-          {/* Mathematical Reconciliation Box */}
-          <div className="p-4 bg-[#FAF5EB] rounded-xl border border-[#E8DFD1] space-y-3">
-            <div className="flex justify-between items-center text-xs font-bold text-gray-700">
-              <span>Expected Cash in Drawer:</span>
-              <span className="font-mono text-sm text-gray-900">{formatINR(expectedCash)}</span>
-            </div>
-            <div className="flex justify-between items-center text-xs font-bold text-gray-700">
-              <span>Actual Physical Cash Counted:</span>
-              <span className="font-mono text-sm text-[#4B1835]">{formatINR(actualCashCounted)}</span>
-            </div>
-            <div
-              className={`p-3 rounded-lg border flex items-center justify-between font-bold text-xs ${
-                isBalanced
-                  ? "bg-emerald-50 text-emerald-800 border-emerald-300"
-                  : "bg-rose-50 text-rose-800 border-rose-300"
-              }`}
-            >
-              <span className="flex items-center gap-1.5">
-                {isBalanced ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                ) : (
-                  <AlertTriangle className="w-4 h-4 text-rose-600" />
-                )}
-                <span>{isBalanced ? "Drawer Exactly Balanced (Zero Variance)" : "Cash Discrepancy Detected"}</span>
-              </span>
-              <span className="font-mono text-sm">
-                Variance: {differenceVariance >= 0 ? `+${formatINR(differenceVariance)}` : formatINR(differenceVariance)}
-              </span>
+              <div
+                className={`p-2.5 rounded-xl border flex items-center justify-between font-mono font-bold text-sm ${
+                  isBalanced
+                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                    : variance > 0
+                    ? "bg-blue-50 text-blue-900 border-blue-200"
+                    : "bg-rose-50 text-rose-900 border-rose-200"
+                }`}
+              >
+                <span>{isBalanced ? "Drawer Balanced (Exact Match)" : variance > 0 ? "Surplus Cash" : "Shortage"}</span>
+                <span>{formatINR(variance)}</span>
+              </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-              Closing Signoff Notes
+            <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+              Closing &amp; Currency Bundle Remarks
             </label>
             <input
               type="text"
               value={closingNotes}
+              disabled={todayData?.closed}
               onChange={(e) => setClosingNotes(e.target.value)}
-              className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl"
+              placeholder="e.g. 500 x 10, 200 x 15 notes. Counted and verified by owner."
+              className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl"
             />
           </div>
 
-          <div className="pt-3 border-t border-[#EFE9DD] flex items-center justify-between">
-            <span className="text-gray-500">
-              Verified &amp; Sealed by: <strong>{verifiedBy}</strong>
-            </span>
-            <button
-              onClick={handleSaveClosing}
-              className="bg-[#4B1835] hover:bg-[#320F23] text-white font-bold px-6 py-2.5 rounded-xl shadow-xs transition-colors flex items-center gap-2"
-            >
-              <Lock className="w-4 h-4 text-[#D4B67F]" />
-              <span>Save &amp; Lock Cash Closing</span>
-            </button>
-          </div>
-        </div>
+          {!todayData?.closed && (
+            <div className="pt-2 flex justify-end">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="px-6 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-bold rounded-xl shadow-xs text-xs flex items-center gap-2"
+              >
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" /> : <CheckCircle2 className="w-4 h-4" />}
+                <span>Freeze &amp; Save Daily Closing</span>
+              </button>
+            </div>
+          )}
+        </form>
+      </div>
 
-        {/* Right: Historical Closings Log */}
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-5 shadow-xs space-y-3 text-xs">
-          <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD]">
-            Recent Daily Closings
+      {/* Past 30 Days Cash Closings History */}
+      <div className="bg-white rounded-2xl border border-[#E6E4DF] p-6 shadow-2xs space-y-4">
+        <h2 className="font-bold text-slate-900 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+          <History className="w-4 h-4 text-slate-500" />
+          <span>Past Cash Drawer Closings Ledger ({closings.length})</span>
+        </h2>
+
+        {closings.length === 0 ? (
+          <div className="text-center py-8 text-xs text-slate-400">
+            No previous cash closings saved yet.
           </div>
-          <div className="space-y-3">
+        ) : (
+          <div className="divide-y divide-slate-100 text-xs">
             {closings.map((c) => (
-              <div key={c.id} className="p-3 bg-[#FBF9F5] rounded-xl border border-[#E8DFD1]">
-                <div className="flex justify-between font-bold text-gray-900">
-                  <span>{formatDate(c.date)}</span>
-                  <span
-                    className={`text-[10px] px-2 py-0.2 rounded-full font-bold ${
-                      c.status === "BALANCED"
-                        ? "bg-emerald-100 text-emerald-800"
-                        : "bg-rose-100 text-rose-800"
+              <div key={c.id} className="py-3 flex items-center justify-between">
+                <div>
+                  <span className="font-mono font-bold text-slate-900">{formatDate(c.date)}</span>
+                  <div className="text-[11px] text-slate-500 mt-0.5">
+                    Verified by: <strong className="text-slate-700">{c.verifiedBy}</strong>
+                    {c.notes && <span> · {c.notes}</span>}
+                  </div>
+                </div>
+
+                <div className="text-right font-mono">
+                  <div className="font-bold text-slate-900">{formatINR(c.actualCash)}</div>
+                  <div
+                    className={`text-[10px] font-semibold ${
+                      c.variance === 0
+                        ? "text-emerald-700"
+                        : c.variance > 0
+                        ? "text-blue-700"
+                        : "text-rose-700"
                     }`}
                   >
-                    {c.status}
-                  </span>
+                    Var: {formatINR(c.variance)}
+                  </div>
                 </div>
-                <div className="text-[11px] text-gray-500 mt-1">
-                  Counted: <strong>{formatINR(c.actualCashCounted)}</strong> • Expected:{" "}
-                  <strong>{formatINR(c.expectedCashInDrawer)}</strong>
-                </div>
-                <div className="text-[10px] text-gray-400 mt-1">Verified: {c.verifiedBy}</div>
               </div>
             ))}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

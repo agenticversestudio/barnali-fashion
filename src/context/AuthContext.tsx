@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { authApi } from "@/lib/api";
 import type { SessionUser, Role } from "@/types/api";
 import { DataStore } from "@/lib/dataStore";
@@ -28,7 +28,6 @@ const AuthContext = createContext<AuthContextType>({
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const pathname = usePathname();
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -44,13 +43,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch {
       setUser(null);
-      if (pathname.startsWith("/erp") && pathname !== "/erp/login") {
-        router.push(`/erp/login?next=${encodeURIComponent(pathname)}`);
+      if (typeof window !== "undefined") {
+        const path = window.location.pathname;
+        if (path.startsWith("/erp") && path !== "/erp/login") {
+          router.push(`/erp/login?next=${encodeURIComponent(path)}`);
+        }
       }
     } finally {
       setLoading(false);
     }
-  }, [pathname, router]);
+  }, [router]);
 
   useEffect(() => {
     refreshUser();

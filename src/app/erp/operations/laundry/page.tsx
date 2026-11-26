@@ -39,17 +39,23 @@ export default function StitchingAndDryCleanPage() {
   const [createGarmentId, setCreateGarmentId] = useState("");
   const [vendorName, setVendorName] = useState("Bargarh Modern Dry Cleaners");
   const [subType, setSubType] = useState("Steam Wash & Press");
-  const [outDate, setOutDate] = useState(new Date().toISOString().split("T")[0]);
-  const [expectedDate, setExpectedDate] = useState(
-    new Date(Date.now() + 86400000 * 3).toISOString().split("T")[0]
-  );
+  const [outDate, setOutDate] = useState("");
+  const [expectedDate, setExpectedDate] = useState("");
   const [cost, setCost] = useState("350");
   const [notes, setNotes] = useState("");
 
   // Receive Modal
   const [receiveJob, setReceiveJob] = useState<CareJobDto | null>(null);
   const [receiving, setReceiving] = useState(false);
-  const [rcvDate, setRcvDate] = useState(new Date().toISOString().split("T")[0]);
+  const [rcvDate, setRcvDate] = useState("");
+
+  useEffect(() => {
+    const nowStr = new Date().toISOString().split("T")[0];
+    const inThreeDays = new Date(Date.now() + 86400000 * 3).toISOString().split("T")[0];
+    setOutDate(nowStr);
+    setRcvDate(nowStr);
+    setExpectedDate(inThreeDays);
+  }, []);
   const [nextStatus, setNextStatus] = useState<"AVAILABLE" | "RETURNED_CLEANING" | "DAMAGED_REPAIR">(
     "AVAILABLE"
   );

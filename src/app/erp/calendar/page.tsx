@@ -30,6 +30,11 @@ export default function AvailabilityCalendarPage() {
   // Date range navigation: Month / Year
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(11); // 11 = November
+  const [todayStr, setTodayStr] = useState("");
+
+  useEffect(() => {
+    setTodayStr(new Date().toISOString().split("T")[0]);
+  }, []);
   const [selectedCell, setSelectedCell] = useState<{
     garmentId: string;
     garmentName: string;
@@ -175,7 +180,7 @@ export default function AvailabilityCalendarPage() {
                   </th>
                   {dayNumbers.map((d) => {
                     const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-                    const isToday = dateStr === new Date().toISOString().split("T")[0];
+                    const isToday = todayStr ? dateStr === todayStr : false;
                     return (
                       <th
                         key={d}

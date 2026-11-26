@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -30,7 +30,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { BookingDto, BookingStatus, PayMode, Settlement, NextAction } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 
-export default function BookingsPage() {
+function BookingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAdmin } = useAuth();
@@ -51,8 +51,12 @@ export default function BookingsPage() {
 
   // --- RETURN & SETTLEMENT MODAL STATE ---
   const [returnBooking, setReturnBooking] = useState<BookingDto | null>(null);
-  const [actualReturnDate, setActualReturnDate] = useState(new Date().toISOString().split("T")[0]);
+  const [actualReturnDate, setActualReturnDate] = useState("");
   const [damageCharge, setDamageCharge] = useState<number>(0);
+
+  useEffect(() => {
+    setActualReturnDate(new Date().toISOString().split("T")[0]);
+  }, []);
   const [cleaningCharge, setCleaningCharge] = useState<number>(0);
   const [returnNotes, setReturnNotes] = useState("");
   const [nextAction, setNextAction] = useState<NextAction>("AVAILABLE");
@@ -804,5 +808,13 @@ export default function BookingsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function BookingsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-gray-400">Loading bookings...</div>}>
+      <BookingsContent />
+    </Suspense>
   );
 }

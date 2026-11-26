@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -28,7 +28,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { GarmentDetailDto, GarmentStatus } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 
-export default function GarmentDetailPage() {
+function GarmentDetailContent() {
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
@@ -500,5 +500,13 @@ export default function GarmentDetailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GarmentDetailPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-gray-400">Loading garment unit...</div>}>
+      <GarmentDetailContent />
+    </Suspense>
   );
 }

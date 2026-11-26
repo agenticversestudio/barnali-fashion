@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -18,7 +18,7 @@ import {
 import { authApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("next") || "/erp/dashboard";
@@ -222,5 +222,13 @@ export default function LoginPage() {
         In front of LIC Office, near Keshariya Restaurant, Bargarh, Odisha 768028 • Phone: +91 7978256488
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-xs text-gray-400">Loading Barnali ERP...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

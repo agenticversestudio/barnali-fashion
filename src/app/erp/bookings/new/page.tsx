@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -25,7 +25,7 @@ import { bookingsApi, customersApi, garmentsApi } from "@/lib/api";
 import { formatINR } from "@/lib/utils";
 import type { CustomerDto, GarmentDto, QuoteResponse, PayMode, ConflictInfo } from "@/types/api";
 
-export default function NewBookingWizardPage() {
+function NewBookingWizardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -47,15 +47,22 @@ export default function NewBookingWizardPage() {
   const [customerCity, setCustomerCity] = useState("Bargarh");
 
   // Dates & Event State (Default: Pickup tomorrow, event in 2 days, return in 4 days)
-  const today = new Date().toISOString().split("T")[0];
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
-  const inTwoDays = new Date(Date.now() + 86400000 * 2).toISOString().split("T")[0];
-  const inFourDays = new Date(Date.now() + 86400000 * 4).toISOString().split("T")[0];
-
   const [eventName, setEventName] = useState("Wedding Reception");
-  const [eventDate, setEventDate] = useState(inTwoDays);
-  const [pickupDate, setPickupDate] = useState(tomorrow);
-  const [returnDueDate, setReturnDueDate] = useState(inFourDays);
+  const [eventDate, setEventDate] = useState("");
+  const [pickupDate, setPickupDate] = useState("");
+  const [returnDueDate, setReturnDueDate] = useState("");
+  const [today, setToday] = useState("");
+
+  useEffect(() => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+    const inTwoDays = new Date(Date.now() + 86400000 * 2).toISOString().split("T")[0];
+    const inFourDays = new Date(Date.now() + 86400000 * 4).toISOString().split("T")[0];
+    setToday(todayStr);
+    setPickupDate(tomorrow);
+    setEventDate(inTwoDays);
+    setReturnDueDate(inFourDays);
+  }, []);
 
   // Garments & Line Items
   const [selectedGarmentIds, setSelectedGarmentIds] = useState<string[]>([]);
@@ -846,5 +853,13 @@ export default function NewBookingWizardPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function NewBookingWizardPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-gray-400">Loading booking wizard...</div>}>
+      <NewBookingWizardContent />
+    </Suspense>
   );
 }

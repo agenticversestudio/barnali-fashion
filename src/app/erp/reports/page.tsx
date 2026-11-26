@@ -1,45 +1,56 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   TrendingUp,
-  Shirt,
-  Calendar,
-  Wallet,
   Download,
   Printer,
-  Sparkles,
   Award,
+  Wallet,
+  Calendar,
+  Layers,
+  Percent,
+  Coins,
+  Loader2,
+  FileSpreadsheet,
 } from "lucide-react";
-import { DataStore } from "@/lib/dataStore";
+import { reportsApi } from "@/lib/api";
 import { formatINR } from "@/lib/utils";
-import { Booking, GarmentUnit } from "@/types";
+import type { ReportSummary } from "@/types/api";
 
 export default function ReportsPage() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [garments, setGarments] = useState<GarmentUnit[]>([]);
+  const [summary, setSummary] = useState<ReportSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Date filters (defaults to start of current month to today, set in useEffect)
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
+  const loadSummary = useCallback(async (from?: string, to?: string) => {
+    setLoading(true);
+    try {
+      const f = from || fromDate;
+      const t = to || toDate;
+      if (!f || !t) return;
+      const data = await reportsApi.getSummary(f, t);
+      setSummary(data);
+    } catch (err) {
+      console.error("Failed to load report summary:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [fromDate, toDate]);
 
   useEffect(() => {
-    setBookings(DataStore.getBookings());
-    setGarments(DataStore.getGarments());
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      .toISOString()
+      .split("T")[0];
+    const today = now.toISOString().split("T")[0];
+    setFromDate(startOfMonth);
+    setToDate(today);
+    loadSummary(startOfMonth, today);
   }, []);
-
-  const totalRevenue = bookings
-    .filter((b) => b.status !== "CANCELLED")
-    .reduce((acc, b) => acc + b.rentalTotal, 0);
-
-  const totalDeposits = bookings
-    .filter((b) => b.depositStatus === "HELD")
-    .reduce((acc, b) => acc + b.securityDepositTotal, 0);
-
-  // Category breakdown
-  const categoryStats = [
-    { name: "Bridal Lehenga", count: 9, revenue: 32500, share: "42%" },
-    { name: "Groom Sherwani", count: 7, revenue: 21600, share: "28%" },
-    { name: "Party Gown", count: 4, revenue: 10400, share: "13%" },
-    { name: "Silk Saree", count: 6, revenue: 8800, share: "11%" },
-    { name: "Indo-Western & Kids", count: 9, revenue: 4500, share: "6%" },
-  ];
 
   return (
     <div className="space-y-6">
@@ -53,100 +64,233 @@ export default function ReportsPage() {
           <h1 className="text-2xl font-serif font-bold text-[#27222A]">Business Analytics &amp; Reports</h1>
         </div>
 
-        <button
-          onClick={() => window.print()}
-          className="bg-[#4B1835] hover:bg-[#320F23] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs flex items-center gap-2 transition-all"
-        >
-          <Printer className="w-4 h-4 text-[#D4B67F]" />
-          <span>Print Monthly Report</span>
-        </button>
-      </div>
-
-      {/* Top Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-        <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs">
-          <div className="text-gray-400 font-semibold uppercase text-[10px]">
-            Total Rental Revenue (Oct - Nov 2026)
-          </div>
-          <div className="text-3xl font-bold text-[#4B1835] mt-1">{formatINR(totalRevenue)}</div>
-          <div className="text-emerald-700 text-[11px] font-semibold mt-1">
-            ↑ 24% increase compared to preceding festival season
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs">
-          <div className="text-gray-400 font-semibold uppercase text-[10px]">
-            Active Deposit Liability (Held)
-          </div>
-          <div className="text-3xl font-bold text-[#B89558] mt-1">{formatINR(totalDeposits)}</div>
-          <div className="text-gray-500 text-[11px] mt-1">100% segregated in vault reserve</div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs">
-          <div className="text-gray-400 font-semibold uppercase text-[10px]">
-            Average Rental Duration
-          </div>
-          <div className="text-3xl font-bold text-gray-900 mt-1">3.4 Days</div>
-          <div className="text-gray-500 text-[11px] mt-1">Optimal 24h post-event turnaround</div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => window.print()}
+            className="bg-[#FAF5EB] hover:bg-[#F3EAD9] text-[#4B1835] border border-[#E8DFD1] text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+          >
+            <Printer className="w-4 h-4 text-[#B89558]" />
+            <span>Print Report</span>
+          </button>
         </div>
       </div>
 
-      {/* Category Performance Breakdown */}
-      <div className="bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-4">
-        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD]">
-          Category-wise Rental Turnover &amp; Volume Share
+      {/* Date Range Selector & CSV Export Links */}
+      <div className="no-print bg-white p-4 rounded-2xl border border-[#EFE9DD] shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 text-xs">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Calendar className="w-4 h-4 text-[#4B1835]" />
+          <span className="font-bold text-gray-700">Period:</span>
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="p-1.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-mono text-xs"
+          />
+          <span className="text-gray-400">to</span>
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="p-1.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-mono text-xs"
+          />
+          <button
+            onClick={() => loadSummary()}
+            className="px-3 py-1.5 bg-[#4B1835] text-white rounded-lg font-bold hover:bg-[#320F23] cursor-pointer"
+          >
+            Apply
+          </button>
         </div>
 
-        <div className="space-y-4">
-          {categoryStats.map((c) => (
-            <div key={c.name} className="space-y-1 text-xs">
-              <div className="flex justify-between font-bold text-gray-800">
-                <span>{c.name} ({c.count} physical units)</span>
-                <span className="font-mono text-[#4B1835]">
-                  {formatINR(c.revenue)} ({c.share})
-                </span>
+        {/* CSV Export Links */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-gray-400 font-semibold text-[11px]">Download Raw CSV:</span>
+          <a
+            href={reportsApi.getExportUrl("bookings")}
+            download
+            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1"
+          >
+            <Download className="w-3 h-3 text-[#B89558]" />
+            <span>Bookings</span>
+          </a>
+          <a
+            href={reportsApi.getExportUrl("payments")}
+            download
+            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1"
+          >
+            <Download className="w-3 h-3 text-[#B89558]" />
+            <span>Payments</span>
+          </a>
+          <a
+            href={reportsApi.getExportUrl("expenses")}
+            download
+            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1"
+          >
+            <Download className="w-3 h-3 text-[#B89558]" />
+            <span>Expenses</span>
+          </a>
+          <a
+            href={reportsApi.getExportUrl("garments")}
+            download
+            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1"
+          >
+            <Download className="w-3 h-3 text-[#B89558]" />
+            <span>Garments</span>
+          </a>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-12 text-center text-xs text-gray-500">
+          <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+          Aggregating financial and asset utilization analytics...
+        </div>
+      ) : !summary ? (
+        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-12 text-center text-xs text-gray-400">
+          Failed to load summary.
+        </div>
+      ) : (
+        <>
+          {/* Top 3 Primary Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
+            <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs">
+              <div className="text-gray-400 font-semibold uppercase text-[10px]">
+                Total Turnover Revenue
               </div>
-              <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-[#4B1835] to-[#B89558] rounded-full"
-                  style={{ width: c.share }}
-                ></div>
+              <div className="text-3xl font-bold text-[#4B1835] mt-1 font-mono">
+                {formatINR(summary.revenue.total)}
+              </div>
+              <div className="text-gray-500 text-[11px] mt-1">
+                Net Profit: <strong className="text-emerald-700">{formatINR(summary.profit)}</strong>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Highest ROI Physical Units */}
-      <div className="bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-4 text-xs">
-        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD] flex items-center gap-2">
-          <Award className="w-4 h-4 text-[#B89558]" />
-          <span>Top Performing Physical Garment Units (Most Rented in Bargarh)</span>
-        </div>
+            <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs">
+              <div className="text-gray-400 font-semibold uppercase text-[10px]">
+                Store Expenses
+              </div>
+              <div className="text-3xl font-bold text-rose-700 mt-1 font-mono">
+                {formatINR(summary.expenses.total)}
+              </div>
+              <div className="text-gray-500 text-[11px] mt-1">
+                Across {summary.expenses.byCategory.length} categories
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-[#FAF5EB] rounded-xl border border-[#E8DFD1]">
-            <div className="font-mono font-bold text-[#4B1835] text-sm">BF-LH-001</div>
-            <div className="font-bold text-gray-900 mt-1">Royal Zardozi Crimson Velvet Lehenga</div>
-            <div className="text-[11px] text-gray-500 mt-1">Total Rentals: 6 times</div>
-            <div className="text-emerald-700 font-bold mt-2">Earned: ₹27,000 (Purchase: ₹38,000)</div>
+            <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs">
+              <div className="text-gray-400 font-semibold uppercase text-[10px]">
+                Active Deposit Liability
+              </div>
+              <div className="text-3xl font-bold text-[#B89558] mt-1 font-mono">
+                {formatINR(summary.depositsHeld)}
+              </div>
+              <div className="text-gray-500 text-[11px] mt-1">Held in vault against rented items</div>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs">
+              <div className="text-gray-400 font-semibold uppercase text-[10px]">
+                Garment Fleet Utilisation
+              </div>
+              <div className="text-3xl font-bold text-gray-900 mt-1 font-mono">
+                {summary.utilisation.percent}%
+              </div>
+              <div className="text-gray-500 text-[11px] mt-1">
+                {summary.utilisation.bookedDays} booked / {summary.utilisation.availableDays} active days
+              </div>
+            </div>
           </div>
 
-          <div className="p-4 bg-[#FAF5EB] rounded-xl border border-[#E8DFD1]">
-            <div className="font-mono font-bold text-[#4B1835] text-sm">BF-JW-001</div>
-            <div className="font-bold text-gray-900 mt-1">Kundan &amp; Pearl Heritage Bridal Choker</div>
-            <div className="text-[11px] text-gray-500 mt-1">Total Rentals: 9 times</div>
-            <div className="text-emerald-700 font-bold mt-2">Earned: ₹13,500 (100% Breakeven Exceeded)</div>
+          {/* Revenue Breakdown by Head */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white rounded-2xl border border-[#EFE9DD] p-5 shadow-xs space-y-3 text-xs">
+              <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD] flex items-center justify-between">
+                <span>Revenue Breakdown by Stream</span>
+                <span className="font-mono text-[#4B1835] font-bold">{formatINR(summary.revenue.total)}</span>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between py-1 border-b border-gray-100">
+                  <span className="text-gray-600">Base Garment Rental:</span>
+                  <span className="font-mono font-bold text-gray-900">{formatINR(summary.revenue.rental)}</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-gray-100">
+                  <span className="text-gray-600">Dry Cleaning Charges:</span>
+                  <span className="font-mono font-bold text-gray-900">{formatINR(summary.revenue.dryClean)}</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-gray-100">
+                  <span className="text-gray-600">Transit &amp; Delivery:</span>
+                  <span className="font-mono font-bold text-gray-900">{formatINR(summary.revenue.transit)}</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-gray-100">
+                  <span className="text-gray-600">Late Fees Collected (15%/day):</span>
+                  <span className="font-mono font-bold text-amber-700">{formatINR(summary.revenue.lateFees)}</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-gray-100">
+                  <span className="text-gray-600">Damage &amp; Deep-Stain Deductions:</span>
+                  <span className="font-mono font-bold text-rose-700">{formatINR(summary.revenue.damageAndCleaning)}</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span className="text-gray-600">Cancellation Retentions:</span>
+                  <span className="font-mono font-bold text-gray-700">{formatINR(summary.revenue.cancellationIncome)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Expenses by Category */}
+            <div className="bg-white rounded-2xl border border-[#EFE9DD] p-5 shadow-xs space-y-3 text-xs">
+              <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD] flex items-center justify-between">
+                <span>Expenses by Category</span>
+                <span className="font-mono text-rose-700 font-bold">{formatINR(summary.expenses.total)}</span>
+              </div>
+
+              {summary.expenses.byCategory.length === 0 ? (
+                <div className="py-8 text-center text-gray-400">No expenses recorded for this period.</div>
+              ) : (
+                <div className="space-y-2">
+                  {summary.expenses.byCategory.map((cat) => (
+                    <div key={cat.category} className="flex justify-between py-1 border-b border-gray-100">
+                      <span className="text-gray-700 font-medium">{cat.category}</span>
+                      <span className="font-mono font-bold text-gray-900">{formatINR(cat.amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="p-4 bg-[#FAF5EB] rounded-xl border border-[#E8DFD1]">
-            <div className="font-mono font-bold text-[#4B1835] text-sm">BF-SH-001</div>
-            <div className="font-bold text-gray-900 mt-1">Maharaja Ivory Raw Silk Sherwani</div>
-            <div className="text-[11px] text-gray-500 mt-1">Total Rentals: 4 times</div>
-            <div className="text-emerald-700 font-bold mt-2">Earned: ₹15,200 (Purchase: ₹32,000)</div>
+          {/* Highest Earning Physical Garments */}
+          <div className="bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-4 text-xs">
+            <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Award className="w-4 h-4 text-[#B89558]" />
+                <span>Top Performing Physical Garment Assets</span>
+              </div>
+              <span className="text-gray-400 text-xs font-normal">Ranked by rental turnover</span>
+            </div>
+
+            {summary.topGarments.length === 0 ? (
+              <div className="py-6 text-center text-gray-400">No garment rental data recorded for this period.</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {summary.topGarments.map((g, idx) => (
+                  <div key={g.garmentId} className="p-4 bg-[#FAF5EB] rounded-xl border border-[#E8DFD1] space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-bold text-[#4B1835] text-sm">{g.garmentId}</span>
+                      <span className="bg-[#4B1835] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        #{idx + 1}
+                      </span>
+                    </div>
+                    <div className="font-bold text-gray-900">{g.name}</div>
+                    <div className="text-[11px] text-gray-500">Rented: {g.timesRented} times</div>
+                    <div className="text-emerald-700 font-bold font-mono text-sm pt-1">
+                      Turnover: {formatINR(g.revenue)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }
