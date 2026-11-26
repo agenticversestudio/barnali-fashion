@@ -45,3 +45,29 @@ All 29 routes responded with **HTTP 200 OK**:
 - **Test E: Return & Deposit Math**: Verified formula `Deposit Held (₹5,000) - Damage (₹300) = Refund (₹4,700)`.
 - **Test F: Laundry & Tailor Restocking**: Approved laundry items automatically re-enter `AVAILABLE` inventory on showroom racks.
 - **Test G: Daily Till Balancing**: Validated zero variance reconciliation between expected and counted drawer cash.
+
+---
+
+# T8.4 — Acceptance criteria run (backend verification, 2026-11-26)
+
+Environment: real Turso (Mumbai), handlers called directly, ZT-prefixed data cleaned up. HEAD 41a2c48 (backend files identical to 998ccf1).
+
+| AC | Result | Evidence |
+|----|--------|----------|
+| AC1 concurrent booking | PASS | `bookings-create.test.ts` "10 parallel create calls": exactly 1×201, 9×409, 1 booking_item row, no orphan customers |
+| AC2 quote/settlement table | PASS | `bookings-lifecycle.test.ts` + `pricing.test.ts` hand-calculated cases (late, damage > deposit, zero deposit) |
+| AC3 client cannot set lateFee/refund | PASS | lifecycle tests: server ignores/recomputes |
+| AC4 staff 403 + no financial fields | PASS | `staff-fuzz.test.ts` auto-discovers every route; new unclassified route fails CI |
+| AC5 phone↔desktop same data | PASS by design | single Turso DB, no client store in API path. Manual check at T9.2 |
+| AC6 p95 < 500 ms | PASS (dev WAN) | `docs/PERF.md`: max 402 ms (customers search). Re-measure from Bargarh at T9.2 |
+| AC7 photo ≤ 300 KB | NOT VERIFIED live | server limit 400 KB, fake storage only. Needs R2 keys (`docs/R2_SETUP.md`) |
+| AC8 Sheets nightly/sync/CSV | NOT VERIFIED live | mocked Google. Needs service account (`docs/SHEETS_SETUP.md`) |
+| AC9 PWA install | FAIL | no `manifest`, icons or service worker in repo (T8.1 open) |
+| AC10 build/lint/tests/auth | PARTIAL | tests 301 pass / 12 opt-in skipped; `tsc` clean; build OK (Gemini + earlier). `ERP_AUTH_GUARD=1` must be set in Vercel or `/erp/*` pages are not gated (API still is) |
+| AC11 ₹0 running cost | PASS on paper | `docs/HANDOVER.md` free-tier table; Vercel Hobby non-commercial clause is a known risk |
+
+`npm run perf:audit` aborted this run: Turso socket closed mid-suite (hotspot network), not a query regression. Last clean audit (752895f): 0 unallowed full scans; no SQL changed since.
+
+## Findings for frontend (Gemini)
+- T8.5 NOT done: `DataStore` still used in `erp/operations/{pickup,returns,inspection,maintenance}`, `ErpHeader`, `MobileBottomNav`, `AuthContext` (role sync). These screens still read localStorage, not the API.
+- `scripts/set-dev-passwords.ts` added by frontend: dev only; must not run against prod.
