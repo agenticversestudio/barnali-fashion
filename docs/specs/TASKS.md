@@ -82,6 +82,6 @@ Per screen: swap `DataStore` → `src/lib/api`, add loading/error/empty states, 
 ## Phase 9 — Deployment, Handover & Training  (Week 4)
 - [ ] **T9.1 [C]** Production env vars, prod migrate, create real admin, import real catalogue via `scripts/import-csv.ts` (CSV template given to client) — **no demo data in prod**.
 - [ ] **T9.2 [C]** Production deploy; verify 200, login, booking round-trip, photo, sheet sync, cron.
-- [ ] **T9.3 [C]** Docs: `docs/HANDOVER.md` (accounts owned by whom, where data lives, how to restore, free-tier limits & what happens if exceeded, sheet is one-way), `docs/STAFF_GUIDE.md` (Hindi/Odia-friendly steps with screenshots: login, search, book, pickup, return+photo, care).
+- [x] **T9.3 [C]** Docs: `docs/HANDOVER.md` (accounts owned by whom, where data lives, how to restore, free-tier limits & what happens if exceeded, sheet is one-way), `docs/STAFF_GUIDE.md` (Hindi/Odia-friendly steps with screenshots: login, search, book, pickup, return+photo, care).
 - [ ] **T9.4 [U]** Staff training session (on-site/remote); collect feedback list.
 - [ ] **T9.5 [C]** Fix training feedback (in-scope only; extras → supplementary work order per Art. 5.3). Final sign-off. **→ Milestone 3 (₹6,000), 30-day warranty starts.**

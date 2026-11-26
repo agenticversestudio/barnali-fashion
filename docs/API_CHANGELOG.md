@@ -101,3 +101,9 @@ Staff may upload; only admin may delete. Env: `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID
 - `GET /cron/sheets` — scheduler only (`Authorization: Bearer CRON_SECRET`, no session). Runs nightly at 23:30 IST via `vercel.json`. UI must not call it.
 - Sheet is a one-way mirror (Bookings, Payments, CashClosings, Expenses, Garments, Customers, `_SyncLog`), fully rewritten on each run. Setup: `docs/SHEETS_SETUP.md`.
 - New table `sync_log` (migration `002_sync_log.sql`); run `npm run db:migrate`.
+## 2026-11-26 — Settings API + ops tooling (what the UI must know)
+
+- `GET /settings` (staff + admin) → `{ settings: SettingsDto }` = `{ lateFeePercent, bufferDays, shopName, shopAddress, shopPhone, defaultCareVendor }`. Use `shopName/shopPhone/shopAddress` for receipts and WhatsApp text; show `lateFeePercent` in the pickup reminder ("late fee = X % of rental per day") instead of hard-coding 15.
+- `PATCH /settings` (admin) — any of `lateFeePercent` (integer 0–100), `shopName` (required if sent), `shopAddress`, `shopPhone`, `defaultCareVendor`. `bufferDays` is read-only (400 if sent: the database trigger uses a fixed 1-day buffer). Changes are audited (`settings.edit`). Returns the full updated `SettingsDto`. The new late-fee % applies to returns settled from then on.
+- Responses of garment list/detail, booking list/detail, alerts, cash/today and reports/summary are unchanged in shape; they now cost ~1 database round trip (`docs/PERF.md`). New indexes `003`/`004` — run `npm run db:migrate`.
+- Operator scripts (not API): `db:backup`, `db:restore`, `db:import` (catalogue CSV), `db:wipe` (go-live reset), `perf:audit`.

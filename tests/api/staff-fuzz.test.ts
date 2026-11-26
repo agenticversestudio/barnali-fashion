@@ -24,7 +24,7 @@ const STAFF_OK = new Set([
   "POST /api/v1/bookings/quote", "GET /api/v1/bookings", "POST /api/v1/bookings", "GET /api/v1/bookings/[id]", "PATCH /api/v1/bookings/[id]",
   "POST /api/v1/bookings/[id]/pickup", "POST /api/v1/bookings/[id]/return", "POST /api/v1/bookings/[id]/payments",
   "GET /api/v1/care", "POST /api/v1/care", "POST /api/v1/care/[id]/receive",
-  "GET /api/v1/alerts",
+  "GET /api/v1/alerts", "GET /api/v1/settings",
   "POST /api/v1/photos/presign", "POST /api/v1/photos",
 ]);
 /** callable without a session */

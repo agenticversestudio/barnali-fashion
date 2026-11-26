@@ -14,4 +14,7 @@
 | Last-admin protection (cannot demote/disable self or last admin) | done, tested | users PATCH |
 | Audit log for user create/update/reset/revoke (money edits in Phase 3) | done | `audit.ts` |
 | Secrets only in `.env.local` / Vercel env, never committed | `.gitignore` covers `.env*` | |
-| Staff fuzz test over every route (AC4) | planned T4.6 | |
+| Staff fuzz test over every route (AC4); a route added without being classified fails the test | done | `tests/api/staff-fuzz.test.ts` |
+| Cron endpoint needs `Authorization: Bearer CRON_SECRET` (constant-time compare, refuses if secret unset/short) | done, tested | `api/v1/cron/sheets` |
+| Photos: private bucket, short-lived signed URLs, size/type/count limits, object existence + size verified at register | done, tested | `storage.ts`, `photos.ts` |
+| Settings changes (late-fee %) audited; backups contain PII, kept out of git | done | `settings.ts`, `.gitignore` |
