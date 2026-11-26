@@ -23,14 +23,14 @@ Screen names may differ by a word or two from what you see on your phone; the st
 
 **English**
 1. Open the app from the icon on your phone's home screen (or the shop link in the browser).
-2. Type your **username** and **password** (given by the owner) → **Log in**.
+2. Type your **username** and **password** (given by the owner) → **Login**.
 3. Stay logged in on the shop phone. Use **Log out** when you use someone else's device.
 4. **5 wrong passwords = account locked for 15 minutes.** Wait, or ask the owner to reset your password.
 5. Forgot password? Only the owner can reset it. Never share your password; every action is recorded under your name.
 
 **हिन्दी**
 1. फोन की होम स्क्रीन के आइकन से ऐप खोलें (या ब्राउज़र में दुकान का लिंक)।
-2. अपना **यूज़रनेम** और **पासवर्ड** (मालिक ने दिया हुआ) डालें → **Log in**।
+2. अपना **यूज़रनेम** और **पासवर्ड** (मालिक ने दिया हुआ) डालें → **Login**।
 3. दुकान के फोन पर लॉगिन रहने दें। किसी और के फोन पर काम करें तो बाद में **Log out** करें।
 4. **5 बार ग़लत पासवर्ड = 15 मिनट के लिए अकाउंट लॉक।** इंतज़ार करें या मालिक से पासवर्ड रीसेट करवाएँ।
 5. पासवर्ड भूल गए? सिर्फ़ मालिक रीसेट कर सकते हैं। पासवर्ड किसी को न बताएँ; हर काम आपके नाम से दर्ज होता है।
@@ -141,7 +141,7 @@ Enter the **advance amount** and how it was paid (**Cash / UPI / Card / Bank tra
    If you try to hand over with money still due, the system stops you: *"Collect ₹X more…"*.
 3. Take the garment from its rack. It must be physically there (status **Available**); if it is not on the rack, tell the owner before promising the customer anything.
 4. Look the garment over **with the customer**. Write the **handover condition** (e.g. *"small stain on left sleeve, zari intact"*). Take **photos** of any marks (the phone camera opens from the button; photos are shrunk automatically).
-5. Tap **Confirm pickup**. Status becomes **Out on rent**.
+5. Tap **Confirm Pickup**. Status becomes **Out on rent**.
 6. Print / send the receipt (WhatsApp button; you press Send). Remind the customer of the **return due date** and the **late fee** (see §6).
 
 **हिन्दी**
@@ -150,7 +150,7 @@ Enter the **advance amount** and how it was paid (**Cash / UPI / Card / Bank tra
    बकाया रहते कपड़ा देने की कोशिश करेंगे तो सिस्टम रोकेगा: *"Collect ₹X more…"*।
 3. कपड़ा रैक से निकालें। वह सचमुच वहाँ होना चाहिए (स्टेटस **Available**); रैक पर न मिले तो ग्राहक से कुछ वादा करने से पहले मालिक को बताएँ।
 4. ग्राहक के **सामने** कपड़ा देखें। **हैंडओवर कंडीशन** लिखें (जैसे *"बाएँ बाज़ू पर छोटा दाग़, ज़री ठीक"*)। निशान हों तो **फोटो** लें (बटन से कैमरा खुलता है; फोटो अपने-आप छोटी हो जाती है)।
-5. **Confirm pickup** दबाएँ। स्टेटस **Out on rent** हो जाएगा।
+5. **Confirm Pickup** दबाएँ। स्टेटस **Out on rent** हो जाएगा।
 6. रसीद भेजें/प्रिंट करें (WhatsApp बटन; Send आप दबाएँगे)। ग्राहक को **वापसी की तारीख़** और **लेट फीस** याद दिलाएँ (§6)।
 
 ---
@@ -171,7 +171,7 @@ Enter the **advance amount** and how it was paid (**Cash / UPI / Card / Bank tra
 | **Repair** | torn / needs stitching | creates a care job; enter the **tailor's name** |
 | **Damaged** | cannot be rented until fixed | blocked from new bookings; tell the owner |
 
-6. Tap **Settle**. The system shows the **settlement**: late days, **late fee**, deductions, **refund** or **amount the customer still owes**. **Read it, do not recalculate it.**
+6. Tap **Settle Deposit & Complete Return**. The system shows the **settlement**: late days, **late fee**, deductions, **refund** or **amount the customer still owes**. **Read it, do not recalculate it.**
 
 **How it is worked out (so you can explain it to the customer):**
 - **Late fee** = 15 % of the booking's rental × number of days late. *Example: rental ₹3,500, returned 2 days late → 15 % = ₹525 per day → late fee ₹1,050.*
@@ -188,7 +188,7 @@ Enter the **advance amount** and how it was paid (**Cash / UPI / Card / Bank tra
 3. ग्राहक के सामने **हर कपड़ा जाँचें**: दाग़, फटा हुआ, बटन/ज़री गायब, बदबू। **नुकसान की फोटो** लें।
 4. **Damage charge** और **Cleaning charge** (रुपये में) भरें, अगर हो। *आप सिर्फ़ यही दो रक़म खुद डालते हैं।* नोट लिखें।
 5. **हर कपड़े** के लिए आगे का काम चुनें: **Back to rack** (साफ़ और ठीक); **Dry clean** (सफ़ाई चाहिए — ड्राई-क्लीनर का नाम भरना ज़रूरी, §7); **Repair** (फटा/सिलाई चाहिए — दर्ज़ी का नाम भरें); **Damaged** (ठीक होने तक किराये पर नहीं; मालिक को बताएँ)।
-6. **Settle** दबाएँ। सिस्टम **हिसाब** दिखाएगा: लेट दिन, **लेट फीस**, कटौती, **रिफंड** या **ग्राहक पर बकाया**। **इसे पढ़ें, दोबारा न जोड़ें।**
+6. **Settle Deposit & Complete Return** दबाएँ। सिस्टम **हिसाब** दिखाएगा: लेट दिन, **लेट फीस**, कटौती, **रिफंड** या **ग्राहक पर बकाया**। **इसे पढ़ें, दोबारा न जोड़ें।**
 
 **हिसाब कैसे बनता है (ग्राहक को समझाने के लिए):**
 - **लेट फीस** = बुकिंग के किराये का 15 % × देरी के दिन। *उदाहरण: किराया ₹3,500, 2 दिन देरी → 15 % = ₹525 प्रतिदिन → लेट फीस ₹1,050।*
@@ -204,7 +204,7 @@ Enter the **advance amount** and how it was paid (**Cash / UPI / Card / Bank tra
 ## 7. Dry-clean / repair / stitching dispatch / ड्राई-क्लीन, मरम्मत, सिलाई भेजना
 
 **English — sending out**
-1. **Care & Laundry** → **New job**. (Garments chosen "Dry clean" or "Repair" at return already have a job: open it and check the details.)
+1. **Care & Laundry** → **Dispatch New Job**. (Garments chosen "Dry clean" or "Repair" at return already have a job: open it and check the details.)
 2. Choose the **garment**, the **type** (Dry clean / Repair / Stitching), the **vendor's name**, the **date sent**, the **expected return date** and the **cost** if agreed. Add a note (e.g. *"hem 2 inch, fitting on Friday"*).
 3. Save. The garment status becomes **In care**. A garment that is out on rent cannot be sent.
 4. Write the vendor's name and the garment SKU on the vendor's slip too.
@@ -218,7 +218,7 @@ Enter the **advance amount** and how it was paid (**Cash / UPI / Card / Bank tra
 **Overdue:** if the expected date passes, an alert **"Care job overdue"** appears. Call the vendor.
 
 **हिन्दी — भेजना**
-1. **Care & Laundry** → **New job**। (वापसी में "Dry clean" या "Repair" चुने कपड़ों का जॉब पहले से बना होता है: उसे खोलकर विवरण जाँचें।)
+1. **Care & Laundry** → **Dispatch New Job**। (वापसी में "Dry clean" या "Repair" चुने कपड़ों का जॉब पहले से बना होता है: उसे खोलकर विवरण जाँचें।)
 2. **कपड़ा**, **किस्म** (Dry clean / Repair / Stitching), **वेंडर का नाम**, **भेजने की तारीख़**, **वापसी की संभावित तारीख़** और तय हो तो **ख़र्च** चुनें/भरें। नोट लिखें (जैसे *"घेर 2 इंच, शुक्रवार को फ़िटिंग"*)।
 3. सेव करें। कपड़े का स्टेटस **In care** हो जाएगा। किराये पर गया हुआ कपड़ा नहीं भेजा जा सकता।
 4. वेंडर की पर्ची पर भी वेंडर का नाम और कपड़े का SKU लिखें।

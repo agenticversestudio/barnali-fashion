@@ -117,3 +117,29 @@ All 3 gaps flagged in review have been implemented and verified:
 | Return: DAMAGE photo capture | RESOLVED | Added `PhotoCapture` component (`kind: "DAMAGE"`) with live camera/gallery intake and auto-compression. Attached `photoIds` passed in `bookingsApi.return`. Implemented in both `/erp/operations/returns` and return modal in `/erp/bookings`. |
 | Button & navigation label alignment | RESOLVED | Aligned sidebar & mobile nav labels to `"Orders"` (matching Staff Guide §4, §5, §6). Aligned pickup button to `"Confirm Pickup"` (Guide §5 step 5) and return button to `"Settle Deposit & Complete Return"` (Guide §6 step 6). |
 | Build & types verification | PASS | `tsc --noEmit` clean (Code 0); `npm run build` succeeds (54 routes prerendered/dynamic). |
+
+## Final verification, commits 2c449c6 / 4976367 (2026-11-26, Claude)
+
+| Check | Result |
+|---|---|
+| `npm test` (Turso dev DB) | 310 passed, 12 opt-in skipped (301 prior + 9 new smoke) |
+| `tsc --noEmit` | clean |
+| `npm run build` | OK, `/manifest.webmanifest` + all /erp routes |
+| `perf:audit` | 173 statements, **0 full scans of large tables**; slowest 51 ms (bookings list, 6000-row scratch SQLite, in-process) |
+| AC1 race | PASS (automated, bookings-create) |
+| AC2/AC3 server-side money | PASS (client lateFee/refund/deductions ignored; also in smoke suite) |
+| AC4 staff RBAC fuzz | PASS (staff-fuzz over every route) |
+| AC6 latency | PASS on Turso from dev machine; **must be re-measured from Bargarh after prod deploy** |
+| AC7 photo 400 KB limit | PASS with fake storage; live R2 check needs client keys |
+| AC8 Sheets sync | PASS dry-run/mocked; live check needs service account |
+| AC9 PWA | manifest/SW valid; device install check at deploy |
+| New: `tests/smoke/lifecycle.test.ts` (`npm run test:smoke`) | health, login, garment, customer, quote, booking, double-booking 409, pickup+HANDOVER photo, 2-day-late return (late fee 1200, refund 800), cash ledger (+200), summary, 6 CSV exports: PASS |
+
+Template `docs/CATALOGUE_TEMPLATE.csv` now has 10 Bargarh-style rows (lehengas, sherwanis, Sambalpuri/Banarasi/Kanjeevaram sarees), all `EXAMPLE-` so an accidental import is refused.
+
+Open frontend gaps found (owner: Gemini), money flows with no UI:
+1. `bookingsApi.addPayment` is never called: no way to record an EXTRA payment (customer owes after settlement), a later REFUND payment ("Deposit refund pending" alert has no action), or extra advance.
+2. `/erp/operations/returns` offers only Pristine / Dry Cleaning / Master Tailor; no "Damaged" next action (backend and the bookings-page modal have it).
+3. STAFF_GUIDE labels synced for Login / Confirm Pickup / Settle Deposit & Complete Return / Dispatch New Job; "Add payment → Extra" and "Back to rack" wording still do not exist on screen. No screenshots in the guide.
+
+Not done / not claimable by me: T6.10 (staging walkthrough on real phone+tablet+desktop) and the Milestone 2 payment sign-off are the client's decision; prod deploy (T9.2) and T9.1 prod steps need the owner's Vercel/Turso/R2/Google accounts.

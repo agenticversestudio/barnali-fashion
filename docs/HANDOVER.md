@@ -82,6 +82,40 @@ Set in the Vercel dashboard → Project → Settings → Environment Variables. 
 
 Rotating a secret (do this if a laptop is lost or someone leaves): create a new token/key in that service's dashboard → paste it into Vercel → redeploy → delete the old token. Rotating the Turso token or R2 key never loses data.
 
+## 4a. Setting it all up from zero (about 1–2 hours, cost ₹0 / month)
+
+Do this once, signed in with the **owner's own email** at every service (see §3). Keep each password in the owner's password manager or on paper.
+
+**Step 1 — GitHub.** Create a free account, create a **private** repository `barnali-fashion`, and give the developer temporary access. The developer pushes the code to it.
+
+**Step 2 — Turso (database).**
+1. Sign up at turso.tech → create a database named `barnali`, region **AWS ap-south-1 (Mumbai)**.
+2. Copy the database URL (starts `libsql://`) and create a token (database → *Create token*, no expiry, read & write).
+3. These are `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`.
+
+**Step 3 — Cloudflare R2 (photos + backup files).** Follow `docs/R2_SETUP.md` (private bucket, API token, CORS rule for the app's address). You end with `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`.
+
+**Step 4 — Google Sheet (nightly read-only copy).** Follow `docs/SHEETS_SETUP.md` (service account, share a blank Sheet with it). You end with `GOOGLE_SA_EMAIL`, `GOOGLE_SA_PRIVATE_KEY`, `GOOGLE_SHEET_ID`.
+
+**Step 5 — Vercel (hosting).**
+1. Sign up at vercel.com with the GitHub account → *Add New → Project* → import `barnali-fashion`.
+2. Before the first deploy open *Settings → Environment Variables* and add every variable from §4, including `ERP_AUTH_GUARD=1`, a long random `CRON_SECRET`, and `APP_ORIGIN` (the project's address, shown after the first deploy; set it, then redeploy).
+3. `vercel.json` already sets the Mumbai region (`bom1`) and the nightly sync (18:00 UTC = 23:30 IST). Deploy.
+
+**Step 6 — Prepare the database** (the developer does this from a computer that has the code and a `.env.local` holding the Turso values — never commit that file):
+```
+npm run db:migrate
+SEED_ADMIN_USERNAME=owner SEED_ADMIN_PASSWORD=<a strong password> npm run db:seed
+npm run db:wipe -- --yes-wipe          # only on a database that was used before; resets booking numbers to 001
+npm run db:import -- catalogue.csv --dry-run
+npm run db:import -- catalogue.csv
+```
+(On Windows PowerShell set the two `SEED_` variables with `$env:SEED_ADMIN_USERNAME="owner"` first.) `catalogue.csv` is the owner's filled copy of `docs/CATALOGUE_TEMPLATE.csv` (delete the `EXAMPLE-` rows).
+
+**Step 7 — Check it works** (10 minutes): open the app address → log in as the owner → Admin → Settings (shop name, phone, late-fee 15 %) → Admin → Staff (create each staff login) → make one test booking, pick up, return, then remove it with a wipe if the shop has not started yet → take a photo → *Sync now* and look at the Sheet → install on each phone (Android Chrome: menu → **Install app**).
+
+**Running cost:** all four services stay on their free plans (limits and what happens beyond them are in §6).
+
 ## 5. The database
 
 - Provider: Turso, free plan, Mumbai. Open the Turso dashboard to see tables and run queries.

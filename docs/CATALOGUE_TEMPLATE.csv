@@ -1,4 +1,11 @@
 SKU,Category,Name,Rental Price,Deposit,Rack,Shelf,Size,Colour,Fabric,Purchase Cost,Notes
-EXAMPLE-001,Lehenga,Red Bridal Lehenga with Zari Work,3500,2000,Rack A-03,Shelf 2,M,Red,Silk,18000,Delete these 3 example rows before importing
-EXAMPLE-002,Saree,Banarasi Silk Saree Maroon,1500,1000,Rack B-01,Shelf 1,Free Size,Maroon,Banarasi Silk,7000,
-EXAMPLE-003,Sherwani,Cream Sherwani with Stole,2500,1500,Rack C-02,Shelf 3,L,Cream,Brocade,12000,
+EXAMPLE-001,Lehenga,Red Bridal Lehenga with Zari Work,6500,4000,Rack A-01,Shelf 1,M,Red,Velvet,28000,DELETE ALL EXAMPLE ROWS before importing
+EXAMPLE-002,Lehenga,Pink Embroidered Lehenga Choli,4500,3000,Rack A-02,Shelf 2,S,Pink,Georgette,19000,
+EXAMPLE-003,Lehenga,Maroon Reception Lehenga,5500,3500,Rack A-03,Shelf 1,L,Maroon,Silk,24000,Dupatta included
+EXAMPLE-004,Sherwani,Cream Wedding Sherwani with Stole,3500,2500,Rack C-01,Shelf 1,L,Cream,Brocade,15000,
+EXAMPLE-005,Sherwani,Royal Blue Indo-Western Sherwani,3000,2000,Rack C-02,Shelf 2,M,Blue,Raw Silk,13000,
+EXAMPLE-006,Sherwani,Black Bandhgala Suit,2500,2000,Rack C-03,Shelf 1,XL,Black,Velvet,11000,
+EXAMPLE-007,Saree,Sambalpuri Silk Saree Red-Black Ikat,1800,1500,Rack B-01,Shelf 1,Free Size,Red,Sambalpuri Silk,8500,Blouse piece included
+EXAMPLE-008,Saree,Sambalpuri Bomkai Saree Green,2200,1500,Rack B-02,Shelf 1,Free Size,Green,Bomkai Silk,10500,
+EXAMPLE-009,Saree,Banarasi Silk Saree Maroon,2000,1500,Rack B-03,Shelf 2,Free Size,Maroon,Banarasi Silk,9500,
+EXAMPLE-010,Saree,Kanjeevaram Bridal Saree Gold,3500,2500,Rack B-04,Shelf 2,Free Size,Gold,Kanjeevaram Silk,18000,

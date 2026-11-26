@@ -75,9 +75,10 @@ describe("validateCatalogue", () => {
     expect(r.warnings.map((w) => w.message).join("|")).toMatch(/5x the rent/);
     expect(r.warnings.map((w) => w.message).join("|")).toMatch(/Unknown column/);
   });
-  it("the shipped template parses; its only errors are the 3 example rows", () => {
+  it("the shipped template parses; every row is an EXAMPLE row (blocked) and nothing else is wrong", () => {
     const r = validateCatalogue(readFileSync("docs/CATALOGUE_TEMPLATE.csv", "utf8"));
-    expect(r.errors.length).toBe(3);
+    const dataRows = readFileSync("docs/CATALOGUE_TEMPLATE.csv", "utf8").trim().split(/\r?\n/).length - 1;
+    expect(r.errors.length).toBe(dataRows);
     expect(r.errors.every((e) => /example/.test(e.message))).toBe(true);
   });
 });

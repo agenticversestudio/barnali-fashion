@@ -14,6 +14,7 @@
     "db:restore": "node --env-file=.env.local scripts/restore.ts",
     "db:wipe": "node --env-file=.env.local scripts/wipe-data.ts",
     "db:import": "node --env-file=.env.local scripts/import-csv.ts",
+    "test:smoke": "vitest run tests/smoke",
     "perf:audit": "node --env-file=.env.local scripts/perf-run.ts"
   },
   "dependencies": {
