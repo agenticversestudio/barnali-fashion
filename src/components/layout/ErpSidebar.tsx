@@ -238,7 +238,7 @@ export function ErpSidebar() {
             <button
               onClick={logout}
               title="Logout"
-              className="p-1.5 text-slate-400 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
+              className="p-1.5 text-slate-400 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors min-h-10"
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>

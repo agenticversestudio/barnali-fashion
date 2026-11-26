@@ -50,14 +50,14 @@ Screen names may differ by a word or two from what you see on your phone; the st
 | **Available** | on the rack, can be rented |
 | **Booked** | on the rack, but reserved for a booking starting within 3 days |
 | **Out on rent** | with a customer |
-| **Returned – cleaning** | back in the shop, not cleaned yet |
-| **In care** | at the dry-cleaner / tailor |
-| **Damaged – repair** | cannot be booked until repaired |
+| **Cleaning pending** | back in the shop, not cleaned yet |
+| **In Care** | at the dry-cleaner / tailor |
+| **In repair** | damaged: cannot be booked until repaired |
 | **Unavailable** | taken out by the owner |
 
 5. Tap the garment for details, photos and its **booking history**.
 6. **To check dates:** set *Available from / to* in the filter. Only garments free for those dates are shown. (A garment is blocked for **1 day before and 1 day after** another booking, so it can be cleaned.)
-7. Moved a garment? Open it → **Edit location** → type the new rack/shelf → save.
+7. Moved a garment? Open it → under *Godown Warehouse Location* tap **Change** → type the new rack/shelf → **Save Location**.
 
 **हिन्दी**
 1. **Inventory** खोलें।
@@ -66,7 +66,7 @@ Screen names may differ by a word or two from what you see on your phone; the st
 4. हर कार्ड पर **फोटो, साइज़, कीमत, रैक और शेल्फ़** (जैसे *Rack A-03, Shelf 2*) और स्टेटस बैज दिखता है (ऊपर की तालिका: Available = रैक पर, किराये पर दे सकते हैं; Booked = रैक पर पर 3 दिन के भीतर बुक; Out on rent = ग्राहक के पास; Returned – cleaning = लौटा, सफ़ाई बाकी; In care = ड्राई-क्लीन/दर्ज़ी के पास; Damaged – repair = मरम्मत तक बुक नहीं हो सकता; Unavailable = मालिक ने हटाया)।
 5. कपड़े पर टैप करें: विवरण, फोटो और **बुकिंग का इतिहास** दिखेगा।
 6. **तारीख़ें चेक करने के लिए:** फ़िल्टर में *Available from / to* डालें। सिर्फ़ उन तारीख़ों पर खाली कपड़े दिखेंगे। (किसी बुकिंग से **1 दिन पहले और 1 दिन बाद** तक कपड़ा रुका रहता है, ताकि सफ़ाई हो सके।)
-7. कपड़ा दूसरी जगह रखा? कपड़ा खोलें → **Edit location** → नया रैक/शेल्फ़ लिखें → सेव।
+7. कपड़ा दूसरी जगह रखा? कपड़ा खोलें → *Godown Warehouse Location* में **Change** दबाएँ → नया रैक/शेल्फ़ लिखें → **Save Location**।
 
 ---
 
@@ -88,7 +88,7 @@ Screen names may differ by a word or two from what you see on your phone; the st
 
 ## 4. New booking at the counter — 5 steps / काउंटर पर नई बुकिंग — 5 स्टेप
 
-Open **Orders → New booking**. You can go back to any step; nothing is saved until step 5.
+Open **Orders → New Counter Booking**. You can go back to any step; nothing is saved until step 5.
 
 ### Step 1 — Customer / ग्राहक
 **English:** type the phone number. If the customer exists, tap their name. If not, fill name (and city/address if you have it) — they are created with the booking.
@@ -122,8 +122,8 @@ Enter the **advance amount** and how it was paid (**Cash / UPI / Card / Bank tra
 **एडवांस की रक़म** और भुगतान का तरीका (**Cash / UPI / Card / Bank transfer**) भरें। स्क्रीन की रक़म पर भरोसा करें: वह सर्वर निकालता है।
 
 ### Step 5 — Review and confirm / जाँच कर कन्फ़र्म करें
-**English:** read everything out to the customer: garments, dates, amounts. Tap **Confirm booking**. You get a booking number like `BF-BK-2026-081`. Then tap **WhatsApp** to open a prefilled confirmation message to the customer; **you must press Send in WhatsApp yourself**. Give the customer the booking number.
-**हिन्दी:** ग्राहक को सब पढ़कर सुनाएँ: कपड़े, तारीख़ें, रक़म। **Confirm booking** दबाएँ। `BF-BK-2026-081` जैसा बुकिंग नंबर मिलेगा। फिर **WhatsApp** बटन दबाएँ — ग्राहक के लिए तैयार संदेश खुलेगा; WhatsApp में **Send आपको खुद दबाना है**। ग्राहक को बुकिंग नंबर दें।
+**English:** read everything out to the customer: garments, dates, amounts. Tap **Confirm & Create Booking**. You get a booking number like `BF-BK-2026-081`. Then tap **WhatsApp** to open a prefilled confirmation message to the customer; **you must press Send in WhatsApp yourself**. Give the customer the booking number.
+**हिन्दी:** ग्राहक को सब पढ़कर सुनाएँ: कपड़े, तारीख़ें, रक़म। **Confirm & Create Booking** दबाएँ। `BF-BK-2026-081` जैसा बुकिंग नंबर मिलेगा। फिर **WhatsApp** बटन दबाएँ — ग्राहक के लिए तैयार संदेश खुलेगा; WhatsApp में **Send आपको खुद दबाना है**। ग्राहक को बुकिंग नंबर दें।
 
 **If two of you book the same garment at the same moment**, only one booking is saved; the other person sees the "already reserved" message. That is normal: pick another garment.
 **दो लोग एक ही कपड़ा एक साथ बुक करें** तो सिर्फ़ एक बुकिंग सेव होगी; दूसरे को "already reserved" संदेश दिखेगा। यह सामान्य है: दूसरा कपड़ा चुनें।
@@ -161,12 +161,12 @@ Enter the **advance amount** and how it was paid (**Cash / UPI / Card / Bank tra
 1. **Orders** → open the booking (status **Out on rent**) → **Return**.
 2. Enter the **actual return date** (today unless the customer returned it earlier; it cannot be in the future).
 3. **Inspect each garment** with the customer: stains, tears, missing buttons/zari, smell. Take **photos of any damage**.
-4. Enter **Damage charge** and **Cleaning charge** if any (rupees). These two are the only money amounts *you* type. Add notes.
+4. Enter **Damage Deduction (₹)** and **Special Cleaning Charge (₹)** if any (rupees). These two are the only money amounts *you* type. Add notes.
 5. For **each garment** choose what happens next:
 
 | Choice | Use when | What the system does |
 |---|---|---|
-| **Back to rack (Available)** | clean and fine | garment is free again |
+| **Back to rack** | clean and fine | garment is free again |
 | **Dry clean** | needs cleaning (almost always) | creates a care job; you must enter the **dry-cleaner's name** (see §7) |
 | **Repair** | torn / needs stitching | creates a care job; enter the **tailor's name** |
 | **Damaged** | cannot be rented until fixed | blocked from new bookings; tell the owner |
@@ -186,7 +186,7 @@ Enter the **advance amount** and how it was paid (**Cash / UPI / Card / Bank tra
 1. **Orders** → बुकिंग खोलें (स्टेटस **Out on rent**) → **Return**।
 2. **असली वापसी की तारीख़** भरें (आज की, या पहले लौटाया हो तो वह; भविष्य की नहीं)।
 3. ग्राहक के सामने **हर कपड़ा जाँचें**: दाग़, फटा हुआ, बटन/ज़री गायब, बदबू। **नुकसान की फोटो** लें।
-4. **Damage charge** और **Cleaning charge** (रुपये में) भरें, अगर हो। *आप सिर्फ़ यही दो रक़म खुद डालते हैं।* नोट लिखें।
+4. **Damage Deduction (₹)** और **Special Cleaning Charge (₹)** (रुपये में) भरें, अगर हो। *आप सिर्फ़ यही दो रक़म खुद डालते हैं।* नोट लिखें।
 5. **हर कपड़े** के लिए आगे का काम चुनें: **Back to rack** (साफ़ और ठीक); **Dry clean** (सफ़ाई चाहिए — ड्राई-क्लीनर का नाम भरना ज़रूरी, §7); **Repair** (फटा/सिलाई चाहिए — दर्ज़ी का नाम भरें); **Damaged** (ठीक होने तक किराये पर नहीं; मालिक को बताएँ)।
 6. **Settle Deposit & Complete Return** दबाएँ। सिस्टम **हिसाब** दिखाएगा: लेट दिन, **लेट फीस**, कटौती, **रिफंड** या **ग्राहक पर बकाया**। **इसे पढ़ें, दोबारा न जोड़ें।**
 
@@ -210,9 +210,9 @@ Enter the **advance amount** and how it was paid (**Cash / UPI / Card / Bank tra
 4. Write the vendor's name and the garment SKU on the vendor's slip too.
 
 **English — receiving back**
-1. **Care & Laundry** → find the job (status **Out**) → **Receive**.
+1. **Care & Laundry** → find the job (status **Out**) → **Mark Received**.
 2. Enter the **date received** and the **final cost**. Check the garment before accepting it.
-3. Choose where the garment goes: **Available** (good, back on rack), **Returned – cleaning** (still needs cleaning) or **Damaged – repair** (still not right).
+3. Choose where the garment goes: **Available for Rent** (good, back on rack), **Still Needs Cleaning** (still needs cleaning) or **Needs More Repair** (still not right).
 4. Put it on its rack.
 
 **Overdue:** if the expected date passes, an alert **"Care job overdue"** appears. Call the vendor.
@@ -224,9 +224,9 @@ Enter the **advance amount** and how it was paid (**Cash / UPI / Card / Bank tra
 4. वेंडर की पर्ची पर भी वेंडर का नाम और कपड़े का SKU लिखें।
 
 **हिन्दी — वापस लेना**
-1. **Care & Laundry** → जॉब खोजें (स्टेटस **Out**) → **Receive**।
+1. **Care & Laundry** → जॉब खोजें (स्टेटस **Out**) → **Mark Received**।
 2. **मिलने की तारीख़** और **अंतिम ख़र्च** भरें। कपड़ा लेने से पहले जाँच लें।
-3. कपड़ा कहाँ जाए चुनें: **Available** (ठीक, रैक पर), **Returned – cleaning** (अभी सफ़ाई बाकी) या **Damaged – repair** (अभी भी ठीक नहीं)।
+3. कपड़ा कहाँ जाए चुनें: **Available for Rent** (ठीक, रैक पर), **Still Needs Cleaning** (अभी सफ़ाई बाकी) या **Needs More Repair** (अभी भी ठीक नहीं)।
 4. रैक पर रखें।
 
 **देरी:** अपेक्षित तारीख़ निकल जाए तो **"Care job overdue"** अलर्ट दिखता है। वेंडर को फ़ोन करें।

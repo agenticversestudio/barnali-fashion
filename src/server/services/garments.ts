@@ -10,7 +10,8 @@ import { garmentPhotosStmt, mainPhotosStmt, signMains, signPhotos } from "./phot
 export const BUFFER_DAYS = 1; // must match the trigger in db/migrations/001_init.sql
 
 export const GARMENT_COLS =
-  "id,name,category,description,fabric,colour,size,chest,waist,length,blouse_size,rack,shelf,purchase_cost,rental_price,security_deposit,status,condition,notes,active";
+  // NOTE: a column literally named `length` collides with the row's own `.length` (column count) when read by name: always alias it.
+  "id,name,category,description,fabric,colour,size,chest,waist,\"length\" AS len_in,blouse_size,rack,shelf,purchase_cost,rental_price,security_deposit,status,condition,notes,active";
 
 const opt = (v: unknown) => (v === null || v === undefined || v === "" ? undefined : String(v));
 
@@ -36,7 +37,7 @@ export function garmentDto(r: Row, role: Role): GarmentDto {
   set("colour", opt(r.colour));
   set("chest", opt(r.chest));
   set("waist", opt(r.waist));
-  set("length", opt(r.length));
+  set("length", opt(r.len_in));
   set("blouseSize", opt(r.blouse_size));
   set("shelf", opt(r.shelf));
   set("notes", opt(r.notes));

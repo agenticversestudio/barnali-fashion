@@ -109,7 +109,7 @@ function InspectionBayContent() {
 
                     <Link
                       href={`/erp/billing/invoices?bookingId=${b.id}`}
-                      className="px-3 py-1.5 bg-white border border-[#E8DFD1] rounded-lg font-bold text-[#4B1835] hover:bg-[#FAF5EB]"
+                      className="px-3 py-1.5 bg-white border border-[#E8DFD1] rounded-lg font-bold text-[#4B1835] hover:bg-[#FAF5EB] min-h-10"
                     >
                       Receipt →
                     </Link>

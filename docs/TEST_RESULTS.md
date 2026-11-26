@@ -174,3 +174,35 @@ Not done / not claimable by me: T6.10 (staging walkthrough on real phone+tablet+
 `tsc --noEmit` clean · `npm test` 312 passed / 12 opt-in skipped (16 files) · `npm run build` OK · smoke 11/11.
 UI confirmed: "Pay deposit refund" on the order drawer banner, orders table and return counter; modal locks REFUND to the exact `refundAmount`.
 All code-level gaps found in this review are closed. Remaining items are not code: live R2 (AC7) and Sheets (AC8) checks, AC6 from Bargarh, device PWA install, T6.10 staging walkthrough + client Milestone 2 sign-off, and T9.1/T9.2 production setup with the owner's accounts.
+
+## Deep audit pass (2026-11-27, Claude): concurrency, money, security, scripts, UI
+
+Result: **367 passed / 12 opt-in skipped (20 files)**, `tsc` clean, `next build` OK (54 routes), perf audit 172 statements / **0 full table scans** (slowest 110 ms on a noisy scratch-SQLite run, in-process).
+New suites in `tests/audit/` (56 tests): `stress` (11), `finance` (22), `security` (19), `integrity` (3) + smoke 11.
+
+| Area | What was exercised | Result |
+|---|---|---|
+| AC1 storm | 40 parallel creates, 40 new customers, one garment | exactly 1 booking, 39x 409, **0 orphan customers**, 0 half-written rows, booking counter not burned |
+| multi-garment storm | [1,2] [2,3] [3,1] x6 in parallel | exactly 1 wins, 2 items, nothing partial |
+| disjoint windows / buffer | 6 parallel non-overlapping; day+1 refused, day+2 ok, day-1 refused | PASS |
+| double submit | pickup x6, return x5, REFUND x6, EXTRA 6x100 on 300 owed, BALANCE 8x1000 on 5500, cancel vs pickup race | exactly-once everywhere; never over-collects |
+| settle() | 2000 random cases vs independent oracle; conservation `refund - additionalDue = deposit - deductions` | PASS |
+| late days | same day, early, leap Feb, non-leap, year end, month skip, DST dates, 21 days | PASS |
+| ledger scenarios | deductions < / = / > deposit; deferred REFUND (exact amount, once, REFUNDED vs PARTIALLY_REFUNDED, alert clears); EXTRA in parts; partial payments + pickup | PASS |
+| cash drawer | 200 random ledger rows, all modes, vs JS oracle; only CASH counts; negative / zero / positive variance; opening = previous counted cash; closed day frozen | PASS |
+| security | staff 403 fuzz (existing, every route), CSRF on POST/PATCH/DELETE, `Origin: null`, look-alike host, APP_ORIGIN, cookie flags incl. `Secure` in production, session tokens stored hashed only, cron secret edge cases, lock expiry | PASS after fix 1 |
+| scripts | backup -> restore (Turso dev -> scratch SQLite) row-for-row; tampered backup refused; non-empty target refused; import dry-run/live/skip-existing/duplicate/EXAMPLE rows; wipe refuses without flag, backs up first, keeps users/settings, next booking 001; set-dev-passwords exits 2 without flag | PASS after fix 2 |
+| UI | no DataStore/localStorage in ERP paths; 21 sub-40px touch targets raised to `min-h-10`; pincode / phone inputs now numeric/tel keyboards; camera input has `capture="environment"`; STAFF_GUIDE labels checked against the UI by script and aligned | fixed (3) |
+
+### Bugs found and fixed in this pass
+1. **Login brute-force bypass (security, real).** Failed attempts were read, verified, then written. 30 parallel guesses were ALL verified, and one correct guess succeeded despite the 5-try lock. Now each attempt is reserved atomically in one `UPDATE ... RETURNING` before the password check: a burst is capped at 5 verifications, the rest get 423. Expired locks count as 0 failures. Regression test: `security.test.ts`.
+2. **Username timing leak (security).** The "unknown user" path hashed with 1,000 PBKDF2 iterations vs 210,000 for a real user (about 200x faster, so existing usernames were distinguishable by response time). Dummy hash now uses the real cost.
+3. **Column named `length` read as the row's own `.length` (data bug, real).** Reading `row.length` returned the column COUNT: the API showed every garment's `length` measurement as a number like "20", and **backups stored that number instead of the measurement** (restored garments lost their length). API now aliases the column (`len_in`); backup/restore reads rows by position. Regression test + row-for-row restore parity test.
+4. `scripts/set-dev-passwords.ts` could not even start under node (extensionless import), so its guard never ran; import fixed, exit-2 refusal now tested.
+5. Mobile ergonomics (21 small touch targets, text inputs for phone/pincode) and STAFF_GUIDE wording drift (Damage Deduction, Special Cleaning Charge, Confirm & Create Booking, Mark Received, Save Location, status badge names).
+
+### Known, accepted trade-offs (documented, not changed)
+- Account lockout can be triggered against a known username by anyone (15 min); this is the standard cost of lockout. A locked account also reveals that the username exists.
+- A request with no `Origin` header skips the CSRF check (non-browser clients; browsers always send Origin on cross-site writes, and the cookie is SameSite=Lax).
+- Admin may pass `openingCash` when closing cash (audited in `cash_closings`).
+- Deposit refund can only be paid once, in full (exact `refundAmount`).

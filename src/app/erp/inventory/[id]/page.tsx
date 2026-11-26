@@ -175,7 +175,7 @@ function GarmentDetailContent() {
         <p className="text-xs text-slate-500">{error || "Please verify the costume SKU ID."}</p>
         <Link
           href="/erp/inventory"
-          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg"
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg min-h-10"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Inventory</span>
@@ -191,7 +191,7 @@ function GarmentDetailContent() {
         <div className="flex items-center gap-3">
           <Link
             href="/erp/inventory"
-            className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors"
+            className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors min-h-10"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
@@ -324,7 +324,7 @@ function GarmentDetailContent() {
                 <button
                   onClick={handleSaveRack}
                   disabled={savingRack}
-                  className="w-full py-1.5 bg-[#6B1D2F] text-white rounded-lg font-semibold text-xs flex items-center justify-center gap-1"
+                  className="w-full py-1.5 bg-[#6B1D2F] text-white rounded-lg font-semibold text-xs flex items-center justify-center gap-1 min-h-10"
                 >
                   {savingRack ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                   <span>Save Location</span>

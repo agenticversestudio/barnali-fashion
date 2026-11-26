@@ -131,7 +131,7 @@ export default function DashboardPage() {
             <button
               onClick={handleSyncNow}
               disabled={syncing}
-              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs flex items-center gap-1.5"
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs flex items-center gap-1.5 min-h-10"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin text-[#6B1D2F]" : ""}`} />
               <span>{syncing ? "Syncing..." : "Sync Now"}</span>
@@ -316,7 +316,7 @@ export default function DashboardPage() {
                       ? "/erp/operations/laundry"
                       : `/erp/bookings?orderId=${a.refId}`
                   }
-                  className="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-lg border border-slate-200 text-[11px] shrink-0"
+                  className="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-lg border border-slate-200 text-[11px] shrink-0 min-h-10"
                 >
                   Inspect
                 </Link>

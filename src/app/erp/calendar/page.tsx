@@ -124,7 +124,7 @@ export default function AvailabilityCalendarPage() {
         <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
           <button
             onClick={handlePrevMonth}
-            className="p-1.5 hover:bg-white rounded-lg text-slate-600 transition-colors shadow-2xs"
+            className="p-1.5 hover:bg-white rounded-lg text-slate-600 transition-colors shadow-2xs min-h-10"
             title="Previous Month"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -134,7 +134,7 @@ export default function AvailabilityCalendarPage() {
           </span>
           <button
             onClick={handleNextMonth}
-            className="p-1.5 hover:bg-white rounded-lg text-slate-600 transition-colors shadow-2xs"
+            className="p-1.5 hover:bg-white rounded-lg text-slate-600 transition-colors shadow-2xs min-h-10"
             title="Next Month"
           >
             <ChevronRight className="w-4 h-4" />

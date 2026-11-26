@@ -107,7 +107,7 @@ export default function ReportsPage() {
           <a
             href={reportsApi.getExportUrl("bookings")}
             download
-            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1"
+            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
           >
             <Download className="w-3 h-3 text-[#B89558]" />
             <span>Bookings</span>
@@ -115,7 +115,7 @@ export default function ReportsPage() {
           <a
             href={reportsApi.getExportUrl("payments")}
             download
-            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1"
+            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
           >
             <Download className="w-3 h-3 text-[#B89558]" />
             <span>Payments</span>
@@ -123,7 +123,7 @@ export default function ReportsPage() {
           <a
             href={reportsApi.getExportUrl("expenses")}
             download
-            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1"
+            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
           >
             <Download className="w-3 h-3 text-[#B89558]" />
             <span>Expenses</span>
@@ -131,7 +131,7 @@ export default function ReportsPage() {
           <a
             href={reportsApi.getExportUrl("garments")}
             download
-            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1"
+            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
           >
             <Download className="w-3 h-3 text-[#B89558]" />
             <span>Garments</span>

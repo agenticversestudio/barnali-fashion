@@ -1,5 +1,5 @@
 import { createClient } from "@tursodatabase/serverless/compat";
-import { hashPassword } from "../src/server/password";
+import { hashPassword } from "../src/server/password.ts";
 import fs from "node:fs";
 
 const env = fs.readFileSync(".env.local", "utf8");

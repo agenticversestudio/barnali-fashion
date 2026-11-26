@@ -382,7 +382,7 @@ export default function StaffPage() {
                   Phone (Optional)
                 </label>
                 <input
-                  type="text"
+                  type="tel" inputMode="tel"
                   placeholder="e.g. +91 9437199001"
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}

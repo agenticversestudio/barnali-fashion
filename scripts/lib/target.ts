@@ -26,7 +26,8 @@ export function tursoConn(url: string, authToken: string): Conn {
     kind: "turso",
     async query(sql, args = []) {
       const r = await c.execute({ sql, args });
-      return r.rows.map((row) => Object.fromEntries(r.columns.map((col) => [col, plain((row as unknown as Record<string, unknown>)[col])])));
+      // read by POSITION: a column named "length" would otherwise return the row's own .length (its column count) and silently corrupt backups
+      return r.rows.map((row) => Object.fromEntries(r.columns.map((col, i) => [col, plain((row as unknown as unknown[])[i])])));
     },
     async run(stmts) {
       if (stmts.length) await c.batch(stmts.map((s) => ({ sql: s.sql, args: s.args ?? [] })), "write");

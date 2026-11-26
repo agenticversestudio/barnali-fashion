@@ -220,7 +220,7 @@ function NewBookingWizardContent() {
         <div className="flex items-center gap-3">
           <Link
             href="/erp/bookings"
-            className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors"
+            className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors min-h-10"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>

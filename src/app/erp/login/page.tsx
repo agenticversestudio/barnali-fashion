@@ -75,7 +75,7 @@ function LoginContent() {
 
         <Link
           href="/"
-          className="text-xs font-semibold text-[#4B1835] hover:text-[#320F23] flex items-center gap-1.5 bg-white border border-[#E8DFD1] px-3 py-1.5 rounded-lg shadow-2xs"
+          className="text-xs font-semibold text-[#4B1835] hover:text-[#320F23] flex items-center gap-1.5 bg-white border border-[#E8DFD1] px-3 py-1.5 rounded-lg shadow-2xs min-h-10"
         >
           <Globe className="w-3.5 h-3.5 text-[#B89558]" />
           <span>Customer Website</span>

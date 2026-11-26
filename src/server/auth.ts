@@ -73,7 +73,8 @@ export async function login(
   });
   const row = r.rows[0];
   if (!row) {
-    await verifyPassword(password, "pbkdf2$1000$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="); // equalise timing
+    // equalise timing with a check at the SAME cost as a genuine hash (a cheap dummy would reveal which usernames exist)
+    await verifyPassword(password, `pbkdf2$${Number(process.env.PBKDF2_ITERS) || 210_000}$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=`);
     return fail("UNAUTHENTICATED", "Wrong username or password");
   }
   const lockedUntil = row.locked_until ? Date.parse(String(row.locked_until)) : 0;
@@ -81,16 +82,20 @@ export async function login(
     const mins = Math.ceil((lockedUntil - Date.now()) / 60_000);
     return fail("LOCKED", `Too many wrong attempts. Try again in ${mins} minute(s).`);
   }
+  // Reserve one attempt BEFORE checking the password, atomically in the database. Counting after the check (read count, verify,
+  // write count) lets N parallel guesses all see "0 failures" and bypass the 5-try limit; reserving first caps a burst at 5.
+  // An expired lock counts as 0 failures. The 5th reserved attempt sets the lock but is still verified; the 6th is refused.
+  const now = iso(Date.now());
+  const base = "(CASE WHEN locked_until IS NOT NULL AND locked_until <= ? THEN 0 ELSE failed_count END)";
+  const reserved = await db().execute({
+    sql: `UPDATE users SET failed_count = CASE WHEN ${base}+1 >= ? THEN ? ELSE ${base}+1 END,
+                 locked_until = CASE WHEN ${base}+1 >= ? THEN ? ELSE NULL END
+          WHERE id = ? AND (locked_until IS NULL OR locked_until <= ?) RETURNING failed_count`,
+    args: [now, MAX_FAILS, MAX_FAILS, now, now, MAX_FAILS, iso(Date.now() + LOCK_MS), row.id as string, now],
+  });
+  if (!reserved.rows[0]) return fail("LOCKED", "Too many wrong attempts. Try again in 15 minute(s).");
   const ok = await verifyPassword(password, String(row.password_hash));
-  if (!ok) {
-    const fails = Number(row.failed_count) + 1;
-    if (fails >= MAX_FAILS) {
-      await db().execute({ sql: "UPDATE users SET failed_count=0, locked_until=? WHERE id=?", args: [iso(Date.now() + LOCK_MS), row.id as string] });
-    } else {
-      await db().execute({ sql: "UPDATE users SET failed_count=? WHERE id=?", args: [fails, row.id as string] });
-    }
-    return fail("UNAUTHENTICATED", "Wrong username or password");
-  }
+  if (!ok) return fail("UNAUTHENTICATED", "Wrong username or password");
   if (!Number(row.active)) return fail("FORBIDDEN", "This account is disabled. Ask the owner.");
   await db().execute({ sql: "UPDATE users SET failed_count=0, locked_until=NULL WHERE id=?", args: [row.id as string] });
   const user = toSessionUser(row as unknown as UserRow);

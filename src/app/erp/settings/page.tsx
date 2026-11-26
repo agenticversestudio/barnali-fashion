@@ -149,7 +149,7 @@ export default function SettingsPage() {
                 Official Phone / WhatsApp *
               </label>
               <input
-                type="text"
+                type="tel" inputMode="tel"
                 required
                 value={shopPhone}
                 onChange={(e) => setShopPhone(e.target.value)}

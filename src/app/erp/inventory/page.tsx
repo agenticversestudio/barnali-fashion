@@ -367,13 +367,13 @@ export default function InventoryPage() {
                   <div className="flex items-center gap-2 pt-1">
                     <Link
                       href={`/erp/inventory/${g.id}`}
-                      className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-center font-semibold rounded-lg text-[11px] transition-colors"
+                      className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-center font-semibold rounded-lg text-[11px] transition-colors min-h-10"
                     >
                       Details
                     </Link>
                     <Link
                       href={`/erp/bookings/new?sku=${g.id}`}
-                      className="flex-1 py-1.5 bg-[#6B1D2F] hover:bg-[#521624] text-white text-center font-semibold rounded-lg text-[11px] transition-colors"
+                      className="flex-1 py-1.5 bg-[#6B1D2F] hover:bg-[#521624] text-white text-center font-semibold rounded-lg text-[11px] transition-colors min-h-10"
                     >
                       Book Now
                     </Link>
@@ -472,13 +472,13 @@ export default function InventoryPage() {
                       <div className="flex items-center justify-end gap-1.5">
                         <Link
                           href={`/erp/inventory/${g.id}`}
-                          className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-[11px] transition-colors"
+                          className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-[11px] transition-colors min-h-10"
                         >
                           Details
                         </Link>
                         <Link
                           href={`/erp/bookings/new?sku=${g.id}`}
-                          className="px-2.5 py-1.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-semibold rounded-lg text-[11px] transition-colors"
+                          className="px-2.5 py-1.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-semibold rounded-lg text-[11px] transition-colors min-h-10"
                         >
                           Book
                         </Link>

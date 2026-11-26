@@ -243,7 +243,7 @@ export default function CustomersPage() {
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl transition-colors flex items-center justify-center shrink-0"
+                      className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl transition-colors flex items-center justify-center shrink-0 min-h-10"
                       title="Open WhatsApp chat"
                     >
                       <MessageCircle className="w-4 h-4" />
@@ -260,7 +260,7 @@ export default function CustomersPage() {
                       href={`/erp/bookings/new?customerId=${c.id}&name=${encodeURIComponent(
                         c.name
                       )}&phone=${cleanPhone}`}
-                      className="flex-1 py-1.5 bg-[#6B1D2F] hover:bg-[#521624] text-white text-center font-semibold rounded-xl text-xs transition-colors"
+                      className="flex-1 py-1.5 bg-[#6B1D2F] hover:bg-[#521624] text-white text-center font-semibold rounded-xl text-xs transition-colors min-h-10"
                     >
                       New Booking
                     </Link>
@@ -472,7 +472,7 @@ export default function CustomersPage() {
                     PIN Code
                   </label>
                   <input
-                    type="text"
+                    type="text" inputMode="numeric" pattern="[0-9]*"
                     value={pincode}
                     onChange={(e) => setPincode(e.target.value)}
                     className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium font-mono"
