@@ -1,6 +1,6 @@
 # TASKS — Barnali Fashion ERP: Real Backend
 
-Status: **APPROVED 2026-11-26. Phase 0 in progress.**
+Status: **APPROVED 2026-11-26. Phases 0–3 complete (Week-1 checkpoint). Next: Phase 4.**
 Rules: one task at a time · verify before ticking · checkpoint commit per task/phase (repo is not yet a git repo → T0.0) · Claude = backend, Gemini = frontend (see ARCHITECTURE §2).
 Tag: `[C]` Claude, `[G]` Gemini, `[U]` owner/user action.
 
@@ -38,7 +38,7 @@ Milestones (Agreement Art. 2/4): **Week 1** = Phases 0–3 · **Week 2** = Phase
 - [x] **T3.7 [C]** `POST /bookings/:id/return` using `settle()`; frees dates; creates care jobs; REFUND payment. *Verify:* AC2/AC3 (client-sent `lateFee` ignored).
 - [x] **T3.8 [C]** Cancel + admin edit with audit log. *Verify:* cancelled booking frees garment dates.
 - [x] **T3.9 [C]** Bookings list/detail with filters; derived `balanceDue`, `grandTotal`, `isOverdue`.
-- [ ] **CHECKPOINT: Week-1 review.** Commit + short demo script with curl; owner informed.
+- [x] **CHECKPOINT: Week-1 review.** Commit + short demo script with curl; owner informed. (done: `docs/WEEK1_DEMO.md`, 108 tests)
 
 ## Phase 4 — Care, Cash, Reports, Alerts  (Week 2)
 - [ ] **T4.1 [C]** Care jobs API (create, list, receive → garment status).
