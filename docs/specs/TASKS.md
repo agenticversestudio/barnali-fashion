@@ -34,10 +34,10 @@ Milestones (Agreement Art. 2/4): **Week 1** = Phases 0–3 · **Week 2** = Phase
 - [x] **T3.3 [C]** Customers API (phone search, upsert, derived totals).
 - [x] **T3.4 [C]** `availability.ts` + `POST /bookings/quote`. *Verify:* conflict message names holder + dates.
 - [x] **T3.5 [C]** `POST /bookings` (§4 transaction; IDs from counters; price from DB; advance payment row). *Verify:* **concurrency test** — 10 parallel create calls same garment/dates → exactly 1 success, 9 × 409 (AC1).
-- [ ] **T3.6 [C]** `POST /bookings/:id/pickup` + payments endpoint.
-- [ ] **T3.7 [C]** `POST /bookings/:id/return` using `settle()`; frees dates; creates care jobs; REFUND payment. *Verify:* AC2/AC3 (client-sent `lateFee` ignored).
-- [ ] **T3.8 [C]** Cancel + admin edit with audit log. *Verify:* cancelled booking frees garment dates.
-- [ ] **T3.9 [C]** Bookings list/detail with filters; derived `balanceDue`, `grandTotal`, `isOverdue`.
+- [x] **T3.6 [C]** `POST /bookings/:id/pickup` + payments endpoint.
+- [x] **T3.7 [C]** `POST /bookings/:id/return` using `settle()`; frees dates; creates care jobs; REFUND payment. *Verify:* AC2/AC3 (client-sent `lateFee` ignored).
+- [x] **T3.8 [C]** Cancel + admin edit with audit log. *Verify:* cancelled booking frees garment dates.
+- [x] **T3.9 [C]** Bookings list/detail with filters; derived `balanceDue`, `grandTotal`, `isOverdue`.
 - [ ] **CHECKPOINT: Week-1 review.** Commit + short demo script with curl; owner informed.
 
 ## Phase 4 — Care, Cash, Reports, Alerts  (Week 2)
