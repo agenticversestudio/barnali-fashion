@@ -30,7 +30,7 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="Main"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-line shadow-[0_-4px_16px_rgba(60,40,20,0.06)] select-none"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-t border-[#EAE0D2] shadow-[0_-4px_16px_rgba(31,24,21,0.06)] select-none"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="h-16 flex items-stretch justify-around">
@@ -46,14 +46,14 @@ export function MobileBottomNav() {
               aria-current={active ? "page" : undefined}
               className={cn(
                 "relative flex-1 min-h-11 flex flex-col items-center justify-center gap-1",
-                active ? "text-plum" : "text-mute active:text-ink"
+                active ? "text-[#7A1624]" : "text-[#9C8E83] active:text-[#1F1815]"
               )}
             >
-              {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-8 rounded-b-full bg-gold" />}
+              {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-8 rounded-b-full bg-[#B8893A]" />}
               <span className="relative">
-                <Icon className={cn("w-[22px] h-[22px]", active ? "stroke-[2.2]" : "stroke-[1.7]")} />
+                <Icon className={cn("w-[22px] h-[22px]", active ? "stroke-[2.2]" : "stroke-[1.75]")} />
                 {badge !== undefined && (
-                  <span className="num absolute -top-1.5 -right-3 min-w-4 text-center bg-rose-600 text-white text-[9px] font-bold px-1 py-px rounded-full leading-tight ring-2 ring-white">
+                  <span className="num absolute -top-1.5 -right-3 min-w-4 text-center bg-[#9F1239] text-white text-[9px] font-bold px-1 py-px rounded-full leading-tight ring-2 ring-white">
                     {badge}
                   </span>
                 )}

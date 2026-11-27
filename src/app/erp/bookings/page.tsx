@@ -326,21 +326,21 @@ function BookingsContent() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="eyebrow">Counter ledger</span>
+          <span className="eyebrow text-[#B8893A]">COUNTER LEDGER</span>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
-            <h1 className="page-title text-2xl md:text-3xl">Rental Orders</h1>
-            <span className="num text-[11px] font-semibold bg-plum/10 text-plum px-2.5 py-0.5 rounded-full">
+            <h1 className="page-title text-2xl md:text-3xl text-[#1F1815]">Rental Orders</h1>
+            <span className="num text-[11px] font-semibold bg-[#F9F2E4] text-[#7A1624] border border-[#E6D5B8] px-3 py-0.5 rounded-full shadow-2xs">
               {bookings.length} booking{bookings.length === 1 ? "" : "s"}
             </span>
           </div>
-          <p className="text-xs text-mute mt-1.5">Selection, client, quote, handover and return settlement in one place.</p>
+          <p className="text-xs text-[#6B5E55] mt-1.5">Selection, client, quote, handover and return settlement in one place.</p>
         </div>
 
         <Link
           href="/erp/bookings/new"
-          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white text-sm font-semibold rounded-xl shadow-[0_1px_2px_rgba(75,24,53,0.3)] transition-colors shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-[#7A1624] hover:bg-[#5C0F1A] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
         >
-          <Plus className="w-4 h-4 text-gold" />
+          <Plus className="w-4 h-4 text-[#F9F2E4]" />
           <span>New Counter Booking</span>
         </Link>
       </div>
@@ -354,14 +354,14 @@ function BookingsContent() {
               placeholder="Search by customer name, phone, SKU (e.g. LF-001) or Order ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-xs pl-9 pr-10 min-h-11 bg-ivory border border-line rounded-xl text-ink placeholder-stone-400 focus:outline-none focus:border-plum"
+              className="w-full text-xs pl-9 pr-10 min-h-10 bg-[#FAF7F2] border border-[#EAE0D2] rounded-xl text-[#1F1815] placeholder-[#9C8E83] focus:outline-none focus:border-[#7A1624] focus:ring-2 focus:ring-[#7A1624]/15 transition-all"
             />
-            <Search className="w-4 h-4 text-mute absolute left-3 top-3.5" />
+            <Search className="w-4 h-4 text-[#9C8E83] absolute left-3 top-3" />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
                 aria-label="Clear search"
-                className="absolute right-1 top-1 w-9 h-9 flex items-center justify-center text-mute hover:text-ink"
+                className="absolute right-1 top-1 w-8 h-8 flex items-center justify-center text-[#9C8E83] hover:text-[#1F1815]"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -381,10 +381,11 @@ function BookingsContent() {
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
                 aria-pressed={statusFilter === tab.id}
-                className={`px-4 min-h-10 rounded-full text-xs whitespace-nowrap transition-colors shrink-0 border ${statusFilter === tab.id
-                  ? "bg-plum text-white font-semibold border-plum"
-                  : "bg-white text-ink-soft font-medium hover:bg-ivory-deep border-line"
-                  }`}
+                className={`px-4 min-h-10 rounded-full text-xs whitespace-nowrap transition-colors shrink-0 border ${
+                  statusFilter === tab.id
+                    ? "bg-[#7A1624] text-white font-semibold border-[#7A1624]"
+                    : "bg-white text-[#6B5E55] font-medium hover:bg-[#F4EDE3] border-[#EAE0D2]"
+                }`}
               >
                 {tab.label}
               </button>
@@ -472,27 +473,27 @@ function BookingsContent() {
           </div>
 
           {/* Desktop: ledger table */}
-          <div className="hidden lg:block surface overflow-hidden">
+          <div className="hidden lg:block bg-white rounded-2xl border border-[#EAE0D2] shadow-2xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="bg-ivory border-b border-line">
+                  <tr className="bg-[#F4EDE3] border-b border-[#EAE0D2]">
                     {["Order & Customer", "Costumes", "Pickup → Return Due", "Status", "Tariff / Balance", "Actions"].map((h, i) => (
-                      <th key={h} className={`py-3.5 px-4 eyebrow-mute ${i >= 4 ? "text-right" : ""}`}>
+                      <th key={h} className={`py-3.5 px-4 text-[11px] font-semibold uppercase tracking-wider text-[#6B5E55] ${i >= 4 ? "text-right" : ""}`}>
                         {h}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-line-soft">
+                <tbody className="divide-y divide-[#F0E8DC]">
                   {bookings.map((b) => {
                     const cleanPhone = b.customer.phone.replace(/\D/g, "").slice(-10);
                     return (
-                      <tr key={b.id} className="hover:bg-ivory transition-colors align-top">
+                      <tr key={b.id} className="hover:bg-[#FAF7F2] transition-colors align-top">
                         <td className="py-4 px-4">
-                          <div className="num font-bold text-xs text-plum">{b.id}</div>
-                          <div className="font-display font-semibold text-ink text-sm mt-0.5">{b.customer.name}</div>
-                          <div className="num text-[11px] text-mute">+91 {cleanPhone}</div>
+                          <div className="num font-bold text-xs text-[#7A1624]">{b.id}</div>
+                          <div className="font-display font-semibold text-[#1F1815] text-sm mt-0.5">{b.customer.name}</div>
+                          <div className="num text-[11px] text-[#9C8E83]">+91 {cleanPhone}</div>
                         </td>
 
                         <td className="py-4 px-4">

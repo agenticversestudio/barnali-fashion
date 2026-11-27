@@ -181,21 +181,21 @@ export default function StitchingAndDryCleanPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="eyebrow">Vendor dispatch</span>
+          <span className="eyebrow text-[#B8893A]">VENDOR DISPATCH</span>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
-            <h1 className="page-title text-2xl md:text-3xl">Care &amp; Laundry</h1>
-            <span className="num text-[11px] font-semibold bg-plum/10 text-plum px-2.5 py-0.5 rounded-full">
+            <h1 className="page-title text-2xl md:text-3xl text-[#1F1815]">Care &amp; Laundry</h1>
+            <span className="num text-[11px] font-semibold bg-[#F9F2E4] text-[#7A1624] border border-[#E6D5B8] px-3 py-0.5 rounded-full shadow-2xs">
               {filteredJobs.length} job{filteredJobs.length === 1 ? "" : "s"}
             </span>
           </div>
-          <p className="text-xs text-mute mt-1.5">Dry cleaning, tailoring alterations and repair turnaround at outside vendors.</p>
+          <p className="text-xs text-[#6B5E55] mt-1.5">Dry cleaning, tailoring alterations and repair turnaround at outside vendors.</p>
         </div>
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white text-sm font-semibold rounded-xl shadow-[0_1px_2px_rgba(75,24,53,0.3)] transition-colors shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-[#7A1624] hover:bg-[#5C0F1A] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
         >
-          <Plus className="w-4 h-4 text-gold" />
+          <Plus className="w-4 h-4 text-[#F9F2E4]" />
           <span>Dispatch New Job</span>
         </button>
       </div>
@@ -224,8 +224,8 @@ export default function StitchingAndDryCleanPage() {
               aria-pressed={activeTab === tab.id}
               className={`px-4 min-h-10 rounded-full text-xs whitespace-nowrap transition-colors shrink-0 border ${
                 activeTab === tab.id
-                  ? "bg-plum text-white font-semibold border-plum"
-                  : "bg-white text-ink-soft font-medium hover:bg-ivory-deep border-line"
+                  ? "bg-[#7A1624] text-white font-semibold border-[#7A1624]"
+                  : "bg-white text-[#6B5E55] font-medium hover:bg-[#F4EDE3] border-[#EAE0D2]"
               }`}
             >
               {tab.label}
@@ -233,12 +233,12 @@ export default function StitchingAndDryCleanPage() {
           ))}
         </div>
 
-        <div className="flex items-center bg-ivory-deep p-1 rounded-xl border border-line text-xs shrink-0" role="group" aria-label="Job status">
+        <div className="flex items-center bg-[#F4EDE3] p-1 rounded-xl border border-[#EAE0D2] text-xs shrink-0" role="group" aria-label="Job status">
           <button
             onClick={() => setStatusFilter("OUT")}
             aria-pressed={statusFilter === "OUT"}
             className={`px-4 min-h-9 rounded-lg font-semibold transition-colors ${
-              statusFilter === "OUT" ? "bg-white text-plum shadow-xs" : "text-mute hover:text-ink"
+              statusFilter === "OUT" ? "bg-white text-[#7A1624] shadow-2xs" : "text-[#9C8E83] hover:text-[#1F1815]"
             }`}
           >
             Currently Out ({careJobs.filter((j) => j.status === "OUT").length})
@@ -247,7 +247,7 @@ export default function StitchingAndDryCleanPage() {
             onClick={() => setStatusFilter("RECEIVED")}
             aria-pressed={statusFilter === "RECEIVED"}
             className={`px-4 min-h-9 rounded-lg font-semibold transition-colors ${
-              statusFilter === "RECEIVED" ? "bg-white text-plum shadow-xs" : "text-mute hover:text-ink"
+              statusFilter === "RECEIVED" ? "bg-white text-[#7A1624] shadow-2xs" : "text-[#9C8E83] hover:text-[#1F1815]"
             }`}
           >
             Past Received

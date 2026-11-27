@@ -198,12 +198,12 @@ export default function InventoryPage() {
         <div>
           <span className="eyebrow">The wardrobe</span>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
-            <h1 className="page-title text-2xl md:text-3xl">Costumes &amp; Inventory</h1>
-            <span className="num text-[11px] font-semibold bg-plum/10 text-plum px-2.5 py-0.5 rounded-full">
+            <h1 className="page-title text-2xl md:text-3xl text-[#1F1815]">Costumes &amp; Inventory</h1>
+            <span className="num text-[11px] font-semibold bg-[#F9F2E4] text-[#7A1624] border border-[#E6D5B8] px-3 py-0.5 rounded-full shadow-2xs">
               {garments.length} piece{garments.length === 1 ? "" : "s"}
             </span>
           </div>
-          <p className="text-xs text-mute mt-1.5">Godown rack tracking, booking availability and care states.</p>
+          <p className="text-xs text-[#6B5E55] mt-1.5">Godown rack tracking, booking availability and care states.</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -213,19 +213,19 @@ export default function InventoryPage() {
                 setCostumeId(`LF-${String(garments.length + 1).padStart(3, "0")}`);
                 setShowAddModal(true);
               }}
-              className="flex items-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white rounded-xl text-sm font-semibold shadow-[0_1px_2px_rgba(75,24,53,0.3)] transition-colors shrink-0"
+              className="flex items-center gap-2 px-5 min-h-11 bg-[#7A1624] hover:bg-[#5C0F1A] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors shrink-0"
             >
-              <Plus className="w-4 h-4 text-gold" />
+              <Plus className="w-4 h-4 text-[#F9F2E4]" />
               <span>Add Costume</span>
             </button>
           )}
 
-          <div className="flex items-center bg-ivory-deep p-1 rounded-xl border border-line" role="group" aria-label="View mode">
+          <div className="flex items-center bg-[#F4EDE3] p-1 rounded-xl border border-[#EAE0D2]" role="group" aria-label="View mode">
             <button
               onClick={() => setViewMode("grid")}
               aria-pressed={viewMode === "grid"}
               className={`w-10 h-9 flex items-center justify-center rounded-lg transition-colors ${
-                viewMode === "grid" ? "bg-white text-plum shadow-xs" : "text-mute hover:text-ink"
+                viewMode === "grid" ? "bg-white text-[#7A1624] shadow-2xs border border-[#EAE0D2]" : "text-[#6B5E55] hover:text-[#1F1815]"
               }`}
               title="Grid view"
             >
@@ -235,7 +235,7 @@ export default function InventoryPage() {
               onClick={() => setViewMode("table")}
               aria-pressed={viewMode === "table"}
               className={`w-10 h-9 flex items-center justify-center rounded-lg transition-colors ${
-                viewMode === "table" ? "bg-white text-plum shadow-xs" : "text-mute hover:text-ink"
+                viewMode === "table" ? "bg-white text-[#7A1624] shadow-2xs border border-[#EAE0D2]" : "text-[#6B5E55] hover:text-[#1F1815]"
               }`}
               title="Table view"
             >
@@ -401,27 +401,27 @@ export default function InventoryPage() {
         </div>
       ) : (
         /* Table View */
-        <div className="surface overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#EAE0D2] shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse min-w-[780px]">
               <thead>
-                <tr className="bg-ivory border-b border-line">
+                <tr className="bg-[#F4EDE3] border-b border-[#EAE0D2]">
                   {["Garment SKU", "Category & Specs", "Current Status", "Godown Location", "Rental / Deposit", "Actions"].map((h, i) => (
-                    <th key={h} className={`py-3.5 px-4 eyebrow-mute ${i >= 4 ? "text-right" : ""}`}>
+                    <th key={h} className={`py-3.5 px-4 text-[11px] font-semibold uppercase tracking-wider text-[#6B5E55] ${i >= 4 ? "text-right" : ""}`}>
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line-soft">
+              <tbody className="divide-y divide-[#F0E8DC]">
                 {garments.map((g) => (
-                  <tr key={g.id} className="hover:bg-ivory transition-colors">
+                  <tr key={g.id} className="hover:bg-[#FAF7F2] transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <CostumeThumb src={g.mainPhotoUrl} alt={g.name} className="w-12 h-14 rounded-lg border border-line shrink-0" />
+                        <CostumeThumb src={g.mainPhotoUrl} alt={g.name} className="w-12 h-14 rounded-lg border border-[#EAE0D2] shrink-0" />
                         <div className="min-w-0">
-                          <span className="num font-bold text-xs text-plum">{g.id}</span>
-                          <div className="font-display font-semibold text-ink line-clamp-1">{g.name}</div>
+                          <span className="num font-bold text-xs text-[#7A1624]">{g.id}</span>
+                          <div className="font-display font-semibold text-[#1F1815] line-clamp-1">{g.name}</div>
                         </div>
                       </div>
                     </td>

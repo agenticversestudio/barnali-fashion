@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Inter, Playfair_Display } from "next/font/google";
+import { Geist_Mono, Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-// Body: Inter. Editorial headings: Playfair Display. Numbers / SKUs / phones: Geist Mono with tabular digits.
-const inter = Inter({
-  variable: "--font-inter",
+// Body: Plus Jakarta Sans. Editorial headings: Playfair Display. Numbers / SKUs / phones: Geist Mono with tabular digits.
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#4B1835",
+  themeColor: "#7A1624",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -48,7 +49,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${playfair.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${plusJakarta.variable} ${playfair.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {children}

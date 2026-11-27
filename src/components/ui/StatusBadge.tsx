@@ -9,91 +9,67 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className, showDot = true }: StatusBadgeProps) {
-  let colorStyle = "bg-stone-50 text-stone-800 border-stone-200 font-semibold";
-  let dotColor = "bg-stone-500";
+  let colorStyle = "bg-[#F3F4F6] text-[#374151] border-[#E5E7EB] font-medium";
+  let dotColor = "bg-[#6B7280]";
   let displayLabel = status.replace(/_/g, " ");
 
   switch (status) {
     case "AVAILABLE":
-      colorStyle = "bg-emerald-50 text-emerald-800 border-emerald-200 font-semibold";
-      dotColor = "bg-emerald-500";
-      displayLabel = "Available";
+    case "COMPLETED":
+    case "FULLY_REFUNDED":
+    case "PAID":
+      colorStyle = "bg-[#ECFDF3] text-[#065F46] border-[#A7F3D0] font-semibold";
+      dotColor = "bg-[#10B981]";
+      displayLabel = status === "AVAILABLE" ? "Available" : status === "COMPLETED" ? "Completed" : status.replace(/_/g, " ");
       break;
 
     case "BOOKED":
+    case "CONFIRMED":
     case "RESERVED":
     case "PICKUP_PENDING":
-      colorStyle = "bg-amber-50 text-amber-900 border-amber-200 font-semibold";
-      dotColor = "bg-amber-500";
-      displayLabel = status === "BOOKED" ? "Booked" : status.replace(/_/g, " ");
-      break;
-
     case "OUT_ON_RENT":
     case "RENTED":
-      colorStyle = "bg-sky-50 text-sky-900 border-sky-200 font-semibold";
-      dotColor = "bg-sky-500";
-      displayLabel = "Out on rent";
+    case "TRIAL":
+    case "PENDING":
+    case "HELD":
+      colorStyle = "bg-[#FEF3C7] text-[#92400E] border-[#FDE68A] font-semibold";
+      dotColor = "bg-[#F59E0B]";
+      displayLabel = status === "OUT_ON_RENT" ? "Out on rent" : status === "BOOKED" ? "Booked" : status === "HELD" ? "Deposit held" : status.replace(/_/g, " ");
+      break;
+
+    case "OVERDUE":
+    case "BALANCE_DUE":
+    case "DAMAGED":
+    case "DAMAGED_REPAIR":
+    case "UNDER_REPAIR":
+    case "REPAIR_PENDING":
+    case "CANCELLED":
+      colorStyle = "bg-[#FFF1F2] text-[#9F1239] border-[#FECDD3] font-semibold";
+      dotColor = "bg-[#F43F5E]";
+      displayLabel = status === "DAMAGED_REPAIR" || status === "UNDER_REPAIR" ? "In repair" : status.replace(/_/g, " ");
       break;
 
     case "RETURNED_CLEANING":
     case "RETURN_RECEIVED":
     case "IN_LAUNDRY":
     case "INSPECTION_PENDING":
-      colorStyle = "bg-violet-50 text-violet-900 border-violet-200 font-semibold";
-      dotColor = "bg-violet-500";
-      displayLabel = "Cleaning pending";
-      break;
-
     case "IN_CARE":
-      colorStyle = "bg-amber-50 text-amber-900 border-amber-200 font-semibold";
-      dotColor = "bg-amber-500";
-      displayLabel = "In Care";
-      break;
-
-    case "DAMAGED_REPAIR":
-    case "DAMAGED":
-    case "UNDER_REPAIR":
-    case "REPAIR_PENDING":
-      colorStyle = "bg-rose-50 text-rose-900 border-rose-200 font-semibold";
-      dotColor = "bg-rose-500";
-      displayLabel = "In repair";
+    case "ALTERATION":
+      colorStyle = "bg-[#F3F4F6] text-[#374151] border-[#E5E7EB] font-semibold";
+      dotColor = "bg-[#8B5CF6]";
+      displayLabel = status === "RETURNED_CLEANING" ? "Cleaning pending" : status === "IN_CARE" ? "In Care" : status.replace(/_/g, " ");
       break;
 
     case "UNAVAILABLE":
     case "RETIRED":
-      colorStyle = "bg-stone-100 text-stone-700 border-stone-200 font-semibold";
-      dotColor = "bg-stone-500";
+      colorStyle = "bg-[#F3F4F6] text-[#6B7280] border-[#E5E7EB] font-medium";
+      dotColor = "bg-[#9CA3AF]";
       displayLabel = "Unavailable";
       break;
 
-    case "CONFIRMED":
-      colorStyle = "bg-amber-50 text-amber-900 border-amber-200 font-semibold";
-      dotColor = "bg-amber-500";
-      displayLabel = "Confirmed";
-      break;
-
-    case "COMPLETED":
-    case "FULLY_REFUNDED":
-      colorStyle = "bg-emerald-50 text-emerald-800 border-emerald-200 font-semibold";
-      dotColor = "bg-emerald-500";
-      displayLabel = "Completed";
-      break;
-
-    case "CANCELLED":
-      colorStyle = "bg-rose-50 text-rose-900 border-rose-200 font-semibold";
-      dotColor = "bg-rose-500";
-      displayLabel = "Cancelled";
-      break;
-
-    case "HELD":
-      colorStyle = "bg-amber-50 text-amber-900 border-amber-200 font-semibold";
-      dotColor = "bg-amber-500";
-      displayLabel = "Deposit held";
-      break;
-
     default:
-      colorStyle = "bg-stone-50 text-stone-800 border-stone-200 font-semibold";
-      dotColor = "bg-stone-500";
+      colorStyle = "bg-[#F3F4F6] text-[#374151] border-[#E5E7EB] font-medium";
+      dotColor = "bg-[#6B7280]";
   }
 
   return (
