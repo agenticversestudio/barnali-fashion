@@ -28,9 +28,9 @@ export default function AvailabilityCalendarPage() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
 
-  // Date range navigation: Month / Year
-  const [year, setYear] = useState(2026);
-  const [month, setMonth] = useState(11); // 11 = November
+  // Date range navigation: Month / Year (defaults to current date)
+  const [year, setYear] = useState(() => new Date().getFullYear());
+  const [month, setMonth] = useState(() => new Date().getMonth() + 1);
   const [todayStr, setTodayStr] = useState("");
 
   useEffect(() => {
