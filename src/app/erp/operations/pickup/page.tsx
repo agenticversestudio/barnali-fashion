@@ -21,6 +21,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { BookingDto, PayMode } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 import { PhotoCapture } from "@/components/operations/PhotoCapture";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 function PickupOperationsContent() {
   const { user } = useAuth();
@@ -98,34 +99,32 @@ function PickupOperationsContent() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-2 text-xs text-[#8C6F3B] font-semibold uppercase tracking-wider mb-1">
-          <PackageCheck className="w-4 h-4 text-[#4B1835]" />
+        <div className="flex items-center gap-2 text-xs text-gold-dark font-semibold uppercase tracking-wider mb-1">
+          <PackageCheck className="w-4 h-4 text-plum" />
           <span>Dispatch &amp; Client Handover Desk</span>
         </div>
-        <h1 className="text-2xl font-serif font-bold text-[#27222A]">Pickup / Issue Management</h1>
+        <h1 className="text-2xl page-title">Pickup / Issue Management</h1>
         <p className="text-xs text-gray-500 mt-0.5">
           Execute physical garment handovers, verify accompanying accessories, and log balance settlements.
         </p>
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-12 text-center text-xs text-gray-500">
-          <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+        <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-gray-500">
+          <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
           Loading confirmed bookings queue for pickup...
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left: Queue of Bookings Awaiting Handover */}
-          <div className="bg-white rounded-2xl border border-[#EFE9DD] p-4 shadow-xs space-y-3">
-            <div className="font-bold text-gray-900 text-xs uppercase tracking-wider flex items-center justify-between pb-2 border-b border-[#EFE9DD]">
+          <div className="bg-white rounded-2xl border border-line-soft p-4 shadow-xs space-y-3">
+            <div className="font-bold text-gray-900 text-xs uppercase tracking-wider flex items-center justify-between pb-2 border-b border-line-soft">
               <span>Pending Pickups ({bookings.length})</span>
               <span className="text-[10px] text-gray-400">Confirmed</span>
             </div>
 
             {bookings.length === 0 ? (
-              <div className="text-center py-10 text-xs text-gray-400">
-                No confirmed bookings awaiting pickup right now.
-              </div>
+              <EmptyState title="No confirmed bookings awaiting pickup right now." className="py-8" />
             ) : (
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {bookings.map((b) => (
@@ -137,19 +136,19 @@ function PickupOperationsContent() {
                     }}
                     className={`p-3 rounded-xl border cursor-pointer transition-all text-xs ${
                       selectedBooking?.id === b.id
-                        ? "bg-[#FAF5EB] border-[#B89558] shadow-xs"
-                        : "bg-[#FBF9F5] border-[#E8DFD1] hover:border-[#B89558]"
+                        ? "bg-gold-soft border-gold shadow-xs"
+                        : "bg-ivory border-line hover:border-gold"
                     }`}
                   >
                     <div className="flex items-center justify-between font-bold text-gray-900">
                       <span>{b.customer?.name}</span>
-                      <span className="font-mono text-[#4B1835] text-[11px]">{b.id}</span>
+                      <span className="font-mono text-plum text-[11px]">{b.id}</span>
                     </div>
                     <div className="text-gray-500 text-[11px] mt-0.5 truncate">
                       {b.items.map((i) => i.name).join(", ")}
                     </div>
                     <div className="mt-2 flex items-center justify-between text-[11px]">
-                      <span className="text-[#8C6F3B] font-semibold">
+                      <span className="text-gold-dark font-semibold">
                         Pickup: {formatDate(b.pickupDate)}
                       </span>
                       <StatusBadge status={b.status} />
@@ -163,10 +162,10 @@ function PickupOperationsContent() {
           {/* Right: Operational Handover Verification Panel */}
           <div className="lg:col-span-2">
             {selectedBooking ? (
-              <div className="bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-5 text-xs">
-                <div className="flex items-start justify-between pb-3 border-b border-[#EFE9DD]">
+              <div className="bg-white rounded-2xl border border-line-soft p-6 shadow-xs space-y-5 text-xs">
+                <div className="flex items-start justify-between pb-3 border-b border-line-soft">
                   <div>
-                    <div className="text-[10px] text-[#8C6F3B] font-bold uppercase">
+                    <div className="text-[10px] text-gold-dark font-bold uppercase">
                       Handover Checklist for Booking
                     </div>
                     <h2 className="text-lg font-bold text-gray-900 mt-0.5">
@@ -178,7 +177,7 @@ function PickupOperationsContent() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-mono font-bold text-sm text-[#4B1835]">
+                    <div className="font-mono font-bold text-sm text-plum">
                       {selectedBooking.id}
                     </div>
                     <StatusBadge status={selectedBooking.status} className="mt-1" />
@@ -194,10 +193,10 @@ function PickupOperationsContent() {
                     {selectedBooking.items.map((item) => (
                       <div
                         key={item.garmentId}
-                        className="p-3 bg-[#FBF9F5] rounded-xl border border-[#E8DFD1] flex items-center justify-between"
+                        className="p-3 bg-ivory rounded-xl border border-line flex items-center justify-between"
                       >
                         <div className="flex items-center gap-3">
-                          <span className="font-mono font-bold text-[#4B1835] bg-white px-2 py-1 rounded border border-[#E8DFD1]">
+                          <span className="font-mono font-bold text-plum bg-white px-2 py-1 rounded border border-line">
                             {item.garmentId}
                           </span>
                           <div>
@@ -216,24 +215,24 @@ function PickupOperationsContent() {
                 </div>
 
                 {/* Financial Verification */}
-                <div className="p-4 bg-[#FAF5EB] rounded-xl border border-[#E8DFD1] space-y-2">
-                  <div className="font-bold text-[#4B1835] text-xs">Payment &amp; Deposit Verification</div>
+                <div className="p-4 bg-gold-soft rounded-xl border border-line space-y-2">
+                  <div className="font-bold text-plum text-xs">Payment &amp; Deposit Verification</div>
                   <div className="grid grid-cols-3 gap-2 text-center pt-1">
-                    <div className="p-2 bg-white rounded-lg border border-[#E8DFD1]">
+                    <div className="p-2 bg-white rounded-lg border border-line">
                       <div className="text-[10px] text-gray-400">Total Rental</div>
                       <div className="font-bold text-gray-900 mt-0.5 font-mono">
                         {formatINR(selectedBooking.rentalTotal)}
                       </div>
                     </div>
-                    <div className="p-2 bg-white rounded-lg border border-[#E8DFD1]">
+                    <div className="p-2 bg-white rounded-lg border border-line">
                       <div className="text-[10px] text-gray-400">Amount Paid</div>
                       <div className="font-bold text-emerald-700 mt-0.5 font-mono">
                         {formatINR(selectedBooking.amountPaid)}
                       </div>
                     </div>
-                    <div className="p-2 bg-white rounded-lg border border-[#B89558]">
-                      <div className="text-[10px] text-[#8C6F3B] font-bold">Security Deposit</div>
-                      <div className="font-bold text-[#B89558] mt-0.5 font-mono">
+                    <div className="p-2 bg-white rounded-lg border border-gold">
+                      <div className="text-[10px] text-gold-dark font-bold">Security Deposit</div>
+                      <div className="font-bold text-gold mt-0.5 font-mono">
                         {formatINR(selectedBooking.depositTotal)}
                       </div>
                     </div>
@@ -261,7 +260,7 @@ function PickupOperationsContent() {
                 </div>
 
                 {/* Handover Condition Remarks & Evidence Photos */}
-                <div className="space-y-3 border-t border-[#EFE9DD] pt-3">
+                <div className="space-y-3 border-t border-line-soft pt-3">
                   <div>
                     <label className="block text-[11px] font-bold text-gray-800 uppercase mb-1">
                       Handover Condition Remarks *
@@ -271,14 +270,14 @@ function PickupOperationsContent() {
                       value={handoverCondition}
                       onChange={(e) => setHandoverCondition(e.target.value)}
                       placeholder="e.g. Small stain on left sleeve, zari intact, hanger & bag given"
-                      className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-medium text-xs text-gray-900 focus:outline-hidden focus:border-[#4B1835]"
+                      className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium text-xs text-gray-900 focus:outline-hidden focus:border-plum"
                     />
                     <p className="text-[10px] text-gray-500 mt-1">
                       Inspect garment with customer and note any pre-existing marks, loose threads, or accessories handed over.
                     </p>
                   </div>
 
-                  <div className="p-3 bg-[#FAF5EB] rounded-xl border border-[#E8DFD1]">
+                  <div className="p-3 bg-gold-soft rounded-xl border border-line">
                     <PhotoCapture
                       kind="HANDOVER"
                       bookingId={selectedBooking.id}
@@ -292,13 +291,13 @@ function PickupOperationsContent() {
                 </div>
 
                 {/* Physical Checks */}
-                <div className="space-y-2 border-t border-[#EFE9DD] pt-3">
+                <div className="space-y-2 border-t border-line-soft pt-3">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={accessoriesChecked}
                       onChange={(e) => setAccessoriesChecked(e.target.checked)}
-                      className="w-4 h-4 rounded text-[#4B1835]"
+                      className="w-4 h-4 rounded text-plum"
                     />
                     <span className="text-gray-800 font-semibold">
                       All accessories verified (Dupatta, latkans, safa brooch, wooden hanger &amp; garment dust cover bag)
@@ -309,7 +308,7 @@ function PickupOperationsContent() {
                       type="checkbox"
                       checked={conditionChecked}
                       onChange={(e) => setConditionChecked(e.target.checked)}
-                      className="w-4 h-4 rounded text-[#4B1835]"
+                      className="w-4 h-4 rounded text-plum"
                     />
                     <span className="text-gray-800 font-semibold">
                       Client inspected garment condition &amp; confirmed pristine state before leaving store
@@ -318,7 +317,7 @@ function PickupOperationsContent() {
                 </div>
 
                 {/* Dispatch Action */}
-                <div className="pt-3 border-t border-[#EFE9DD] flex items-center justify-between">
+                <div className="pt-3 border-t border-line-soft flex items-center justify-between">
                   <div>
                     <span className="text-[10px] text-gray-400 font-mono">Logged By:</span>
                     <div className="font-semibold text-gray-800">{user?.name || "Counter Staff"}</div>
@@ -335,12 +334,12 @@ function PickupOperationsContent() {
                     <button
                       onClick={handleIssueGarments}
                       disabled={submitting}
-                      className="bg-[#4B1835] hover:bg-[#320F23] disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-xl shadow-xs transition-colors flex items-center gap-2 cursor-pointer"
+                      className="bg-plum hover:bg-plum-dark disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-xl shadow-xs transition-colors flex items-center gap-2 cursor-pointer"
                     >
                       {submitting ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" />
+                        <Loader2 className="w-4 h-4 animate-spin text-gold-light" />
                       ) : (
-                        <CheckCircle2 className="w-4 h-4 text-[#D4B67F]" />
+                        <CheckCircle2 className="w-4 h-4 text-gold-light" />
                       )}
                       <span>Confirm Pickup</span>
                     </button>
@@ -348,9 +347,7 @@ function PickupOperationsContent() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl border border-[#EFE9DD] p-12 text-center text-xs text-gray-400 shadow-xs">
-                Select a confirmed booking from the queue to conduct the handover inspection.
-              </div>
+              <EmptyState title="Select a confirmed booking from the queue to conduct the handover inspection." className="py-12" />
             )}
           </div>
         </div>

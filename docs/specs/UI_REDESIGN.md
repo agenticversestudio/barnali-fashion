@@ -26,7 +26,7 @@ Minimum touch target 40 px (`min-h-10`), 44 px for bottom-nav items.
 - [x] **Phase 3** Orders cards (`/erp/bookings`)
 - [x] **Phase 4** Inventory grid with thumbnails and rack tags
 - [x] **Phase 5** Return & Care vendor tracker (`/erp/operations/laundry`)
-- [ ] **Phase 6** Customer directory cards + deposit ledger, empty states and micro-interactions sweep
+- [x] **Phase 6** Customer directory cards + deposit ledger, empty states and micro-interactions sweep
 
 ## Acceptance for each phase
 No functional regression (all 367 tests green, build OK), every touched screen usable at 360 px width, no hard-coded maroon / slate left in touched files, numbers set in `.num`.

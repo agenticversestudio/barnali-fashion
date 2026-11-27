@@ -102,8 +102,8 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-[#EFE9DD] p-12 text-center text-xs text-gray-500">
-        <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+      <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-gray-500">
+        <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
         Loading system configuration &amp; sync status...
       </div>
     );
@@ -112,11 +112,11 @@ export default function SettingsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 text-xs">
       <div>
-        <div className="flex items-center gap-2 text-xs text-[#8C6F3B] font-semibold uppercase tracking-wider mb-1">
-          <Settings className="w-4 h-4 text-[#4B1835]" />
+        <div className="flex items-center gap-2 text-xs text-gold-dark font-semibold uppercase tracking-wider mb-1">
+          <Settings className="w-4 h-4 text-plum" />
           <span>Operational Parameters &amp; Configuration</span>
         </div>
-        <h1 className="text-2xl font-serif font-bold text-[#27222A]">Business Settings</h1>
+        <h1 className="text-2xl page-title">Business Settings</h1>
         <p className="text-xs text-gray-500 mt-0.5">
           Manage store location profile, buffer turnaround days, late fee policies, and Google Sheets sync.
         </p>
@@ -124,9 +124,9 @@ export default function SettingsPage() {
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* Store Location Profile */}
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-4">
-          <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD] flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-[#B89558]" />
+        <div className="bg-white rounded-2xl border border-line-soft p-6 shadow-xs space-y-4">
+          <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-gold" />
             <span>Store Profile &amp; Invoice Header</span>
           </div>
 
@@ -140,7 +140,7 @@ export default function SettingsPage() {
                 required
                 value={shopName}
                 onChange={(e) => setShopName(e.target.value)}
-                className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-bold"
+                className="w-full p-2.5 bg-ivory border border-line rounded-xl font-bold"
               />
             </div>
 
@@ -153,7 +153,7 @@ export default function SettingsPage() {
                 required
                 value={shopPhone}
                 onChange={(e) => setShopPhone(e.target.value)}
-                className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-mono font-bold"
+                className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono font-bold"
               />
             </div>
           </div>
@@ -167,15 +167,15 @@ export default function SettingsPage() {
               required
               value={shopAddress}
               onChange={(e) => setShopAddress(e.target.value)}
-              className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl"
+              className="w-full p-2.5 bg-ivory border border-line rounded-xl"
             />
           </div>
         </div>
 
         {/* Rental Business Policy Parameters */}
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-4">
-          <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD] flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#B89558]" />
+        <div className="bg-white rounded-2xl border border-line-soft p-6 shadow-xs space-y-4">
+          <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center gap-2">
+            <Clock className="w-4 h-4 text-gold" />
             <span>Rental Policies &amp; Cleaning Quarantine Buffers</span>
           </div>
 
@@ -191,7 +191,7 @@ export default function SettingsPage() {
                   max="7"
                   value={bufferDays}
                   onChange={(e) => setBufferDays(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-bold font-mono"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-bold font-mono"
                 />
                 <span className="text-gray-500 font-semibold">Days</span>
               </div>
@@ -209,7 +209,7 @@ export default function SettingsPage() {
                   max="100"
                   value={lateFeePercent}
                   onChange={(e) => setLateFeePercent(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-bold font-mono text-rose-700"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-bold font-mono text-rose-700"
                 />
                 <span className="text-gray-500 font-semibold">%</span>
               </div>
@@ -225,7 +225,7 @@ export default function SettingsPage() {
                 value={defaultCareVendor}
                 onChange={(e) => setDefaultCareVendor(e.target.value)}
                 placeholder="e.g. Royal Dry Cleaners"
-                className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-medium"
+                className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium"
               />
               <div className="text-[10px] text-gray-400 mt-1">Primary dry cleaning partner</div>
             </div>
@@ -236,12 +236,12 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-[#4B1835] hover:bg-[#320F23] disabled:opacity-50 text-white font-bold px-6 py-2.5 rounded-xl shadow-xs transition-colors flex items-center gap-2 cursor-pointer"
+                className="bg-plum hover:bg-plum-dark disabled:opacity-50 text-white font-bold px-6 py-2.5 rounded-xl shadow-xs transition-colors flex items-center gap-2 cursor-pointer"
               >
                 {saving ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  <Save className="w-4 h-4 text-[#D4B67F]" />
+                  <Save className="w-4 h-4 text-gold-light" />
                 )}
                 <span>Save Configuration</span>
               </button>
@@ -251,8 +251,8 @@ export default function SettingsPage() {
       </form>
 
       {/* Google Sheets Sync & Disaster Recovery */}
-      <div className="bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-4">
-        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD] flex items-center justify-between">
+      <div className="bg-white rounded-2xl border border-line-soft p-6 shadow-xs space-y-4">
+        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
             <span>Google Sheets Live Mirror &amp; Backup Sync</span>
@@ -273,7 +273,7 @@ export default function SettingsPage() {
         </p>
 
         {syncStatus && (
-          <div className="p-3 bg-[#FAF5EB] rounded-xl border border-[#E8DFD1] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="p-3 bg-gold-soft rounded-xl border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <div className="text-[11px] text-gray-700">
                 Last Sync: <strong>{syncStatus.lastSyncAt ? formatDate(syncStatus.lastSyncAt) : "Never"}</strong>
@@ -303,26 +303,26 @@ export default function SettingsPage() {
       </div>
 
       {/* Database & Infrastructure Specifications */}
-      <div className="bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-3">
-        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD] flex items-center gap-2">
-          <Database className="w-4 h-4 text-[#B89558]" />
+      <div className="bg-white rounded-2xl border border-line-soft p-6 shadow-xs space-y-3">
+        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center gap-2">
+          <Database className="w-4 h-4 text-gold" />
           <span>Database Architecture &amp; Zero-Cost Hosting</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
-          <div className="p-3 bg-[#FBF9F5] rounded-xl border border-[#E8DFD1]">
+          <div className="p-3 bg-ivory rounded-xl border border-line">
             <div className="text-gray-400 font-semibold uppercase text-[9px]">Primary Database</div>
             <div className="font-bold text-gray-900 mt-0.5">Turso Edge SQLite</div>
             <div className="text-gray-500 text-[10px]">Region: AWS Mumbai (bom1)</div>
           </div>
 
-          <div className="p-3 bg-[#FBF9F5] rounded-xl border border-[#E8DFD1]">
+          <div className="p-3 bg-ivory rounded-xl border border-line">
             <div className="text-gray-400 font-semibold uppercase text-[9px]">Application Runtime</div>
             <div className="font-bold text-gray-900 mt-0.5">Next.js 16 (Node.js)</div>
             <div className="text-gray-500 text-[10px]">Zero server cost tier</div>
           </div>
 
-          <div className="p-3 bg-[#FBF9F5] rounded-xl border border-[#E8DFD1]">
+          <div className="p-3 bg-ivory rounded-xl border border-line">
             <div className="text-gray-400 font-semibold uppercase text-[9px]">Concurrency Protection</div>
             <div className="font-bold text-gray-900 mt-0.5">SQL Trigger Locks</div>
             <div className="text-gray-500 text-[10px]">Zero double booking guarantee</div>

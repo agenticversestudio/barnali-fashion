@@ -24,6 +24,7 @@ import type { BookingDto, NextAction, Settlement } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 import { PhotoCapture } from "@/components/operations/PhotoCapture";
 import { AddPaymentModal } from "@/components/operations/AddPaymentModal";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 function ReturnsCounterContent() {
   const { user } = useAuth();
@@ -120,34 +121,32 @@ function ReturnsCounterContent() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-2 text-xs text-[#8C6F3B] font-semibold uppercase tracking-wider mb-1">
-          <RotateCcw className="w-4 h-4 text-[#4B1835]" />
+        <div className="flex items-center gap-2 text-xs text-gold-dark font-semibold uppercase tracking-wider mb-1">
+          <RotateCcw className="w-4 h-4 text-plum" />
           <span>Intake, Damage Check &amp; Deposit Settlement</span>
         </div>
-        <h1 className="text-2xl font-serif font-bold text-[#27222A]">Return Counter &amp; Inspection</h1>
+        <h1 className="text-2xl page-title">Return Counter &amp; Inspection</h1>
         <p className="text-xs text-gray-500 mt-0.5">
           Process customer garment returns, execute multi-point condition checks, calculate damage deductions, and settle refundable deposits.
         </p>
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-12 text-center text-xs text-gray-500">
-          <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+        <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-gray-500">
+          <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
           Loading active rentals queue...
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left: Active Rentals Queue */}
-          <div className="bg-white rounded-2xl border border-[#EFE9DD] p-4 shadow-xs space-y-3">
-            <div className="font-bold text-gray-900 text-xs uppercase tracking-wider flex items-center justify-between pb-2 border-b border-[#EFE9DD]">
+          <div className="bg-white rounded-2xl border border-line-soft p-4 shadow-xs space-y-3">
+            <div className="font-bold text-gray-900 text-xs uppercase tracking-wider flex items-center justify-between pb-2 border-b border-line-soft">
               <span>Active Out on Rent ({bookings.length})</span>
               <span className="text-[10px] text-gray-400">Due / Overdue</span>
             </div>
 
             {bookings.length === 0 ? (
-              <div className="text-center py-10 text-xs text-gray-400">
-                No active rentals out on rent right now.
-              </div>
+              <EmptyState title="No active rentals out on rent right now." className="py-8" />
             ) : (
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {bookings.map((b) => (
@@ -160,10 +159,10 @@ function ReturnsCounterContent() {
                     }}
                     className={`p-3 rounded-xl border cursor-pointer transition-all text-xs ${
                       selectedBooking?.id === b.id
-                        ? "bg-[#FAF5EB] border-[#B89558] shadow-xs"
+                        ? "bg-gold-soft border-gold shadow-xs"
                         : b.isOverdue
                         ? "bg-rose-50/70 border-rose-200"
-                        : "bg-[#FBF9F5] border-[#E8DFD1] hover:border-[#B89558]"
+                        : "bg-ivory border-line hover:border-gold"
                     }`}
                   >
                     <div className="flex items-center justify-between font-bold text-gray-900">
@@ -178,7 +177,7 @@ function ReturnsCounterContent() {
                       {b.items.map((i) => i.name).join(", ")}
                     </div>
                     <div className="mt-2 flex items-center justify-between text-[11px]">
-                      <span className={b.isOverdue ? "text-rose-700 font-bold" : "text-[#8C6F3B] font-semibold"}>
+                      <span className={b.isOverdue ? "text-rose-700 font-bold" : "text-gold-dark font-semibold"}>
                         Due: {formatDate(b.returnDueDate)}
                       </span>
                       <span className="font-mono text-gray-500">Dep: {formatINR(b.depositTotal)}</span>
@@ -192,10 +191,10 @@ function ReturnsCounterContent() {
           {/* Right: Inspection & Settlement Card */}
           <div className="lg:col-span-2">
             {selectedBooking ? (
-              <div className="bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-5 text-xs">
-                <div className="flex items-start justify-between pb-3 border-b border-[#EFE9DD]">
+              <div className="bg-white rounded-2xl border border-line-soft p-6 shadow-xs space-y-5 text-xs">
+                <div className="flex items-start justify-between pb-3 border-b border-line-soft">
                   <div>
-                    <div className="text-[10px] text-[#8C6F3B] font-bold uppercase">
+                    <div className="text-[10px] text-gold-dark font-bold uppercase">
                       Return Check-in &amp; Quality Inspection
                     </div>
                     <h2 className="text-lg font-bold text-gray-900 mt-0.5">
@@ -208,7 +207,7 @@ function ReturnsCounterContent() {
                   </div>
                   <div className="text-right">
                     <div className="text-[10px] text-gray-400">Deposit In Vault</div>
-                    <div className="text-lg font-bold text-[#B89558] font-mono">
+                    <div className="text-lg font-bold text-gold font-mono">
                       {formatINR(depositHeld)}
                     </div>
                   </div>
@@ -222,10 +221,10 @@ function ReturnsCounterContent() {
                   {selectedBooking.items.map((item) => (
                     <div
                       key={item.garmentId}
-                      className="p-3 bg-[#FBF9F5] rounded-xl border border-[#E8DFD1] flex items-center justify-between"
+                      className="p-3 bg-ivory rounded-xl border border-line flex items-center justify-between"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-[#4B1835]">{item.garmentId}</span>
+                        <span className="font-mono font-bold text-plum">{item.garmentId}</span>
                         <span className="font-bold text-gray-900">{item.name}</span>
                         <span className="text-gray-400 text-[11px]">({item.size})</span>
                       </div>
@@ -235,48 +234,48 @@ function ReturnsCounterContent() {
                 </div>
 
                 {/* Inspection Multi-point Checklist */}
-                <div className="p-4 bg-[#FAF5EB] rounded-xl border border-[#E8DFD1] space-y-3">
+                <div className="p-4 bg-gold-soft rounded-xl border border-line space-y-3">
                   <div className="font-bold text-gray-900 uppercase text-[11px]">
                     Physical Condition Checklist
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <label className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-[#E8DFD1] cursor-pointer">
+                    <label className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-line cursor-pointer">
                       <input
                         type="checkbox"
                         checked={hasStains}
                         onChange={(e) => setHasStains(e.target.checked)}
-                        className="rounded text-[#4B1835]"
+                        className="rounded text-plum"
                       />
                       <span className="font-semibold text-gray-800">Stains / Spills</span>
                     </label>
 
-                    <label className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-[#E8DFD1] cursor-pointer">
+                    <label className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-line cursor-pointer">
                       <input
                         type="checkbox"
                         checked={hasTears}
                         onChange={(e) => setHasTears(e.target.checked)}
-                        className="rounded text-[#4B1835]"
+                        className="rounded text-plum"
                       />
                       <span className="font-semibold text-gray-800">Tears / Rips</span>
                     </label>
 
-                    <label className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-[#E8DFD1] cursor-pointer">
+                    <label className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-line cursor-pointer">
                       <input
                         type="checkbox"
                         checked={missingAccessories}
                         onChange={(e) => setMissingAccessories(e.target.checked)}
-                        className="rounded text-[#4B1835]"
+                        className="rounded text-plum"
                       />
                       <span className="font-semibold text-gray-800">Missing Parts</span>
                     </label>
 
-                    <label className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-[#E8DFD1] cursor-pointer">
+                    <label className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-line cursor-pointer">
                       <input
                         type="checkbox"
                         checked={zipperFunctional}
                         onChange={(e) => setZipperFunctional(e.target.checked)}
-                        className="rounded text-[#4B1835]"
+                        className="rounded text-plum"
                       />
                       <span className="font-semibold text-gray-800">Zip / Hooks OK</span>
                     </label>
@@ -291,7 +290,7 @@ function ReturnsCounterContent() {
                         type="date"
                         value={actualReturnDate}
                         onChange={(e) => setActualReturnDate(e.target.value)}
-                        className="w-full p-2 bg-white border border-[#E8DFD1] rounded-lg font-mono"
+                        className="w-full p-2 bg-white border border-line rounded-lg font-mono"
                       />
                     </div>
 
@@ -303,13 +302,13 @@ function ReturnsCounterContent() {
                         type="text"
                         value={inspectionNotes}
                         onChange={(e) => setInspectionNotes(e.target.value)}
-                        className="w-full p-2 bg-white border border-[#E8DFD1] rounded-lg"
+                        className="w-full p-2 bg-white border border-line rounded-lg"
                       />
                     </div>
                   </div>
 
                   {/* Damage & Defect Evidence Photos */}
-                  <div className="p-3 bg-white rounded-xl border border-[#E8DFD1] mt-2">
+                  <div className="p-3 bg-white rounded-xl border border-line mt-2">
                     <PhotoCapture
                       kind="DAMAGE"
                       bookingId={selectedBooking.id}
@@ -323,7 +322,7 @@ function ReturnsCounterContent() {
                 </div>
 
                 {/* Deductions Input & Late Fee Notice */}
-                <div className="p-4 bg-white rounded-xl border-2 border-[#B89558]/30 space-y-3">
+                <div className="p-4 bg-white rounded-xl border-2 border-gold/30 space-y-3">
                   <div className="font-bold text-gray-900 text-xs uppercase flex items-center justify-between">
                     <span>Refundable Deposit Settlement Inputs</span>
                     <span className="text-[10px] text-gray-400 font-normal">
@@ -341,7 +340,7 @@ function ReturnsCounterContent() {
                         min="0"
                         value={damageDeduction}
                         onChange={(e) => setDamageDeduction(Number(e.target.value) || 0)}
-                        className="w-full p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-bold text-rose-700 font-mono"
+                        className="w-full p-2 bg-ivory border border-line rounded-lg font-bold text-rose-700 font-mono"
                       />
                     </div>
 
@@ -354,7 +353,7 @@ function ReturnsCounterContent() {
                         min="0"
                         value={cleaningCharge}
                         onChange={(e) => setCleaningCharge(Number(e.target.value) || 0)}
-                        className="w-full p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-bold text-amber-700 font-mono"
+                        className="w-full p-2 bg-ivory border border-line rounded-lg font-bold text-amber-700 font-mono"
                       />
                     </div>
 
@@ -365,7 +364,7 @@ function ReturnsCounterContent() {
                       <select
                         value={refundPayMode}
                         onChange={(e) => setRefundPayMode(e.target.value as any)}
-                        className="w-full p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-bold"
+                        className="w-full p-2 bg-ivory border border-line rounded-lg font-bold"
                       >
                         <option value="CASH">Cash in Drawer</option>
                         <option value="UPI">UPI Transfer</option>
@@ -461,11 +460,11 @@ function ReturnsCounterContent() {
                       onClick={() => setNextAction("AVAILABLE")}
                       className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                         nextAction === "AVAILABLE"
-                          ? "bg-[#4B1835] text-white border-[#4B1835] font-bold shadow-xs"
-                          : "bg-[#FBF9F5] text-gray-700 border-[#E8DFD1]"
+                          ? "bg-plum text-white border-plum font-bold shadow-xs"
+                          : "bg-ivory text-gray-700 border-line"
                       }`}
                     >
-                      <CheckCircle2 className="w-4 h-4 mx-auto mb-1 text-[#D4B67F]" />
+                      <CheckCircle2 className="w-4 h-4 mx-auto mb-1 text-gold-light" />
                       <span className="block text-xs font-bold leading-tight">Back to rack</span>
                       <span className="text-[10px] opacity-80">(Available)</span>
                     </button>
@@ -478,11 +477,11 @@ function ReturnsCounterContent() {
                       }}
                       className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                         nextAction === "DRY_CLEAN"
-                          ? "bg-[#4B1835] text-white border-[#4B1835] font-bold shadow-xs"
-                          : "bg-[#FBF9F5] text-gray-700 border-[#E8DFD1]"
+                          ? "bg-plum text-white border-plum font-bold shadow-xs"
+                          : "bg-ivory text-gray-700 border-line"
                       }`}
                     >
-                      <Sparkles className="w-4 h-4 mx-auto mb-1 text-[#D4B67F]" />
+                      <Sparkles className="w-4 h-4 mx-auto mb-1 text-gold-light" />
                       <span className="block text-xs font-bold leading-tight">Dry clean</span>
                       <span className="text-[10px] opacity-80">(In care job)</span>
                     </button>
@@ -495,11 +494,11 @@ function ReturnsCounterContent() {
                       }}
                       className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                         nextAction === "REPAIR"
-                          ? "bg-[#4B1835] text-white border-[#4B1835] font-bold shadow-xs"
-                          : "bg-[#FBF9F5] text-gray-700 border-[#E8DFD1]"
+                          ? "bg-plum text-white border-plum font-bold shadow-xs"
+                          : "bg-ivory text-gray-700 border-line"
                       }`}
                     >
-                      <Wrench className="w-4 h-4 mx-auto mb-1 text-[#D4B67F]" />
+                      <Wrench className="w-4 h-4 mx-auto mb-1 text-gold-light" />
                       <span className="block text-xs font-bold leading-tight">Repair</span>
                       <span className="text-[10px] opacity-80">(Tailor / Stitch)</span>
                     </button>
@@ -529,7 +528,7 @@ function ReturnsCounterContent() {
                         value={vendorName}
                         onChange={(e) => setVendorName(e.target.value)}
                         placeholder={nextAction === "DRY_CLEAN" ? "e.g. Royal Dry Cleaners, Bargarh" : "e.g. Master Salim Tailor"}
-                        className="w-full p-2 bg-white border border-[#E8DFD1] rounded-lg font-medium text-xs"
+                        className="w-full p-2 bg-white border border-line rounded-lg font-medium text-xs"
                         required
                       />
                     </div>
@@ -537,7 +536,7 @@ function ReturnsCounterContent() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="pt-4 border-t border-[#EFE9DD] flex items-center justify-between">
+                <div className="pt-4 border-t border-line-soft flex items-center justify-between">
                   <div className="text-[11px] text-gray-500">
                     Inspected By: <strong>{user?.name || "Counter Manager"}</strong>
                   </div>
@@ -557,9 +556,7 @@ function ReturnsCounterContent() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl border border-[#EFE9DD] p-12 text-center text-xs text-gray-400 shadow-xs">
-                Select an active rental from the left queue to conduct return check-in.
-              </div>
+              <EmptyState title="Select an active rental from the left queue to conduct return check-in." className="py-12" />
             )}
           </div>
         </div>

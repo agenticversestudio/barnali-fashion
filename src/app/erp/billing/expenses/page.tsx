@@ -18,6 +18,7 @@ import { expensesApi } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
 import type { ExpenseDto } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const CATEGORIES = [
   "Dry Cleaning & Laundry",
@@ -131,11 +132,11 @@ export default function ExpensesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#8C6F3B] font-semibold uppercase tracking-wider mb-1">
-            <Coins className="w-4 h-4 text-[#4B1835]" />
+          <div className="flex items-center gap-2 text-xs text-gold-dark font-semibold uppercase tracking-wider mb-1">
+            <Coins className="w-4 h-4 text-plum" />
             <span>Operational Outflow &amp; Maintenance Costs</span>
           </div>
-          <h1 className="text-2xl font-serif font-bold text-[#27222A]">Expense Tracker</h1>
+          <h1 className="text-2xl page-title">Expense Tracker</h1>
           <p className="text-xs text-gray-500 mt-0.5">
             Record day-to-day store expenditures including laundry dry cleaning, tailoring, packaging bags, and utilities.
           </p>
@@ -143,16 +144,16 @@ export default function ExpensesPage() {
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="bg-[#4B1835] hover:bg-[#320F23] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs flex items-center gap-2 transition-all self-start sm:self-auto cursor-pointer"
+          className="bg-plum hover:bg-plum-dark text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs flex items-center gap-2 transition-all self-start sm:self-auto cursor-pointer"
         >
-          <Plus className="w-4 h-4 text-[#D4B67F]" />
+          <Plus className="w-4 h-4 text-gold-light" />
           <span>Record New Expense</span>
         </button>
       </div>
 
       {/* Top Banner KPI */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-        <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs">
+        <div className="bg-white p-5 rounded-2xl border border-line-soft shadow-xs">
           <div className="text-gray-400 font-semibold uppercase text-[10px]">
             Total Expenses ({filteredExpenses.length})
           </div>
@@ -160,7 +161,7 @@ export default function ExpensesPage() {
           <div className="text-gray-500 text-[11px] mt-1">Based on current filter view</div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs">
+        <div className="bg-white p-5 rounded-2xl border border-line-soft shadow-xs">
           <div className="text-gray-400 font-semibold uppercase text-[10px]">
             Cash Drawer Outflow
           </div>
@@ -168,7 +169,7 @@ export default function ExpensesPage() {
           <div className="text-gray-500 text-[11px] mt-1">Directly deducted from cash drawer</div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs">
+        <div className="bg-white p-5 rounded-2xl border border-line-soft shadow-xs">
           <div className="text-gray-400 font-semibold uppercase text-[10px]">
             UPI / Bank Outflow
           </div>
@@ -178,7 +179,7 @@ export default function ExpensesPage() {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white rounded-2xl border border-[#EFE9DD] p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 text-xs">
+      <div className="bg-white rounded-2xl border border-line-soft p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 text-xs">
         <div className="flex-1 relative">
           <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -186,7 +187,7 @@ export default function ExpensesPage() {
             placeholder="Search expense description, category, or receipt #..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl text-xs"
+            className="w-full pl-9 pr-3 py-2 bg-ivory border border-line rounded-xl text-xs"
           />
         </div>
 
@@ -195,7 +196,7 @@ export default function ExpensesPage() {
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl text-xs font-semibold text-gray-700"
+            className="p-2 bg-ivory border border-line rounded-xl text-xs font-semibold text-gray-700"
           >
             <option value="ALL">All Categories</option>
             {CATEGORIES.map((c) => (
@@ -208,20 +209,18 @@ export default function ExpensesPage() {
       </div>
 
       {/* Expense List Table */}
-      <div className="bg-white rounded-2xl border border-[#EFE9DD] shadow-xs overflow-hidden">
+      <div className="bg-white rounded-2xl border border-line-soft shadow-xs overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-xs text-gray-500">
-            <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+            <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
             Loading store expense records...
           </div>
         ) : filteredExpenses.length === 0 ? (
-          <div className="p-12 text-center text-xs text-gray-400">
-            No expenses found matching the current criteria.
-          </div>
+          <EmptyState title="No expenses found matching the current criteria." className="py-12" />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF5EB] border-b border-[#EFE9DD] text-[#8C6F3B] uppercase text-[10px] tracking-wider font-bold">
+              <thead className="bg-gold-soft border-b border-line-soft text-gold-dark uppercase text-[10px] tracking-wider font-bold">
                 <tr>
                   <th className="py-3 px-4">Date</th>
                   <th className="py-3 px-3">Expense Category</th>
@@ -232,12 +231,12 @@ export default function ExpensesPage() {
                   {isAdmin && <th className="py-3 px-4 text-right">Actions</th>}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F1ECE3]">
+              <tbody className="divide-y divide-line-soft">
                 {filteredExpenses.map((exp) => (
-                  <tr key={exp.id} className="hover:bg-[#FBF9F5] transition-colors">
+                  <tr key={exp.id} className="hover:bg-ivory transition-colors">
                     <td className="py-3 px-4 font-mono text-gray-600">{formatDate(exp.date)}</td>
                     <td className="py-3 px-3 font-semibold text-gray-900">
-                      <span className="bg-[#FAF5EB] text-[#8C6F3B] px-2 py-0.5 rounded text-[11px] border border-[#E8DFD1]">
+                      <span className="bg-gold-soft text-gold-dark px-2 py-0.5 rounded text-[11px] border border-line">
                         {exp.category}
                       </span>
                     </td>
@@ -283,10 +282,10 @@ export default function ExpensesPage() {
       {/* Add Expense Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl border border-[#EFE9DD] max-w-md w-full p-6 text-xs animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-[#EFE9DD]">
-              <div className="flex items-center gap-2 font-bold text-sm text-[#4B1835]">
-                <Plus className="w-4 h-4 text-[#B89558]" />
+          <div className="bg-white rounded-2xl shadow-2xl border border-line-soft max-w-md w-full p-6 text-xs animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between pb-3 border-b border-line-soft">
+              <div className="flex items-center gap-2 font-bold text-sm text-plum">
+                <Plus className="w-4 h-4 text-gold" />
                 <span>Record Store Expense</span>
               </div>
               <button
@@ -307,7 +306,7 @@ export default function ExpensesPage() {
                   required
                   value={expenseDate}
                   onChange={(e) => setExpenseDate(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-mono"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono"
                 />
               </div>
 
@@ -318,7 +317,7 @@ export default function ExpensesPage() {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-bold"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-bold"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c} value={c}>
@@ -338,7 +337,7 @@ export default function ExpensesPage() {
                   placeholder="e.g. 50 bridal dust cover bags &amp; hangers"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl"
                 />
               </div>
 
@@ -354,7 +353,7 @@ export default function ExpensesPage() {
                     placeholder="e.g. 1500"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-bold font-mono text-rose-700"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-bold font-mono text-rose-700"
                   />
                 </div>
 
@@ -365,7 +364,7 @@ export default function ExpensesPage() {
                   <select
                     value={mode}
                     onChange={(e) => setMode(e.target.value as any)}
-                    className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-semibold"
                   >
                     <option value="UPI">UPI (PhonePe / GPay)</option>
                     <option value="CASH">Cash in Drawer</option>
@@ -383,11 +382,11 @@ export default function ExpensesPage() {
                   placeholder="e.g. BILL-9821"
                   value={receiptNo}
                   onChange={(e) => setReceiptNo(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-mono"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono"
                 />
               </div>
 
-              <div className="pt-3 border-t border-[#EFE9DD] flex justify-end gap-2">
+              <div className="pt-3 border-t border-line-soft flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
@@ -398,7 +397,7 @@ export default function ExpensesPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-[#4B1835] hover:bg-[#320F23] disabled:opacity-50 text-white font-bold rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2 bg-plum hover:bg-plum-dark disabled:opacity-50 text-white font-bold rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Save Expense</span>

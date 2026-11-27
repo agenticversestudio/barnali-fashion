@@ -28,6 +28,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { CostumeThumb } from "@/components/ui/CostumeThumb";
 import type { GarmentDetailDto, GarmentStatus } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 function GarmentDetailContent() {
   const params = useParams();
@@ -490,9 +491,7 @@ function GarmentDetailContent() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-6 text-xs text-stone-400">
-                No past bookings recorded for this garment yet.
-              </div>
+              <EmptyState title="No past bookings recorded for this garment yet." className="py-8" />
             )}
           </div>
         </div>

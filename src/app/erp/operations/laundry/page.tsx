@@ -140,7 +140,10 @@ export default function StitchingAndDryCleanPage() {
     return j.kind === activeTab;
   });
 
-  const todayStr = localISO();
+  const [todayStr, setTodayStr] = useState("");
+  useEffect(() => {
+    setTodayStr(localISO());
+  }, []);
   const outJobs = careJobs.filter((j) => j.status === "OUT");
   const overdueCount = outJobs.filter((j) => j.isOverdue).length;
   const outCost = outJobs.reduce((sum, j) => sum + (j.cost || 0), 0);
@@ -154,6 +157,7 @@ export default function StitchingAndDryCleanPage() {
   /** Countdown pill: days left to the expected return, or days overdue. */
   const countdown = (j: CareJobDto) => {
     if (!j.expectedDate) return <span className="text-[11px] text-mute">No expected date</span>;
+    if (!todayStr) return <span className="text-[11px] text-mute">—</span>;
     const n = daysBetween(todayStr, j.expectedDate);
     const late = j.isOverdue || n < 0;
     return (
@@ -497,7 +501,7 @@ export default function StitchingAndDryCleanPage() {
                   disabled={creating}
                   className="flex-1 min-h-11 bg-plum hover:bg-plum-dark text-white font-bold rounded-xl shadow-xs flex items-center justify-center gap-1.5"
                 >
-                  {creating ? <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" /> : <CheckCircle2 className="w-4 h-4" />}
+                  {creating ? <Loader2 className="w-4 h-4 animate-spin text-gold-light" /> : <CheckCircle2 className="w-4 h-4" />}
                   <span>Confirm Dispatch</span>
                 </button>
               </div>

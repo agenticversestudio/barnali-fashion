@@ -216,7 +216,7 @@ function NewBookingWizardContent() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Top Header */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+      <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-line shadow-2xs">
         <div className="flex items-center gap-3">
           <Link
             href="/erp/bookings"
@@ -235,7 +235,7 @@ function NewBookingWizardContent() {
         </div>
 
         {step < 5 && (
-          <div className="text-xs font-semibold text-[#4B1835] bg-[#4B1835]/10 px-3 py-1.5 rounded-full font-mono">
+          <div className="text-xs font-semibold text-plum bg-plum/10 px-3 py-1.5 rounded-full font-mono">
             Step {step} of 4
           </div>
         )}
@@ -259,7 +259,7 @@ function NewBookingWizardContent() {
                 onClick={() => setStep(item.s)}
                 className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-colors ${
                   isCurrent
-                    ? "bg-[#4B1835] text-white border-[#4B1835] font-bold shadow-xs"
+                    ? "bg-plum text-white border-plum font-bold shadow-xs"
                     : isDone
                     ? "bg-emerald-50 text-emerald-800 border-emerald-200 font-semibold"
                     : "bg-white text-stone-500 border-stone-200"
@@ -294,7 +294,7 @@ function NewBookingWizardContent() {
 
       {/* STEP 1: Customer Details */}
       {step === 1 && (
-        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-6 shadow-2xs space-y-5">
+        <div className="bg-white rounded-2xl border border-line p-6 shadow-2xs space-y-5">
           <div className="border-b border-stone-100 pb-3 flex items-center justify-between">
             <div>
               <h2 className="font-bold text-stone-900 text-sm">Step 1: Client Information</h2>
@@ -313,7 +313,7 @@ function NewBookingWizardContent() {
                 value={customerSearch}
                 onChange={(e) => setCustomerSearch(e.target.value)}
                 placeholder="Type name or phone number..."
-                className="w-full pl-9 pr-4 py-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl text-xs"
+                className="w-full pl-9 pr-4 py-2 bg-ivory border border-line rounded-xl text-xs"
               />
               <Search className="w-4 h-4 text-stone-400 absolute left-3 top-2.5" />
             </div>
@@ -358,7 +358,7 @@ function NewBookingWizardContent() {
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="e.g. Smt. Sunita Sahu"
-                className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium"
                 required
               />
             </div>
@@ -376,7 +376,7 @@ function NewBookingWizardContent() {
                 }}
                 placeholder="9876543210"
                 maxLength={10}
-                className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-bold"
+                className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono font-bold"
                 required
               />
             </div>
@@ -391,7 +391,7 @@ function NewBookingWizardContent() {
                 onChange={(e) => setCustomerWhatsapp(e.target.value)}
                 placeholder="9876543210"
                 maxLength={10}
-                className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono"
+                className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono"
               />
             </div>
 
@@ -404,7 +404,7 @@ function NewBookingWizardContent() {
                 value={customerCity}
                 onChange={(e) => setCustomerCity(e.target.value)}
                 placeholder="Bargarh"
-                className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium"
               />
             </div>
 
@@ -417,7 +417,7 @@ function NewBookingWizardContent() {
                 value={customerAddress}
                 onChange={(e) => setCustomerAddress(e.target.value)}
                 placeholder="e.g. Near Bhatli Chowk, Ward 4"
-                className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium"
               />
             </div>
           </div>
@@ -431,7 +431,7 @@ function NewBookingWizardContent() {
                 }
                 setStep(2);
               }}
-              className="px-6 py-2.5 bg-[#4B1835] text-white font-semibold rounded-xl text-xs shadow-xs hover:bg-[#521624]"
+              className="px-6 py-2.5 bg-plum text-white font-semibold rounded-xl text-xs shadow-xs hover:bg-plum-dark"
             >
               Next: Event &amp; Dates &rarr;
             </button>
@@ -441,7 +441,7 @@ function NewBookingWizardContent() {
 
       {/* STEP 2: Event & Dates */}
       {step === 2 && (
-        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-6 shadow-2xs space-y-5">
+        <div className="bg-white rounded-2xl border border-line p-6 shadow-2xs space-y-5">
           <div className="border-b border-stone-100 pb-3">
             <h2 className="font-bold text-stone-900 text-sm">Step 2: Event &amp; Rental Schedule</h2>
             <p className="text-xs text-stone-500">Pick-up, wedding/function date, and expected return deadline</p>
@@ -457,7 +457,7 @@ function NewBookingWizardContent() {
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
                 placeholder="e.g. Sangeet & Reception, Bridal Photoshoot"
-                className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium"
                 required
               />
             </div>
@@ -470,7 +470,7 @@ function NewBookingWizardContent() {
                 type="date"
                 value={eventDate}
                 onChange={(e) => setEventDate(e.target.value)}
-                className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-medium"
+                className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono font-medium"
                 required
               />
             </div>
@@ -484,7 +484,7 @@ function NewBookingWizardContent() {
                 value={pickupDate}
                 min={today}
                 onChange={(e) => setPickupDate(e.target.value)}
-                className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-semibold text-[#4B1835]"
+                className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono font-semibold text-plum"
                 required
               />
             </div>
@@ -498,7 +498,7 @@ function NewBookingWizardContent() {
                 value={returnDueDate}
                 min={pickupDate}
                 onChange={(e) => setReturnDueDate(e.target.value)}
-                className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-semibold text-rose-800"
+                className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono font-semibold text-rose-800"
                 required
               />
             </div>
@@ -513,7 +513,7 @@ function NewBookingWizardContent() {
             </button>
             <button
               onClick={() => setStep(3)}
-              className="px-6 py-2.5 bg-[#4B1835] text-white font-semibold rounded-xl text-xs shadow-xs hover:bg-[#521624]"
+              className="px-6 py-2.5 bg-plum text-white font-semibold rounded-xl text-xs shadow-xs hover:bg-plum-dark"
             >
               Next: Select Costumes &rarr;
             </button>
@@ -523,13 +523,13 @@ function NewBookingWizardContent() {
 
       {/* STEP 3: Costume Selection */}
       {step === 3 && (
-        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-6 shadow-2xs space-y-5">
+        <div className="bg-white rounded-2xl border border-line p-6 shadow-2xs space-y-5">
           <div className="border-b border-stone-100 pb-3 flex items-center justify-between">
             <div>
               <h2 className="font-bold text-stone-900 text-sm">Step 3: Select Rental Pieces</h2>
               <p className="text-xs text-stone-500">Pick costumes from inventory for these dates</p>
             </div>
-            <div className="text-xs font-mono font-bold text-[#4B1835]">
+            <div className="text-xs font-mono font-bold text-plum">
               {selectedGarmentIds.length} Selected
             </div>
           </div>
@@ -541,7 +541,7 @@ function NewBookingWizardContent() {
               value={garmentSearch}
               onChange={(e) => setGarmentSearch(e.target.value)}
               placeholder="Filter costumes by SKU, name, or category..."
-              className="w-full pl-9 pr-4 py-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl text-xs"
+              className="w-full pl-9 pr-4 py-2 bg-ivory border border-line rounded-xl text-xs"
             />
             <Search className="w-4 h-4 text-stone-400 absolute left-3 top-2.5" />
           </div>
@@ -563,7 +563,7 @@ function NewBookingWizardContent() {
                     onClick={() => toggleGarment(g.id)}
                     className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
                       isSelected
-                        ? "bg-[#4B1835]/5 border-[#4B1835] shadow-xs ring-1 ring-[#4B1835]"
+                        ? "bg-plum/5 border-plum shadow-xs ring-1 ring-plum"
                         : "bg-white border-stone-200 hover:border-stone-300"
                     }`}
                   >
@@ -571,11 +571,11 @@ function NewBookingWizardContent() {
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => {}}
-                      className="mt-1 h-4 w-4 text-[#4B1835] rounded border-stone-300 pointer-events-none"
+                      className="mt-1 h-4 w-4 text-plum rounded border-stone-300 pointer-events-none"
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between">
-                        <span className="font-mono text-[10px] font-bold text-[#4B1835]">{g.id}</span>
+                        <span className="font-mono text-[10px] font-bold text-plum">{g.id}</span>
                         <span className="text-[10px] text-stone-400">{g.rack}</span>
                       </div>
                       <div className="font-bold text-xs text-stone-900 truncate mt-0.5">{g.name}</div>
@@ -603,7 +603,7 @@ function NewBookingWizardContent() {
                 }
                 setStep(4);
               }}
-              className="px-6 py-2.5 bg-[#4B1835] text-white font-semibold rounded-xl text-xs shadow-xs hover:bg-[#521624]"
+              className="px-6 py-2.5 bg-plum text-white font-semibold rounded-xl text-xs shadow-xs hover:bg-plum-dark"
             >
               Next: Financial Quote &rarr;
             </button>
@@ -613,7 +613,7 @@ function NewBookingWizardContent() {
 
       {/* STEP 4: Financial Quote & Settlement */}
       {step === 4 && (
-        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-6 shadow-2xs space-y-5">
+        <div className="bg-white rounded-2xl border border-line p-6 shadow-2xs space-y-5">
           <div className="border-b border-stone-100 pb-3">
             <h2 className="font-bold text-stone-900 text-sm">Step 4: Real-time Tariff &amp; Deposit Quote</h2>
             <p className="text-xs text-stone-500">Live computation from server-side pricing engine</p>
@@ -628,7 +628,7 @@ function NewBookingWizardContent() {
               {selectedCostumes.map((g) => (
                 <div key={g.id} className="p-3 flex items-center justify-between text-xs">
                   <div>
-                    <span className="font-mono font-bold text-[#4B1835] mr-2">{g.id}</span>
+                    <span className="font-mono font-bold text-plum mr-2">{g.id}</span>
                     <span className="font-semibold text-stone-800">{g.name}</span>
                     <span className="text-stone-400 text-[11px] ml-2 font-mono">({g.rack})</span>
                   </div>
@@ -651,7 +651,7 @@ function NewBookingWizardContent() {
                 type="number"
                 value={dryCleanCharge}
                 onChange={(e) => setDryCleanCharge(Number(e.target.value) || 0)}
-                className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono text-stone-800"
+                className="w-full p-2 bg-ivory border border-line rounded-xl font-mono text-stone-800"
               />
             </div>
 
@@ -663,7 +663,7 @@ function NewBookingWizardContent() {
                 type="number"
                 value={transitCharge}
                 onChange={(e) => setTransitCharge(Number(e.target.value) || 0)}
-                className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono text-stone-800"
+                className="w-full p-2 bg-ivory border border-line rounded-xl font-mono text-stone-800"
               />
             </div>
 
@@ -675,7 +675,7 @@ function NewBookingWizardContent() {
                 type="number"
                 value={advanceAmount}
                 onChange={(e) => setAdvanceAmount(Number(e.target.value) || 0)}
-                className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-bold text-[#4B1835]"
+                className="w-full p-2 bg-ivory border border-line rounded-xl font-mono font-bold text-plum"
                 required
               />
             </div>
@@ -689,7 +689,7 @@ function NewBookingWizardContent() {
               <select
                 value={paymentMode}
                 onChange={(e) => setPaymentMode(e.target.value as PayMode)}
-                className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                className="w-full p-2 bg-ivory border border-line rounded-xl font-medium"
               >
                 <option value="UPI">UPI / GPay / PhonePe</option>
                 <option value="CASH">Cash at Counter</option>
@@ -707,7 +707,7 @@ function NewBookingWizardContent() {
                 value={bookingNotes}
                 onChange={(e) => setBookingNotes(e.target.value)}
                 placeholder="e.g. Alter blouse waist by 1 inch"
-                className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl text-xs"
+                className="w-full p-2 bg-ivory border border-line rounded-xl text-xs"
               />
             </div>
           </div>
@@ -715,11 +715,11 @@ function NewBookingWizardContent() {
           {/* Live Quote Breakdown Card */}
           {quoting ? (
             <div className="p-4 bg-stone-50 rounded-xl text-center text-xs text-stone-500 flex items-center justify-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin text-[#4B1835]" />
+              <Loader2 className="w-4 h-4 animate-spin text-plum" />
               <span>Fetching server-side quote...</span>
             </div>
           ) : quote ? (
-            <div className="p-4 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl space-y-2 text-xs">
+            <div className="p-4 bg-ivory border border-line rounded-xl space-y-2 text-xs">
               <div className="flex justify-between text-stone-600">
                 <span>Rental Service Tariff:</span>
                 <span className="font-mono font-semibold">{formatINR(quote.rentalTotal)}</span>
@@ -742,7 +742,7 @@ function NewBookingWizardContent() {
               )}
               <div className="pt-2 border-t border-stone-200 flex justify-between font-bold text-sm text-stone-900">
                 <span>Grand Total:</span>
-                <span className="font-mono text-[#4B1835]">{formatINR(quote.grandTotal)}</span>
+                <span className="font-mono text-plum">{formatINR(quote.grandTotal)}</span>
               </div>
               <div className="flex justify-between text-emerald-800 font-semibold pt-1">
                 <span>Advance Receipt:</span>
@@ -772,11 +772,11 @@ function NewBookingWizardContent() {
             <button
               onClick={handleSubmitBooking}
               disabled={submitting || conflicts.length > 0}
-              className="px-6 py-2.5 bg-[#4B1835] hover:bg-[#521624] disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-xs flex items-center gap-2"
+              className="px-6 py-2.5 bg-plum hover:bg-plum-dark disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-xs flex items-center gap-2"
             >
               {submitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" />
+                  <Loader2 className="w-4 h-4 animate-spin text-gold-light" />
                   <span>Locking in Turso DB...</span>
                 </>
               ) : (
@@ -792,13 +792,13 @@ function NewBookingWizardContent() {
 
       {/* STEP 5: Success & WhatsApp Slip */}
       {step === 5 && createdBookingId && (
-        <div className="bg-white rounded-3xl border border-[#E8DFD1] p-8 shadow-xl text-center space-y-6">
+        <div className="bg-white rounded-3xl border border-line p-8 shadow-xl text-center space-y-6">
           <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200">
             <CheckCircle2 className="w-8 h-8" />
           </div>
 
           <div className="space-y-1">
-            <span className="text-xs font-mono font-bold text-[#4B1835] uppercase tracking-wider">
+            <span className="text-xs font-mono font-bold text-plum uppercase tracking-wider">
               Booking Created Successfully
             </span>
             <h2 className="font-serif font-bold text-2xl text-stone-900">
@@ -845,7 +845,7 @@ function NewBookingWizardContent() {
             </Link>
             <Link
               href="/erp/bookings"
-              className="px-5 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white font-semibold rounded-xl text-xs shadow-xs"
+              className="px-5 py-2.5 bg-plum hover:bg-plum-dark text-white font-semibold rounded-xl text-xs shadow-xs"
             >
               Go to Orders List
             </Link>

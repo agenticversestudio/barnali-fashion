@@ -114,11 +114,11 @@ export function AddPaymentModal({
 
   return (
     <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-      <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4">
+      <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-line shadow-2xl space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-stone-100">
           <div>
-            <span className="font-mono text-xs text-[#4B1835] font-bold">
+            <span className="font-mono text-xs text-plum font-bold">
               {booking.id}
             </span>
             <h3 className="font-serif font-bold text-lg text-stone-900">
@@ -152,7 +152,7 @@ export function AddPaymentModal({
               Customer: <strong className="text-stone-900">{booking.customer.name}</strong> ({booking.customer.phone})
             </div>
             <div>
-              Status: <strong className="font-mono text-[#4B1835]">{booking.status}</strong>
+              Status: <strong className="font-mono text-plum">{booking.status}</strong>
             </div>
             <div className="pt-1 flex items-center justify-between border-t border-stone-200 text-stone-900 font-semibold">
               <span>
@@ -195,7 +195,7 @@ export function AddPaymentModal({
               <select
                 value={kind}
                 onChange={(e) => setKind(e.target.value as any)}
-                className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-semibold"
+                className="w-full p-2.5 bg-ivory border border-line rounded-xl font-semibold"
               >
                 <option value="BALANCE">BALANCE (Rental balance collected)</option>
                 <option value="DEPOSIT">DEPOSIT (Security deposit collected)</option>
@@ -211,7 +211,7 @@ export function AddPaymentModal({
             <select
               value={mode}
               onChange={(e) => setMode(e.target.value as PayMode)}
-              className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-semibold"
+              className="w-full p-2.5 bg-ivory border border-line rounded-xl font-semibold"
             >
               <option value="CASH">Cash (From Till / Counter Drawer)</option>
               <option value="UPI">UPI (GPay / PhonePe / Paytm)</option>
@@ -230,7 +230,7 @@ export function AddPaymentModal({
                 <button
                   type="button"
                   onClick={() => setAmount(maxAllowed)}
-                  className="text-[10px] text-[#8C6F3B] hover:underline font-semibold cursor-pointer"
+                  className="text-[10px] text-gold-dark hover:underline font-semibold cursor-pointer"
                 >
                   Fill Full Amount ({formatINR(maxAllowed)})
                 </button>
@@ -251,7 +251,7 @@ export function AddPaymentModal({
                 className={`w-full pl-7 pr-3 py-2.5 border rounded-xl font-mono font-bold text-sm text-gray-900 focus:outline-hidden ${
                   isRefund
                     ? "bg-amber-50/50 border-amber-300 cursor-not-allowed text-amber-900"
-                    : "bg-white border-[#E8DFD1] focus:border-[#4B1835]"
+                    : "bg-white border-line focus:border-plum"
                 }`}
                 required
               />
@@ -277,7 +277,7 @@ export function AddPaymentModal({
                   ? "e.g. Deposit refunded to customer via UPI"
                   : "e.g. Received by counter manager, settled in full"
               }
-              className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+              className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium"
             />
           </div>
 

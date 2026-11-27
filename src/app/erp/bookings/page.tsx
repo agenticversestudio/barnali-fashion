@@ -548,10 +548,10 @@ function BookingsContent() {
       {/* HANDOVER / PICKUP MODAL */}
       {handoverBooking && (
         <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-line shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="font-mono text-xs text-[#4B1835] font-bold">
+                <span className="font-mono text-xs text-plum font-bold">
                   {handoverBooking.id}
                 </span>
                 <h3 className="font-serif font-bold text-lg text-stone-900">
@@ -605,7 +605,7 @@ function BookingsContent() {
                   type="text"
                   value={handoverCondition}
                   onChange={(e) => setHandoverCondition(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium"
                 />
               </div>
 
@@ -646,10 +646,10 @@ function BookingsContent() {
       {/* RETURN & SETTLEMENT MODAL */}
       {returnBooking && (
         <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-line shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="font-mono text-xs text-[#4B1835] font-bold">
+                <span className="font-mono text-xs text-plum font-bold">
                   {returnBooking.id}
                 </span>
                 <h3 className="font-serif font-bold text-lg text-stone-900">
@@ -680,7 +680,7 @@ function BookingsContent() {
                     type="date"
                     value={actualReturnDate}
                     onChange={(e) => setActualReturnDate(e.target.value)}
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-medium"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono font-medium"
                     required
                   />
                 </div>
@@ -692,7 +692,7 @@ function BookingsContent() {
                   <select
                     value={nextAction}
                     onChange={(e) => setNextAction(e.target.value as NextAction)}
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-semibold"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-semibold"
                   >
                     <option value="AVAILABLE">Good Condition (Make Available)</option>
                     <option value="DRY_CLEAN">Send to Dry Clean</option>
@@ -712,7 +712,7 @@ function BookingsContent() {
                     value={vendorName}
                     onChange={(e) => setVendorName(e.target.value)}
                     placeholder="e.g. Bargarh Modern Dry Cleaners"
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium"
                   />
                 </div>
               )}
@@ -726,7 +726,7 @@ function BookingsContent() {
                     type="number"
                     value={damageCharge}
                     onChange={(e) => setDamageCharge(Number(e.target.value) || 0)}
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono"
                   />
                 </div>
 
@@ -738,7 +738,7 @@ function BookingsContent() {
                     type="number"
                     value={cleaningCharge}
                     onChange={(e) => setCleaningCharge(Number(e.target.value) || 0)}
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono"
                   />
                 </div>
               </div>
@@ -752,7 +752,7 @@ function BookingsContent() {
                   value={returnNotes}
                   onChange={(e) => setReturnNotes(e.target.value)}
                   placeholder="e.g. Returned on time, minor dupatta stain"
-                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl"
                 />
               </div>
 
@@ -763,7 +763,7 @@ function BookingsContent() {
                 <select
                   value={refundPayMode}
                   onChange={(e) => setRefundPayMode(e.target.value as any)}
-                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-semibold"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-semibold"
                 >
                   <option value="CASH">Cash Refund at Counter</option>
                   <option value="UPI">UPI Refund to Customer Phone</option>
@@ -801,7 +801,7 @@ function BookingsContent() {
               <button
                 onClick={handleExecuteReturn}
                 disabled={submittingReturn}
-                className="flex-1 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white font-bold rounded-xl text-xs shadow-xs flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 bg-plum hover:bg-plum-dark text-white font-bold rounded-xl text-xs shadow-xs flex items-center justify-center gap-1.5"
               >
                 {submittingReturn ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 <span>Settle Deposit &amp; Complete Return</span>
@@ -814,7 +814,7 @@ function BookingsContent() {
       {/* WHATSAPP RECEIPT MODAL */}
       {whatsappReceipt && (
         <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-line shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-stone-100">
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-emerald-600" />
@@ -844,7 +844,7 @@ function BookingsContent() {
               </button>
               <button
                 onClick={() => setWhatsappReceipt(null)}
-                className="flex-1 py-2 bg-[#4B1835] text-white font-semibold rounded-xl text-xs shadow-xs"
+                className="flex-1 py-2 bg-plum text-white font-semibold rounded-xl text-xs shadow-xs"
               >
                 Done
               </button>
@@ -856,10 +856,10 @@ function BookingsContent() {
       {/* ORDER DETAILS MODAL */}
       {selectedOrder && (
         <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-line shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="font-mono text-xs text-[#4B1835] font-bold">
+                <span className="font-mono text-xs text-plum font-bold">
                   {selectedOrder.id}
                 </span>
                 <h3 className="font-serif font-bold text-lg text-stone-900">
@@ -885,11 +885,11 @@ function BookingsContent() {
                 <span className="text-[10px] font-bold text-stone-400 uppercase block mb-1">
                   Booked Costumes ({selectedOrder.items.length})
                 </span>
-                <div className="divide-y divide-stone-100 border border-stone-200 rounded-xl bg-[#FBF8F2] p-2 space-y-1">
+                <div className="divide-y divide-stone-100 border border-stone-200 rounded-xl bg-ivory p-2 space-y-1">
                   {selectedOrder.items.map((i, idx) => (
                     <div key={idx} className="flex items-center justify-between py-1 text-xs">
                       <div>
-                        <span className="font-mono font-bold text-[#4B1835] mr-2">{i.garmentId}</span>
+                        <span className="font-mono font-bold text-plum mr-2">{i.garmentId}</span>
                         <span className="font-semibold">{i.name}</span>
                         {i.rack && <span className="text-stone-400 text-[10px] ml-1">({i.rack})</span>}
                       </div>

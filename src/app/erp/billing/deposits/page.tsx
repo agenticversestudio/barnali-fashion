@@ -15,6 +15,7 @@ import {
 import { bookingsApi } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
 import type { BookingDto, DepositStatus } from "@/types/api";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function DepositsLedgerPage() {
   const [bookings, setBookings] = useState<BookingDto[]>([]);
@@ -65,11 +66,11 @@ export default function DepositsLedgerPage() {
   return (
     <div className="space-y-6">
       <div>
-        <div className="flex items-center gap-2 text-xs text-[#8C6F3B] font-semibold uppercase tracking-wider mb-1">
-          <Wallet className="w-4 h-4 text-[#4B1835]" />
+        <div className="flex items-center gap-2 text-xs text-gold-dark font-semibold uppercase tracking-wider mb-1">
+          <Wallet className="w-4 h-4 text-plum" />
           <span>Refundable Deposit Escrow &amp; Reconciliation</span>
         </div>
-        <h1 className="text-2xl font-serif font-bold text-[#27222A]">Security Deposit Ledger</h1>
+        <h1 className="text-2xl page-title">Security Deposit Ledger</h1>
         <p className="text-xs text-gray-500 mt-0.5">
           Strict separation of client security deposits from rental income, tracking active liabilities, damage deductions, and refunds.
         </p>
@@ -77,11 +78,11 @@ export default function DepositsLedgerPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-        <div className="bg-white p-4 rounded-xl border border-[#EFE9DD] shadow-xs">
+        <div className="bg-white p-4 rounded-xl border border-line-soft shadow-xs">
           <div className="text-gray-400 font-semibold uppercase text-[10px]">
             Active Deposit Liability (In Vault)
           </div>
-          <div className="text-2xl font-bold text-[#B89558] mt-1 font-mono">
+          <div className="text-2xl font-bold text-gold mt-1 font-mono">
             {formatINR(totalDepositsHeld)}
           </div>
           <div className="text-gray-500 text-[11px] mt-0.5">
@@ -89,7 +90,7 @@ export default function DepositsLedgerPage() {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-[#EFE9DD] shadow-xs">
+        <div className="bg-white p-4 rounded-xl border border-line-soft shadow-xs">
           <div className="text-gray-400 font-semibold uppercase text-[10px]">
             Total Deposits Refunded
           </div>
@@ -101,7 +102,7 @@ export default function DepositsLedgerPage() {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-[#EFE9DD] shadow-xs">
+        <div className="bg-white p-4 rounded-xl border border-line-soft shadow-xs">
           <div className="text-gray-400 font-semibold uppercase text-[10px]">
             Damage Deductions Retained
           </div>
@@ -115,7 +116,7 @@ export default function DepositsLedgerPage() {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white rounded-2xl border border-[#EFE9DD] p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 text-xs">
+      <div className="bg-white rounded-2xl border border-line-soft p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 text-xs">
         <div className="flex-1 relative">
           <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -123,7 +124,7 @@ export default function DepositsLedgerPage() {
             placeholder="Search booking ref, customer name or phone..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl text-xs"
+            className="w-full pl-9 pr-3 py-2 bg-ivory border border-line rounded-xl text-xs"
           />
         </div>
 
@@ -132,7 +133,7 @@ export default function DepositsLedgerPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="p-2 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl text-xs font-semibold text-gray-700"
+            className="p-2 bg-ivory border border-line rounded-xl text-xs font-semibold text-gray-700"
           >
             <option value="ALL">All Statuses</option>
             <option value="HELD">HELD (Active)</option>
@@ -145,20 +146,18 @@ export default function DepositsLedgerPage() {
       </div>
 
       {/* Deposit Records Table */}
-      <div className="bg-white rounded-2xl border border-[#EFE9DD] shadow-xs overflow-hidden">
+      <div className="bg-white rounded-2xl border border-line-soft shadow-xs overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-xs text-gray-500">
-            <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+            <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
             Loading deposit escrow entries...
           </div>
         ) : filteredBookings.length === 0 ? (
-          <div className="p-12 text-center text-xs text-gray-400">
-            No booking deposits found.
-          </div>
+          <EmptyState title="No booking deposits found." className="py-12" />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF5EB] border-b border-[#EFE9DD] text-[#8C6F3B] uppercase text-[10px] tracking-wider font-bold">
+              <thead className="bg-gold-soft border-b border-line-soft text-gold-dark uppercase text-[10px] tracking-wider font-bold">
                 <tr>
                   <th className="py-3 px-4">Booking Ref</th>
                   <th className="py-3 px-3">Customer</th>
@@ -169,10 +168,10 @@ export default function DepositsLedgerPage() {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F1ECE3]">
+              <tbody className="divide-y divide-line-soft">
                 {filteredBookings.map((b) => (
-                  <tr key={b.id} className="hover:bg-[#FBF9F5] transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-[#4B1835]">{b.id}</td>
+                  <tr key={b.id} className="hover:bg-ivory transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-plum">{b.id}</td>
                     <td className="py-3 px-3">
                       <div className="font-bold text-gray-900">{b.customer.name}</div>
                       <div className="text-gray-400 text-[10px]">{b.customer.phone}</div>
@@ -180,7 +179,7 @@ export default function DepositsLedgerPage() {
                     <td className="py-3 px-3 font-mono text-gray-600">
                       {formatDate(b.eventDate)}
                     </td>
-                    <td className="py-3 px-3 font-mono font-bold text-[#B89558]">
+                    <td className="py-3 px-3 font-mono font-bold text-gold">
                       {formatINR(b.depositTotal)}
                     </td>
                     <td className="py-3 px-3">
@@ -206,7 +205,7 @@ export default function DepositsLedgerPage() {
                     <td className="py-3 px-4 text-right">
                       <Link
                         href={`/erp/billing/invoices?bookingId=${b.id}`}
-                        className="text-[#4B1835] hover:underline font-bold text-[11px]"
+                        className="text-plum hover:underline font-bold text-[11px]"
                       >
                         Receipt →
                       </Link>

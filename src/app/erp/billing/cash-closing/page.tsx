@@ -16,6 +16,7 @@ import { cashApi } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
 import type { CashTodayDto, CashClosingDto } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function CashClosingPage() {
   const { user, isAdmin } = useAuth();
@@ -83,8 +84,8 @@ export default function CashClosingPage() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center">
-        <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+      <div className="bg-white rounded-2xl border border-line p-12 text-center">
+        <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
         <div className="text-xs text-stone-500">Reconciling today&apos;s cash payments and drawer totals...</div>
       </div>
     );
@@ -93,9 +94,9 @@ export default function CashClosingPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-line shadow-2xs">
         <div>
-          <span className="text-xs font-mono text-[#4B1835] font-bold">
+          <span className="text-xs font-mono text-plum font-bold">
             Daily Financial Audit
           </span>
           <h1 className="font-serif font-bold text-xl md:text-2xl text-stone-900 tracking-tight mt-0.5">
@@ -117,7 +118,7 @@ export default function CashClosingPage() {
       {/* Drawer Breakdown Grid */}
       {todayData && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+          <div className="bg-white p-4 rounded-2xl border border-line shadow-2xs">
             <span className="text-[11px] text-stone-500 font-medium block">Opening Cash</span>
             <div className="font-mono font-bold text-lg text-stone-900 mt-0.5">
               {formatINR(todayData.openingCash)}
@@ -125,7 +126,7 @@ export default function CashClosingPage() {
             <span className="text-[10px] text-stone-400">from yesterday closing</span>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+          <div className="bg-white p-4 rounded-2xl border border-line shadow-2xs">
             <span className="text-[11px] text-emerald-700 font-medium block">Cash Inflows</span>
             <div className="font-mono font-bold text-lg text-emerald-800 mt-0.5">
               +{formatINR(todayData.cashIn)}
@@ -133,7 +134,7 @@ export default function CashClosingPage() {
             <span className="text-[10px] text-stone-400">rentals &amp; deposits in</span>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+          <div className="bg-white p-4 rounded-2xl border border-line shadow-2xs">
             <span className="text-[11px] text-rose-700 font-medium block">Cash Outflows</span>
             <div className="font-mono font-bold text-lg text-rose-800 mt-0.5">
               −{formatINR(todayData.cashRefunds + todayData.cashExpenses)}
@@ -141,9 +142,9 @@ export default function CashClosingPage() {
             <span className="text-[10px] text-stone-400">refunds + expenses</span>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+          <div className="bg-white p-4 rounded-2xl border border-line shadow-2xs">
             <span className="text-[11px] text-stone-600 font-bold block">Expected in Drawer</span>
-            <div className="font-mono font-bold text-lg text-[#4B1835] mt-0.5">
+            <div className="font-mono font-bold text-lg text-plum mt-0.5">
               {formatINR(todayData.expectedCash)}
             </div>
             <span className="text-[10px] text-stone-400">system computed</span>
@@ -152,7 +153,7 @@ export default function CashClosingPage() {
       )}
 
       {/* Form: Actual Cash Counted & Verification */}
-      <div className="bg-white rounded-2xl border border-[#E8DFD1] p-6 shadow-2xs space-y-4">
+      <div className="bg-white rounded-2xl border border-line p-6 shadow-2xs space-y-4">
         <h2 className="font-bold text-stone-900 text-sm border-b border-stone-100 pb-2">
           Physical Currency Count &amp; Reconciliation
         </h2>
@@ -169,7 +170,7 @@ export default function CashClosingPage() {
                 disabled={todayData?.closed}
                 onChange={(e) => setActualCash(e.target.value)}
                 placeholder="Count all notes in drawer..."
-                className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-bold text-base text-stone-900 focus:outline-none focus:border-[#4B1835]"
+                className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono font-bold text-base text-stone-900 focus:outline-none focus:border-plum"
                 required
               />
             </div>
@@ -203,7 +204,7 @@ export default function CashClosingPage() {
               disabled={todayData?.closed}
               onChange={(e) => setClosingNotes(e.target.value)}
               placeholder="e.g. 500 x 10, 200 x 15 notes. Counted and verified by owner."
-              className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl"
+              className="w-full p-2.5 bg-ivory border border-line rounded-xl"
             />
           </div>
 
@@ -212,9 +213,9 @@ export default function CashClosingPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-6 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white font-bold rounded-xl shadow-xs text-xs flex items-center gap-2"
+                className="px-6 py-2.5 bg-plum hover:bg-plum-dark text-white font-bold rounded-xl shadow-xs text-xs flex items-center gap-2"
               >
-                {submitting ? <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" /> : <CheckCircle2 className="w-4 h-4" />}
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin text-gold-light" /> : <CheckCircle2 className="w-4 h-4" />}
                 <span>Freeze &amp; Save Daily Closing</span>
               </button>
             </div>
@@ -223,16 +224,14 @@ export default function CashClosingPage() {
       </div>
 
       {/* Past 30 Days Cash Closings History */}
-      <div className="bg-white rounded-2xl border border-[#E8DFD1] p-6 shadow-2xs space-y-4">
+      <div className="bg-white rounded-2xl border border-line p-6 shadow-2xs space-y-4">
         <h2 className="font-bold text-stone-900 text-sm flex items-center gap-2 border-b border-stone-100 pb-2">
           <History className="w-4 h-4 text-stone-500" />
           <span>Past Cash Drawer Closings Ledger ({closings.length})</span>
         </h2>
 
         {closings.length === 0 ? (
-          <div className="text-center py-8 text-xs text-stone-400">
-            No previous cash closings saved yet.
-          </div>
+          <EmptyState title="No previous cash closings saved yet." className="py-8" />
         ) : (
           <div className="divide-y divide-stone-100 text-xs">
             {closings.map((c) => (

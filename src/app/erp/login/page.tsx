@@ -58,37 +58,37 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBF9F5] flex flex-col justify-between p-4 md:p-8">
+    <div className="min-h-screen bg-ivory flex flex-col justify-between p-4 md:p-8">
       {/* Top Navbar */}
       <div className="max-w-6xl w-full mx-auto flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#4B1835] text-[#D4B67F] font-serif font-black flex items-center justify-center text-sm shadow-sm">
+          <div className="w-8 h-8 rounded-lg bg-plum text-gold-light font-serif font-black flex items-center justify-center text-sm shadow-sm">
             BF
           </div>
           <div>
-            <span className="font-serif font-bold text-sm text-[#27222A] tracking-wider">
+            <span className="font-serif font-bold text-sm text-ink tracking-wider">
               BARNALI FASHION
             </span>
-            <span className="text-[10px] text-[#8C6F3B] block font-semibold">Bargarh, Odisha</span>
+            <span className="text-[10px] text-gold-dark block font-semibold">Bargarh, Odisha</span>
           </div>
         </Link>
 
         <Link
           href="/"
-          className="text-xs font-semibold text-[#4B1835] hover:text-[#320F23] flex items-center gap-1.5 bg-white border border-[#E8DFD1] px-3 py-1.5 rounded-lg shadow-2xs min-h-10"
+          className="text-xs font-semibold text-plum hover:text-plum-dark flex items-center gap-1.5 bg-white border border-line px-3 py-1.5 rounded-lg shadow-2xs min-h-10"
         >
-          <Globe className="w-3.5 h-3.5 text-[#B89558]" />
+          <Globe className="w-3.5 h-3.5 text-gold" />
           <span>Customer Website</span>
         </Link>
       </div>
 
       {/* Main Login Card */}
-      <div className="max-w-md w-full mx-auto my-8 bg-white rounded-3xl border border-[#EFE9DD] p-7 md:p-8 shadow-xl text-xs space-y-6">
+      <div className="max-w-md w-full mx-auto my-8 bg-white rounded-3xl border border-line-soft p-7 md:p-8 shadow-xl text-xs space-y-6">
         <div className="text-center space-y-1">
-          <div className="w-12 h-12 rounded-2xl bg-[#4B1835] text-[#D4B67F] font-serif font-black text-xl flex items-center justify-center mx-auto shadow-md">
+          <div className="w-12 h-12 rounded-2xl bg-plum text-gold-light font-serif font-black text-xl flex items-center justify-center mx-auto shadow-md">
             BF
           </div>
-          <h1 className="font-serif font-bold text-2xl text-[#27222A] pt-2">
+          <h1 className="font-serif font-bold text-2xl text-ink pt-2">
             Staff &amp; ERP Access
           </h1>
           <p className="text-gray-500 text-xs">
@@ -97,8 +97,8 @@ function LoginContent() {
         </div>
 
         {/* Quick Demo Credentials */}
-        <div className="bg-[#FAF5EB] p-3.5 rounded-2xl border border-[#E8DFD1] space-y-2">
-          <div className="flex items-center justify-between text-[11px] font-bold text-[#8C6F3B]">
+        <div className="bg-gold-soft p-3.5 rounded-2xl border border-line space-y-2">
+          <div className="flex items-center justify-between text-[11px] font-bold text-gold-dark">
             <span className="flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Select Role for Quick Access</span>
@@ -113,11 +113,11 @@ function LoginContent() {
               onClick={() => handleQuickDemoFill("admin", "admin123")}
               className={`p-2.5 rounded-xl border text-left transition-colors font-medium flex items-center gap-2 ${
                 username === "admin"
-                  ? "bg-white border-[#4B1835] shadow-xs text-[#4B1835] font-bold"
-                  : "bg-white/70 hover:bg-white border-[#E8DFD1] text-gray-700"
+                  ? "bg-white border-plum shadow-xs text-plum font-bold"
+                  : "bg-white/70 hover:bg-white border-line text-gray-700"
               }`}
             >
-              <ShieldCheck className="w-4 h-4 text-[#4B1835] shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-plum shrink-0" />
               <div>
                 <div className="font-bold text-xs">Admin / Owner</div>
                 <div className="text-[10px] text-gray-500 font-mono">admin / admin123</div>
@@ -128,8 +128,8 @@ function LoginContent() {
               onClick={() => handleQuickDemoFill("staff", "staff123")}
               className={`p-2.5 rounded-xl border text-left transition-colors font-medium flex items-center gap-2 ${
                 username === "staff"
-                  ? "bg-white border-[#4B1835] shadow-xs text-[#4B1835] font-bold"
-                  : "bg-white/70 hover:bg-white border-[#E8DFD1] text-gray-700"
+                  ? "bg-white border-plum shadow-xs text-plum font-bold"
+                  : "bg-white/70 hover:bg-white border-line text-gray-700"
               }`}
             >
               <User className="w-4 h-4 text-stone-600 shrink-0" />
@@ -162,7 +162,7 @@ function LoginContent() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="e.g. admin or staff"
-                className="w-full p-2.5 pl-9 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold text-stone-800 focus:outline-none focus:border-[#4B1835]"
+                className="w-full p-2.5 pl-9 bg-ivory border border-line rounded-xl font-semibold text-stone-800 focus:outline-none focus:border-plum"
               />
               <User className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
             </div>
@@ -179,7 +179,7 @@ function LoginContent() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
-                className="w-full p-2.5 pl-9 pr-10 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold text-stone-800 focus:outline-none focus:border-[#4B1835]"
+                className="w-full p-2.5 pl-9 pr-10 bg-ivory border border-line rounded-xl font-semibold text-stone-800 focus:outline-none focus:border-plum"
               />
               <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
               <button
@@ -196,23 +196,23 @@ function LoginContent() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#4B1835] hover:bg-[#320F23] disabled:opacity-70 text-white font-bold py-3 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 text-xs"
+            className="w-full bg-plum hover:bg-plum-dark disabled:opacity-70 text-white font-bold py-3 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 text-xs"
           >
             {loading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" />
+                <Loader2 className="w-4 h-4 animate-spin text-gold-light" />
                 <span>Verifying credentials...</span>
               </>
             ) : (
               <>
                 <span>Enter Barnali ERP Dashboard</span>
-                <ArrowRight className="w-4 h-4 text-[#D4B67F]" />
+                <ArrowRight className="w-4 h-4 text-gold-light" />
               </>
             )}
           </button>
         </form>
 
-        <div className="text-center text-[11px] text-gray-400 pt-2 border-t border-[#EFE9DD]">
+        <div className="text-center text-[11px] text-gray-400 pt-2 border-t border-line-soft">
           Barnali Fashion Bargarh • Security Guarded Session
         </div>
       </div>

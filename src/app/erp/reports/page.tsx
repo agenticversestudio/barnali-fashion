@@ -17,6 +17,7 @@ import {
 import { reportsApi } from "@/lib/api";
 import { formatINR } from "@/lib/utils";
 import type { ReportSummary } from "@/types/api";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function ReportsPage() {
   const [summary, setSummary] = useState<ReportSummary | null>(null);
@@ -57,45 +58,45 @@ export default function ReportsPage() {
       {/* Header */}
       <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#8C6F3B] font-semibold uppercase tracking-wider mb-1">
-            <TrendingUp className="w-4 h-4 text-[#4B1835]" />
+          <div className="flex items-center gap-2 text-xs text-gold-dark font-semibold uppercase tracking-wider mb-1">
+            <TrendingUp className="w-4 h-4 text-plum" />
             <span>Turnover, Asset Utilization &amp; Demand Insights</span>
           </div>
-          <h1 className="text-2xl font-serif font-bold text-[#27222A]">Business Analytics &amp; Reports</h1>
+          <h1 className="text-2xl page-title">Business Analytics &amp; Reports</h1>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => window.print()}
-            className="bg-[#FAF5EB] hover:bg-[#F3EAD9] text-[#4B1835] border border-[#E8DFD1] text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+            className="bg-gold-soft hover:bg-gold-soft text-plum border border-line text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
           >
-            <Printer className="w-4 h-4 text-[#B89558]" />
+            <Printer className="w-4 h-4 text-gold" />
             <span>Print Report</span>
           </button>
         </div>
       </div>
 
       {/* Date Range Selector & CSV Export Links */}
-      <div className="no-print bg-white p-4 rounded-2xl border border-[#EFE9DD] shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 text-xs">
+      <div className="no-print bg-white p-4 rounded-2xl border border-line-soft shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 text-xs">
         <div className="flex items-center gap-2 flex-wrap">
-          <Calendar className="w-4 h-4 text-[#4B1835]" />
+          <Calendar className="w-4 h-4 text-plum" />
           <span className="font-bold text-gray-700">Period:</span>
           <input
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
-            className="p-1.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-mono text-xs"
+            className="p-1.5 bg-ivory border border-line rounded-lg font-mono text-xs"
           />
           <span className="text-gray-400">to</span>
           <input
             type="date"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
-            className="p-1.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-mono text-xs"
+            className="p-1.5 bg-ivory border border-line rounded-lg font-mono text-xs"
           />
           <button
             onClick={() => loadSummary()}
-            className="px-3 py-1.5 bg-[#4B1835] text-white rounded-lg font-bold hover:bg-[#320F23] cursor-pointer"
+            className="px-3 py-1.5 bg-plum text-white rounded-lg font-bold hover:bg-plum-dark cursor-pointer"
           >
             Apply
           </button>
@@ -107,56 +108,54 @@ export default function ReportsPage() {
           <a
             href={reportsApi.getExportUrl("bookings")}
             download
-            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
+            className="bg-ivory hover:bg-gold-soft text-gray-700 border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
           >
-            <Download className="w-3 h-3 text-[#B89558]" />
+            <Download className="w-3 h-3 text-gold" />
             <span>Bookings</span>
           </a>
           <a
             href={reportsApi.getExportUrl("payments")}
             download
-            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
+            className="bg-ivory hover:bg-gold-soft text-gray-700 border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
           >
-            <Download className="w-3 h-3 text-[#B89558]" />
+            <Download className="w-3 h-3 text-gold" />
             <span>Payments</span>
           </a>
           <a
             href={reportsApi.getExportUrl("expenses")}
             download
-            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
+            className="bg-ivory hover:bg-gold-soft text-gray-700 border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
           >
-            <Download className="w-3 h-3 text-[#B89558]" />
+            <Download className="w-3 h-3 text-gold" />
             <span>Expenses</span>
           </a>
           <a
             href={reportsApi.getExportUrl("garments")}
             download
-            className="bg-[#FBF9F5] hover:bg-[#FAF5EB] text-gray-700 border border-[#E8DFD1] px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
+            className="bg-ivory hover:bg-gold-soft text-gray-700 border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
           >
-            <Download className="w-3 h-3 text-[#B89558]" />
+            <Download className="w-3 h-3 text-gold" />
             <span>Garments</span>
           </a>
         </div>
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-12 text-center text-xs text-gray-500">
-          <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+        <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-gray-500">
+          <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
           Aggregating financial and asset utilization analytics...
         </div>
       ) : !summary ? (
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-12 text-center text-xs text-gray-400">
-          Failed to load summary.
-        </div>
+        <EmptyState title="Failed to load summary." className="py-12" />
       ) : (
         <>
           {/* Top 3 Primary Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
-            <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs">
+            <div className="bg-white p-5 rounded-2xl border border-line-soft shadow-xs">
               <div className="text-gray-400 font-semibold uppercase text-[10px]">
                 Total Turnover Revenue
               </div>
-              <div className="text-3xl font-bold text-[#4B1835] mt-1 font-mono">
+              <div className="text-3xl font-bold text-plum mt-1 font-mono">
                 {formatINR(summary.revenue.total)}
               </div>
               <div className="text-gray-500 text-[11px] mt-1">
@@ -164,7 +163,7 @@ export default function ReportsPage() {
               </div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs">
+            <div className="bg-white p-5 rounded-2xl border border-line-soft shadow-xs">
               <div className="text-gray-400 font-semibold uppercase text-[10px]">
                 Store Expenses
               </div>
@@ -176,17 +175,17 @@ export default function ReportsPage() {
               </div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs">
+            <div className="bg-white p-5 rounded-2xl border border-line-soft shadow-xs">
               <div className="text-gray-400 font-semibold uppercase text-[10px]">
                 Active Deposit Liability
               </div>
-              <div className="text-3xl font-bold text-[#B89558] mt-1 font-mono">
+              <div className="text-3xl font-bold text-gold mt-1 font-mono">
                 {formatINR(summary.depositsHeld)}
               </div>
               <div className="text-gray-500 text-[11px] mt-1">Held in vault against rented items</div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-[#EFE9DD] shadow-xs">
+            <div className="bg-white p-5 rounded-2xl border border-line-soft shadow-xs">
               <div className="text-gray-400 font-semibold uppercase text-[10px]">
                 Garment Fleet Utilisation
               </div>
@@ -201,10 +200,10 @@ export default function ReportsPage() {
 
           {/* Revenue Breakdown by Head */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white rounded-2xl border border-[#EFE9DD] p-5 shadow-xs space-y-3 text-xs">
-              <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD] flex items-center justify-between">
+            <div className="bg-white rounded-2xl border border-line-soft p-5 shadow-xs space-y-3 text-xs">
+              <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center justify-between">
                 <span>Revenue Breakdown by Stream</span>
-                <span className="font-mono text-[#4B1835] font-bold">{formatINR(summary.revenue.total)}</span>
+                <span className="font-mono text-plum font-bold">{formatINR(summary.revenue.total)}</span>
               </div>
 
               <div className="space-y-2">
@@ -236,14 +235,14 @@ export default function ReportsPage() {
             </div>
 
             {/* Expenses by Category */}
-            <div className="bg-white rounded-2xl border border-[#EFE9DD] p-5 shadow-xs space-y-3 text-xs">
-              <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD] flex items-center justify-between">
+            <div className="bg-white rounded-2xl border border-line-soft p-5 shadow-xs space-y-3 text-xs">
+              <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center justify-between">
                 <span>Expenses by Category</span>
                 <span className="font-mono text-rose-700 font-bold">{formatINR(summary.expenses.total)}</span>
               </div>
 
               {summary.expenses.byCategory.length === 0 ? (
-                <div className="py-8 text-center text-gray-400">No expenses recorded for this period.</div>
+                <EmptyState title="No expenses recorded for this period." className="py-8" />
               ) : (
                 <div className="space-y-2">
                   {summary.expenses.byCategory.map((cat) => (
@@ -258,24 +257,24 @@ export default function ReportsPage() {
           </div>
 
           {/* Highest Earning Physical Garments */}
-          <div className="bg-white rounded-2xl border border-[#EFE9DD] p-6 shadow-xs space-y-4 text-xs">
-            <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD] flex items-center justify-between">
+          <div className="bg-white rounded-2xl border border-line-soft p-6 shadow-xs space-y-4 text-xs">
+            <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Award className="w-4 h-4 text-[#B89558]" />
+                <Award className="w-4 h-4 text-gold" />
                 <span>Top Performing Physical Garment Assets</span>
               </div>
               <span className="text-gray-400 text-xs font-normal">Ranked by rental turnover</span>
             </div>
 
             {summary.topGarments.length === 0 ? (
-              <div className="py-6 text-center text-gray-400">No garment rental data recorded for this period.</div>
+              <EmptyState title="No garment rental data recorded for this period." className="py-8" />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {summary.topGarments.map((g, idx) => (
-                  <div key={g.garmentId} className="p-4 bg-[#FAF5EB] rounded-xl border border-[#E8DFD1] space-y-1">
+                  <div key={g.garmentId} className="p-4 bg-gold-soft rounded-xl border border-line space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono font-bold text-[#4B1835] text-sm">{g.garmentId}</span>
-                      <span className="bg-[#4B1835] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      <span className="font-mono font-bold text-plum text-sm">{g.garmentId}</span>
+                      <span className="bg-plum text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                         #{idx + 1}
                       </span>
                     </div>

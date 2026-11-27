@@ -16,6 +16,7 @@ import {
 import { bookingsApi } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
 import type { BookingDto } from "@/types/api";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 function InspectionBayContent() {
   const [completedBookings, setCompletedBookings] = useState<BookingDto[]>([]);
@@ -40,31 +41,29 @@ function InspectionBayContent() {
   return (
     <div className="space-y-6">
       <div>
-        <div className="flex items-center gap-2 text-xs text-[#8C6F3B] font-semibold uppercase tracking-wider mb-1">
-          <ShieldCheck className="w-4 h-4 text-[#4B1835]" />
+        <div className="flex items-center gap-2 text-xs text-gold-dark font-semibold uppercase tracking-wider mb-1">
+          <ShieldCheck className="w-4 h-4 text-plum" />
           <span>Quality Audit &amp; Defect Classification</span>
         </div>
-        <h1 className="text-2xl font-serif font-bold text-[#27222A]">Inspection Bay</h1>
+        <h1 className="text-2xl page-title">Inspection Bay</h1>
         <p className="text-xs text-gray-500 mt-0.5">
           Detailed condition logs of returned garments, stain assessments, and before/after verification history.
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-[#EFE9DD] p-5 shadow-xs space-y-4">
-        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD] flex items-center justify-between">
+      <div className="bg-white rounded-2xl border border-line-soft p-5 shadow-xs space-y-4">
+        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center justify-between">
           <span>Inspection &amp; Return Logs ({completedBookings.length})</span>
           <span className="text-xs text-gray-400 font-normal">Recent Settled Orders</span>
         </div>
 
         {loading ? (
           <div className="py-12 text-center text-xs text-gray-500">
-            <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+            <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
             Loading inspection history...
           </div>
         ) : completedBookings.length === 0 ? (
-          <div className="py-12 text-center text-xs text-gray-400">
-            No completed return inspections on record yet.
-          </div>
+          <EmptyState title="No completed return inspections on record yet." className="py-12" />
         ) : (
           <div className="space-y-3">
             {completedBookings.map((b) => {
@@ -74,11 +73,11 @@ function InspectionBayContent() {
               return (
                 <div
                   key={b.id}
-                  className="p-4 bg-[#FBF9F5] rounded-xl border border-[#E8DFD1] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs"
+                  className="p-4 bg-ivory rounded-xl border border-line flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-[#4B1835] text-sm">{b.id}</span>
+                      <span className="font-mono font-bold text-plum text-sm">{b.id}</span>
                       <span className="font-bold text-gray-900">{b.customer?.name}</span>
                       <span className="text-gray-400 text-[11px] font-mono">{b.customer?.phone}</span>
                     </div>
@@ -109,7 +108,7 @@ function InspectionBayContent() {
 
                     <Link
                       href={`/erp/billing/invoices?bookingId=${b.id}`}
-                      className="px-3 py-1.5 bg-white border border-[#E8DFD1] rounded-lg font-bold text-[#4B1835] hover:bg-[#FAF5EB] min-h-10"
+                      className="px-3 py-1.5 bg-white border border-line rounded-lg font-bold text-plum hover:bg-gold-soft min-h-10"
                     >
                       Receipt →
                     </Link>

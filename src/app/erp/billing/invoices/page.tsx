@@ -67,8 +67,8 @@ function InvoiceContent() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-[#EFE9DD] p-12 text-center text-xs text-gray-500">
-        <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+      <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-gray-500">
+        <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
         Loading booking invoice &amp; voucher...
       </div>
     );
@@ -76,7 +76,7 @@ function InvoiceContent() {
 
   if (!selectedBooking) {
     return (
-      <div className="bg-white rounded-2xl border border-[#EFE9DD] p-12 text-center text-xs text-gray-500">
+      <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-gray-500">
         No bookings found. Create a booking first to generate an invoice.
       </div>
     );
@@ -97,20 +97,20 @@ function InvoiceContent() {
       {/* Header controls (Hidden during print) */}
       <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#8C6F3B] font-semibold uppercase tracking-wider mb-1">
-            <Receipt className="w-4 h-4 text-[#4B1835]" />
+          <div className="flex items-center gap-2 text-xs text-gold-dark font-semibold uppercase tracking-wider mb-1">
+            <Receipt className="w-4 h-4 text-plum" />
             <span>Official Rental Invoice &amp; Security Deposit Agreement</span>
           </div>
-          <h1 className="text-2xl font-serif font-bold text-[#27222A]">Invoices &amp; Receipts</h1>
+          <h1 className="text-2xl page-title">Invoices &amp; Receipts</h1>
         </div>
 
         <div className="flex items-center gap-2">
           {/* Format Toggle */}
-          <div className="bg-white p-1 rounded-xl border border-[#E8DFD1] flex text-xs">
+          <div className="bg-white p-1 rounded-xl border border-line flex text-xs">
             <button
               onClick={() => setPrintLayout("A4")}
               className={`px-3 py-1.5 rounded-lg font-bold transition-colors cursor-pointer ${
-                printLayout === "A4" ? "bg-[#4B1835] text-white" : "text-gray-600 hover:text-gray-900"
+                printLayout === "A4" ? "bg-plum text-white" : "text-gray-600 hover:text-gray-900"
               }`}
             >
               A4 Agreement
@@ -118,7 +118,7 @@ function InvoiceContent() {
             <button
               onClick={() => setPrintLayout("thermal")}
               className={`px-3 py-1.5 rounded-lg font-bold transition-colors cursor-pointer ${
-                printLayout === "thermal" ? "bg-[#4B1835] text-white" : "text-gray-600 hover:text-gray-900"
+                printLayout === "thermal" ? "bg-plum text-white" : "text-gray-600 hover:text-gray-900"
               }`}
             >
               80mm Thermal Receipt
@@ -127,7 +127,7 @@ function InvoiceContent() {
 
           <button
             onClick={() => window.print()}
-            className="bg-[#B89558] hover:bg-[#A38248] text-[#27222A] font-bold text-xs px-4 py-2 rounded-xl shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="bg-gold hover:bg-gold-dark text-ink font-bold text-xs px-4 py-2 rounded-xl shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Printer className="w-4 h-4" />
             <span>Print Invoice</span>
@@ -136,7 +136,7 @@ function InvoiceContent() {
       </div>
 
       {/* Select booking dropdown (Hidden during print) */}
-      <div className="no-print bg-white p-3 rounded-2xl border border-[#EFE9DD] flex items-center gap-3 text-xs">
+      <div className="no-print bg-white p-3 rounded-2xl border border-line-soft flex items-center gap-3 text-xs">
         <span className="font-bold text-gray-700">Select Booking:</span>
         <select
           value={selectedBooking.id}
@@ -144,7 +144,7 @@ function InvoiceContent() {
             const b = bookings.find((item) => item.id === e.target.value);
             if (b) setSelectedBooking(b);
           }}
-          className="p-1.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-lg font-bold text-[#4B1835] flex-1 max-w-md"
+          className="p-1.5 bg-ivory border border-line rounded-lg font-bold text-plum flex-1 max-w-md"
         >
           {bookings.map((b) => (
             <option key={b.id} value={b.id}>
@@ -157,14 +157,14 @@ function InvoiceContent() {
       {/* Printable Invoice Container */}
       {printLayout === "A4" ? (
         /* A4 Layout */
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-8 max-w-4xl mx-auto shadow-sm text-xs font-sans">
+        <div className="bg-white rounded-2xl border border-line-soft p-8 max-w-4xl mx-auto shadow-sm text-xs font-sans">
           {/* Header */}
-          <div className="flex justify-between items-start border-b-2 border-[#4B1835] pb-6">
+          <div className="flex justify-between items-start border-b-2 border-plum pb-6">
             <div>
-              <div className="font-serif font-black text-2xl text-[#4B1835] tracking-wider uppercase">
+              <div className="font-serif font-black text-2xl text-plum tracking-wider uppercase">
                 {shopName}
               </div>
-              <div className="text-[10px] text-[#8C6F3B] font-bold uppercase tracking-widest mt-0.5">
+              <div className="text-[10px] text-gold-dark font-bold uppercase tracking-widest mt-0.5">
                 Bridal &amp; Occasion Wear Rental Studio
               </div>
               <div className="text-gray-600 mt-2 space-y-0.5 text-[11px] max-w-md">
@@ -177,14 +177,14 @@ function InvoiceContent() {
               <div className="font-bold text-gray-400 uppercase text-[10px] tracking-wider">
                 Tax Invoice / Rental Voucher
               </div>
-              <div className="text-lg font-mono font-bold text-[#4B1835] mt-0.5">
+              <div className="text-lg font-mono font-bold text-plum mt-0.5">
                 {selectedBooking.id}
               </div>
               <div className="text-gray-500 text-[11px] mt-1">
                 Date: {formatDate(selectedBooking.createdAt)}
               </div>
               <div className="mt-1">
-                <span className="bg-[#FAF5EB] text-[#8C6F3B] font-bold px-2 py-0.5 rounded text-[10px] border border-[#E8DFD1]">
+                <span className="bg-gold-soft text-gold-dark font-bold px-2 py-0.5 rounded text-[10px] border border-line">
                   Status: {selectedBooking.status}
                 </span>
               </div>
@@ -192,7 +192,7 @@ function InvoiceContent() {
           </div>
 
           {/* Customer & Event Details */}
-          <div className="grid grid-cols-2 gap-6 my-6 p-4 bg-[#FBF9F5] rounded-xl border border-[#E8DFD1]">
+          <div className="grid grid-cols-2 gap-6 my-6 p-4 bg-ivory rounded-xl border border-line">
             <div>
               <div className="font-bold text-gray-500 uppercase text-[10px] mb-1">
                 Customer Information
@@ -219,9 +219,9 @@ function InvoiceContent() {
           </div>
 
           {/* Garments Table */}
-          <div className="border border-[#EFE9DD] rounded-xl overflow-hidden mb-6">
+          <div className="border border-line-soft rounded-xl overflow-hidden mb-6">
             <table className="w-full text-left">
-              <thead className="bg-[#FAF5EB] text-[#8C6F3B] font-bold uppercase text-[10px] border-b border-[#EFE9DD]">
+              <thead className="bg-gold-soft text-gold-dark font-bold uppercase text-[10px] border-b border-line-soft">
                 <tr>
                   <th className="py-2.5 px-4">Item #</th>
                   <th className="py-2.5 px-3">Garment SKU</th>
@@ -231,11 +231,11 @@ function InvoiceContent() {
                   <th className="py-2.5 px-4 text-right">Security Deposit</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F1ECE3]">
+              <tbody className="divide-y divide-line-soft">
                 {selectedBooking.items.map((item, idx) => (
                   <tr key={item.garmentId}>
                     <td className="py-3 px-4 text-gray-400 font-mono">{idx + 1}</td>
-                    <td className="py-3 px-3 font-mono font-bold text-[#4B1835]">
+                    <td className="py-3 px-3 font-mono font-bold text-plum">
                       {item.garmentId}
                     </td>
                     <td className="py-3 px-3 font-semibold text-gray-900">{item.name}</td>
@@ -245,7 +245,7 @@ function InvoiceContent() {
                     <td className="py-3 px-3 text-right font-semibold text-gray-900 font-mono">
                       {formatINR(item.rentalPrice)}
                     </td>
-                    <td className="py-3 px-4 text-right font-semibold text-[#B89558] font-mono">
+                    <td className="py-3 px-4 text-right font-semibold text-gold font-mono">
                       {formatINR(item.securityDeposit)}
                     </td>
                   </tr>
@@ -257,7 +257,7 @@ function InvoiceContent() {
           {/* Financial Calculation Breakdown */}
           <div className="grid grid-cols-2 gap-6 my-6">
             {/* Rental Terms & Conditions */}
-            <div className="p-4 bg-[#FAF5EB]/60 rounded-xl border border-[#E8DFD1] text-[10px] text-gray-600 space-y-1">
+            <div className="p-4 bg-gold-soft/60 rounded-xl border border-line text-[10px] text-gray-600 space-y-1">
               <div className="font-bold text-gray-800 uppercase text-[11px] mb-1">
                 Standard Rental Terms
               </div>
@@ -268,20 +268,20 @@ function InvoiceContent() {
             </div>
 
             {/* Billing Totals */}
-            <div className="p-4 bg-[#FBF9F5] rounded-xl border border-[#E8DFD1] space-y-2">
+            <div className="p-4 bg-ivory rounded-xl border border-line space-y-2">
               <div className="flex justify-between font-bold text-gray-700">
                 <span>Rental Service Fee:</span>
                 <span className="font-mono text-gray-900">
                   {formatINR(selectedBooking.rentalTotal)}
                 </span>
               </div>
-              <div className="flex justify-between font-bold text-[#B89558]">
+              <div className="flex justify-between font-bold text-gold">
                 <span>Refundable Security Deposit (Held):</span>
                 <span className="font-mono">
                   {formatINR(selectedBooking.depositTotal)}
                 </span>
               </div>
-              <div className="border-t border-[#E8DFD1] pt-2 flex justify-between font-bold text-sm text-[#4B1835]">
+              <div className="border-t border-line pt-2 flex justify-between font-bold text-sm text-plum">
                 <span>Total Amount Initial:</span>
                 <span className="font-mono">
                   {formatINR(selectedBooking.grandTotal)}
@@ -291,7 +291,7 @@ function InvoiceContent() {
                 <span>Advance / Paid:</span>
                 <span className="font-mono">− {formatINR(advancePayment)}</span>
               </div>
-              <div className="border-t-2 border-[#4B1835] pt-2 flex justify-between font-black text-sm text-gray-900">
+              <div className="border-t-2 border-plum pt-2 flex justify-between font-black text-sm text-gray-900">
                 <span>Remaining Balance Due:</span>
                 <span className="font-mono">
                   {formatINR(selectedBooking.balanceDue)}
@@ -301,7 +301,7 @@ function InvoiceContent() {
           </div>
 
           {/* Signature Signoff */}
-          <div className="pt-8 border-t border-[#EFE9DD] grid grid-cols-2 gap-10 text-center text-xs">
+          <div className="pt-8 border-t border-line-soft grid grid-cols-2 gap-10 text-center text-xs">
             <div>
               <div className="h-10 border-b border-gray-400"></div>
               <div className="font-bold text-gray-800 mt-1">Customer Signature</div>
@@ -309,7 +309,7 @@ function InvoiceContent() {
             </div>
             <div>
               <div className="h-10 border-b border-gray-400"></div>
-              <div className="font-bold text-[#4B1835] mt-1">Authorized Signatory — {shopName}</div>
+              <div className="font-bold text-plum mt-1">Authorized Signatory — {shopName}</div>
               <div className="text-[10px] text-gray-500">Bargarh, Odisha Flagship Store</div>
             </div>
           </div>

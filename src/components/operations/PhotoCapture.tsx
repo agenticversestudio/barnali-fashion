@@ -166,19 +166,19 @@ export function PhotoCapture({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled || uploading}
-            className="w-20 h-20 rounded-xl border-2 border-dashed border-[#B89558]/50 hover:border-[#B89558] bg-[#FAF5EB]/60 hover:bg-[#FAF5EB] transition-colors flex flex-col items-center justify-center text-center p-1.5 cursor-pointer disabled:opacity-50"
+            className="w-20 h-20 rounded-xl border-2 border-dashed border-gold/50 hover:border-gold bg-gold-soft/60 hover:bg-gold-soft transition-colors flex flex-col items-center justify-center text-center p-1.5 cursor-pointer disabled:opacity-50"
           >
             {uploading ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin text-[#8C6F3B] mb-1" />
+                <Loader2 className="w-5 h-5 animate-spin text-gold-dark mb-1" />
                 <span className="text-[9px] font-semibold text-gray-600 leading-tight">
                   {uploadProgressText || "Uploading..."}
                 </span>
               </>
             ) : (
               <>
-                <Camera className="w-5 h-5 text-[#8C6F3B] mb-1" />
-                <span className="text-[9px] font-bold text-[#8C6F3B] leading-tight">
+                <Camera className="w-5 h-5 text-gold-dark mb-1" />
+                <span className="text-[9px] font-bold text-gold-dark leading-tight">
                   Take Photo
                 </span>
                 <span className="text-[8px] text-gray-400">or upload</span>

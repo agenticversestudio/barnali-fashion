@@ -477,11 +477,11 @@ export default function InventoryPage() {
       {/* Quick Edit Rack Modal */}
       {editingRackGarment && (
         <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-5 border border-[#E8DFD1] shadow-xl space-y-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 border border-line shadow-xl space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-stone-100">
               <div>
                 <h3 className="font-bold text-stone-900 text-sm">Update Godown Rack</h3>
-                <span className="text-[11px] font-mono text-[#4B1835] font-semibold">
+                <span className="text-[11px] font-mono text-plum font-semibold">
                   {editingRackGarment.id} · {editingRackGarment.name}
                 </span>
               </div>
@@ -503,7 +503,7 @@ export default function InventoryPage() {
                   value={newRack}
                   onChange={(e) => setNewRack(e.target.value)}
                   placeholder="e.g. Rack A-02, Godown Rack B"
-                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium focus:outline-none focus:border-[#4B1835]"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium focus:outline-none focus:border-plum"
                   required
                 />
               </div>
@@ -517,7 +517,7 @@ export default function InventoryPage() {
                   value={newShelf}
                   onChange={(e) => setNewShelf(e.target.value)}
                   placeholder="e.g. Shelf 2, Box 3"
-                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium focus:outline-none focus:border-[#4B1835]"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium focus:outline-none focus:border-plum"
                 />
               </div>
 
@@ -532,7 +532,7 @@ export default function InventoryPage() {
                 <button
                   type="submit"
                   disabled={savingLocation}
-                  className="flex-1 py-2 bg-[#4B1835] text-white rounded-xl font-semibold shadow-xs flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2 bg-plum text-white rounded-xl font-semibold shadow-xs flex items-center justify-center gap-1.5"
                 >
                   {savingLocation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                   <span>Save Location</span>
@@ -546,7 +546,7 @@ export default function InventoryPage() {
       {/* Add New Costume Modal (Admin Only) */}
       {showAddModal && (
         <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-line shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
                 <h3 className="font-serif font-bold text-stone-900 text-base">Add New Rental Costume</h3>
@@ -578,7 +578,7 @@ export default function InventoryPage() {
                     value={costumeId}
                     onChange={(e) => setCostumeId(e.target.value)}
                     placeholder="e.g. LF-041"
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-bold text-stone-800"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono font-bold text-stone-800"
                     required
                   />
                 </div>
@@ -590,7 +590,7 @@ export default function InventoryPage() {
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium text-stone-800"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium text-stone-800"
                   >
                     {categories.filter((c) => c !== "ALL").map((c) => (
                       <option key={c} value={c}>
@@ -610,7 +610,7 @@ export default function InventoryPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Zardosi Maroon Velvet Bridal Lehenga"
-                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium text-stone-800"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium text-stone-800"
                   required
                 />
               </div>
@@ -625,7 +625,7 @@ export default function InventoryPage() {
                     value={size}
                     onChange={(e) => setSize(e.target.value)}
                     placeholder="e.g. M / 38"
-                    className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                    className="w-full p-2 bg-ivory border border-line rounded-xl font-medium"
                     required
                   />
                 </div>
@@ -638,7 +638,7 @@ export default function InventoryPage() {
                     value={colour}
                     onChange={(e) => setColour(e.target.value)}
                     placeholder="e.g. Maroon"
-                    className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                    className="w-full p-2 bg-ivory border border-line rounded-xl font-medium"
                   />
                 </div>
                 <div>
@@ -650,7 +650,7 @@ export default function InventoryPage() {
                     value={fabric}
                     onChange={(e) => setFabric(e.target.value)}
                     placeholder="e.g. Velvet"
-                    className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                    className="w-full p-2 bg-ivory border border-line rounded-xl font-medium"
                   />
                 </div>
               </div>
@@ -664,7 +664,7 @@ export default function InventoryPage() {
                     type="number"
                     value={rentalPrice}
                     onChange={(e) => setRentalPrice(e.target.value)}
-                    className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-bold text-[#4B1835]"
+                    className="w-full p-2 bg-ivory border border-line rounded-xl font-mono font-bold text-plum"
                     required
                   />
                 </div>
@@ -676,7 +676,7 @@ export default function InventoryPage() {
                     type="number"
                     value={securityDeposit}
                     onChange={(e) => setSecurityDeposit(e.target.value)}
-                    className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-bold"
+                    className="w-full p-2 bg-ivory border border-line rounded-xl font-mono font-bold"
                     required
                   />
                 </div>
@@ -688,7 +688,7 @@ export default function InventoryPage() {
                     type="number"
                     value={purchaseCost}
                     onChange={(e) => setPurchaseCost(e.target.value)}
-                    className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono text-stone-500"
+                    className="w-full p-2 bg-ivory border border-line rounded-xl font-mono text-stone-500"
                   />
                 </div>
               </div>
@@ -703,7 +703,7 @@ export default function InventoryPage() {
                     value={rack}
                     onChange={(e) => setRack(e.target.value)}
                     placeholder="e.g. Rack A-01"
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium"
                     required
                   />
                 </div>
@@ -716,7 +716,7 @@ export default function InventoryPage() {
                     value={shelf}
                     onChange={(e) => setShelf(e.target.value)}
                     placeholder="e.g. Shelf 1"
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium"
                   />
                 </div>
               </div>
@@ -730,7 +730,7 @@ export default function InventoryPage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="e.g. Padded blouse, includes matching dupatta and can-can skirt layer."
-                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium"
                 />
               </div>
 
@@ -745,11 +745,11 @@ export default function InventoryPage() {
                 <button
                   type="submit"
                   disabled={creating}
-                  className="flex-1 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white rounded-xl font-semibold shadow-xs flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 bg-plum hover:bg-plum-dark text-white rounded-xl font-semibold shadow-xs flex items-center justify-center gap-1.5"
                 >
                   {creating ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" />
+                      <Loader2 className="w-4 h-4 animate-spin text-gold-light" />
                       <span>Saving Piece...</span>
                     </>
                   ) : (

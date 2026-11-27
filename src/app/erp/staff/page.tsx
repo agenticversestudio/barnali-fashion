@@ -131,11 +131,11 @@ export default function StaffPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#8C6F3B] font-semibold uppercase tracking-wider mb-1">
-            <ShieldCheck className="w-4 h-4 text-[#4B1835]" />
+          <div className="flex items-center gap-2 text-xs text-gold-dark font-semibold uppercase tracking-wider mb-1">
+            <ShieldCheck className="w-4 h-4 text-plum" />
             <span>Role-Based Access Control (RBAC)</span>
           </div>
-          <h1 className="text-2xl font-serif font-bold text-[#27222A]">Staff &amp; Operator Accounts</h1>
+          <h1 className="text-2xl page-title">Staff &amp; Operator Accounts</h1>
           <p className="text-xs text-gray-500 mt-0.5">
             Manage authenticated user access, assign Admin vs Staff roles, and govern counter permissions.
           </p>
@@ -144,9 +144,9 @@ export default function StaffPage() {
         {isAdmin && (
           <button
             onClick={() => setShowCreateModal(true)}
-            className="bg-[#4B1835] hover:bg-[#320F23] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs flex items-center gap-2 transition-all self-start sm:self-auto cursor-pointer"
+            className="bg-plum hover:bg-plum-dark text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs flex items-center gap-2 transition-all self-start sm:self-auto cursor-pointer"
           >
-            <Plus className="w-4 h-4 text-[#D4B67F]" />
+            <Plus className="w-4 h-4 text-gold-light" />
             <span>Create Staff Account</span>
           </button>
         )}
@@ -154,8 +154,8 @@ export default function StaffPage() {
 
       {/* Staff Roster Cards */}
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#EFE9DD] p-12 text-center text-xs text-gray-500">
-          <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+        <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-gray-500">
+          <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
           Loading user accounts...
         </div>
       ) : (
@@ -164,7 +164,7 @@ export default function StaffPage() {
             <div
               key={u.id}
               className={`bg-white rounded-2xl border p-5 shadow-xs text-xs space-y-3 ${
-                u.active ? "border-[#EFE9DD]" : "border-rose-200 bg-rose-50/20 opacity-70"
+                u.active ? "border-line-soft" : "border-rose-200 bg-rose-50/20 opacity-70"
               }`}
             >
               <div className="flex justify-between items-start">
@@ -174,7 +174,7 @@ export default function StaffPage() {
                     <span
                       className={`font-mono font-bold text-[10px] px-2 py-0.5 rounded uppercase ${
                         u.role === "admin"
-                          ? "bg-[#FAF5EB] text-[#4B1835] border border-[#E8DFD1]"
+                          ? "bg-gold-soft text-plum border border-line"
                           : "bg-blue-50 text-blue-800 border border-blue-200"
                       }`}
                     >
@@ -201,13 +201,13 @@ export default function StaffPage() {
               </div>
 
               {isAdmin && (
-                <div className="pt-3 border-t border-[#EFE9DD] flex items-center justify-between gap-2">
+                <div className="pt-3 border-t border-line-soft flex items-center justify-between gap-2">
                   <button
                     onClick={() => {
                       setSelectedUser(u);
                       setShowResetModal(true);
                     }}
-                    className="flex items-center gap-1 text-[#4B1835] hover:underline font-bold text-[11px] cursor-pointer"
+                    className="flex items-center gap-1 text-plum hover:underline font-bold text-[11px] cursor-pointer"
                   >
                     <KeyRound className="w-3.5 h-3.5" />
                     <span>Reset Pass</span>
@@ -241,21 +241,21 @@ export default function StaffPage() {
       )}
 
       {/* Role & Permissions Explanation */}
-      <div className="bg-white rounded-2xl border border-[#EFE9DD] p-5 shadow-xs space-y-3">
-        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-[#EFE9DD]">
+      <div className="bg-white rounded-2xl border border-line-soft p-5 shadow-xs space-y-3">
+        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft">
           Role Permissions Matrix
         </div>
 
         <div className="overflow-x-auto text-xs">
           <table className="w-full text-left">
-            <thead className="bg-[#FAF5EB] text-[#8C6F3B] font-bold uppercase text-[10px] border-b border-[#EFE9DD]">
+            <thead className="bg-gold-soft text-gold-dark font-bold uppercase text-[10px] border-b border-line-soft">
               <tr>
                 <th className="py-2.5 px-4">Feature / Action Area</th>
                 <th className="py-2.5 px-4 text-center">Admin (Owner)</th>
                 <th className="py-2.5 px-4 text-center">Staff (Counter Operator)</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F1ECE3]">
+            <tbody className="divide-y divide-line-soft">
               <tr>
                 <td className="py-2.5 px-4 font-semibold text-gray-800">New Booking &amp; Quote Calculation</td>
                 <td className="py-2.5 px-4 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" /></td>
@@ -304,10 +304,10 @@ export default function StaffPage() {
       {/* Create User Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl border border-[#EFE9DD] max-w-md w-full p-6 text-xs animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-[#EFE9DD]">
-              <div className="flex items-center gap-2 font-bold text-sm text-[#4B1835]">
-                <Plus className="w-4 h-4 text-[#B89558]" />
+          <div className="bg-white rounded-2xl shadow-2xl border border-line-soft max-w-md w-full p-6 text-xs animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between pb-3 border-b border-line-soft">
+              <div className="flex items-center gap-2 font-bold text-sm text-plum">
+                <Plus className="w-4 h-4 text-gold" />
                 <span>Create Staff User</span>
               </div>
               <button
@@ -329,7 +329,7 @@ export default function StaffPage() {
                   placeholder="e.g. Pooja Das"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-semibold"
                 />
               </div>
 
@@ -344,7 +344,7 @@ export default function StaffPage() {
                     placeholder="e.g. pooja"
                     value={newUsername}
                     onChange={(e) => setNewUsername(e.target.value)}
-                    className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-mono"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono"
                   />
                 </div>
 
@@ -355,7 +355,7 @@ export default function StaffPage() {
                   <select
                     value={newRole}
                     onChange={(e) => setNewRole(e.target.value as Role)}
-                    className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-bold"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-bold"
                   >
                     <option value="staff">Staff (Counter)</option>
                     <option value="admin">Admin (Owner)</option>
@@ -373,7 +373,7 @@ export default function StaffPage() {
                   placeholder="Min 6 characters"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-mono"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono"
                 />
               </div>
 
@@ -386,11 +386,11 @@ export default function StaffPage() {
                   placeholder="e.g. +91 9437199001"
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-mono"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono"
                 />
               </div>
 
-              <div className="pt-3 border-t border-[#EFE9DD] flex justify-end gap-2">
+              <div className="pt-3 border-t border-line-soft flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
@@ -401,7 +401,7 @@ export default function StaffPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-[#4B1835] hover:bg-[#320F23] disabled:opacity-50 text-white font-bold rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2 bg-plum hover:bg-plum-dark disabled:opacity-50 text-white font-bold rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Create Account</span>
@@ -415,10 +415,10 @@ export default function StaffPage() {
       {/* Reset Password Modal */}
       {showResetModal && selectedUser && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl border border-[#EFE9DD] max-w-sm w-full p-6 text-xs animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-[#EFE9DD]">
-              <div className="flex items-center gap-2 font-bold text-sm text-[#4B1835]">
-                <KeyRound className="w-4 h-4 text-[#B89558]" />
+          <div className="bg-white rounded-2xl shadow-2xl border border-line-soft max-w-sm w-full p-6 text-xs animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between pb-3 border-b border-line-soft">
+              <div className="flex items-center gap-2 font-bold text-sm text-plum">
+                <KeyRound className="w-4 h-4 text-gold" />
                 <span>Reset Password</span>
               </div>
               <button
@@ -447,11 +447,11 @@ export default function StaffPage() {
                   placeholder="Min 6 characters"
                   value={resetPasswordVal}
                   onChange={(e) => setResetPasswordVal(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-mono"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono"
                 />
               </div>
 
-              <div className="pt-3 border-t border-[#EFE9DD] flex justify-end gap-2">
+              <div className="pt-3 border-t border-line-soft flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -465,7 +465,7 @@ export default function StaffPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-[#4B1835] hover:bg-[#320F23] disabled:opacity-50 text-white font-bold rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2 bg-plum hover:bg-plum-dark disabled:opacity-50 text-white font-bold rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Update Password</span>
