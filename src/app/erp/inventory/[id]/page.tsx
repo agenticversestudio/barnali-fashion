@@ -25,6 +25,7 @@ import {
 import { garmentsApi, photosApi } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { CostumeThumb } from "@/components/ui/CostumeThumb";
 import type { GarmentDetailDto, GarmentStatus } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 
@@ -161,8 +162,8 @@ function GarmentDetailContent() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-[#E8DFD1] p-16 text-center">
-        <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+      <div className="bg-white rounded-2xl border border-line p-16 text-center">
+        <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
         <div className="text-xs text-stone-500">Loading garment details...</div>
       </div>
     );
@@ -170,7 +171,7 @@ function GarmentDetailContent() {
 
   if (error || !garment) {
     return (
-      <div className="bg-white rounded-2xl border border-[#E8DFD1] p-16 text-center space-y-3">
+      <div className="bg-white rounded-2xl border border-line p-16 text-center space-y-3">
         <div className="text-rose-600 font-bold text-sm">Garment SKU not found</div>
         <p className="text-xs text-stone-500">{error || "Please verify the costume SKU ID."}</p>
         <Link
@@ -187,22 +188,22 @@ function GarmentDetailContent() {
   return (
     <div className="space-y-6">
       {/* Top Navigation & SKU Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-line shadow-2xs">
         <div className="flex items-center gap-3">
           <Link
             href="/erp/inventory"
-            className="p-2 rounded-xl border border-stone-200 hover:bg-stone-50 text-stone-600 transition-colors min-h-10"
+            className="w-10 h-10 flex items-center justify-center rounded-xl border border-line hover:bg-ivory-deep text-ink-soft transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-mono font-bold text-xs bg-[#4B1835]/10 text-[#4B1835] px-2.5 py-0.5 rounded-full">
+              <span className="num font-bold text-xs bg-plum/10 text-plum px-2.5 py-0.5 rounded-full">
                 {garment.id}
               </span>
               <StatusBadge status={garment.status} />
             </div>
-            <h1 className="font-serif font-bold text-lg md:text-xl text-stone-900 mt-1">
+            <h1 className="page-title text-xl md:text-2xl mt-1">
               {garment.name}
             </h1>
           </div>
@@ -211,7 +212,7 @@ function GarmentDetailContent() {
         <div className="flex items-center gap-2">
           <Link
             href={`/erp/bookings/new?sku=${garment.id}`}
-            className="px-4 py-2 bg-[#4B1835] hover:bg-[#521624] text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5"
+            className="px-5 min-h-11 bg-plum hover:bg-plum-dark text-white rounded-xl text-sm font-semibold shadow-[0_1px_2px_rgba(75,24,53,0.3)] flex items-center justify-center gap-2 transition-colors"
           >
             <CalendarDays className="w-3.5 h-3.5" />
             <span>Create Booking</span>
@@ -222,16 +223,13 @@ function GarmentDetailContent() {
       {/* Main Grid: Details & Photos */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Image & Media Gallery */}
-        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-5 shadow-2xs space-y-4">
-          <div className="h-80 bg-stone-100 rounded-xl overflow-hidden relative border border-stone-200">
-            <img
-              src={
-                garment.mainPhotoUrl ||
-                garment.photos?.[0]?.url ||
-                "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=600"
-              }
+        <div className="surface p-5 space-y-4">
+          <div className="aspect-[4/5] sm:aspect-[4/3] lg:aspect-[4/5] rounded-xl overflow-hidden relative border border-line">
+            <CostumeThumb
+              src={garment.mainPhotoUrl || garment.photos?.[0]?.url}
               alt={garment.name}
-              className="w-full h-full object-cover"
+              code={garment.id}
+              className="absolute inset-0"
             />
             <div className="absolute top-2.5 right-2.5">
               <StatusBadge status={garment.status} />
@@ -240,9 +238,9 @@ function GarmentDetailContent() {
 
           {/* Photo Gallery Thumbnails */}
           <div>
-            <div className="flex items-center justify-between text-xs font-bold text-stone-700 uppercase mb-2">
+            <div className="flex items-center justify-between eyebrow mb-2">
               <span>Costume Photos ({garment.photos?.length || 0}/8)</span>
-              <label className="flex items-center gap-1 text-[11px] text-[#4B1835] hover:underline cursor-pointer">
+              <label className="flex items-center gap-1 text-[11px] text-plum hover:underline cursor-pointer min-h-8">
                 <Upload className="w-3 h-3" />
                 <span>Upload</span>
                 <input
@@ -291,14 +289,14 @@ function GarmentDetailContent() {
           </div>
 
           {/* Location & Godown Rack info */}
-          <div className="p-3.5 bg-stone-50 rounded-xl border border-stone-200/80 space-y-2 text-xs">
+          <div className="p-3.5 bg-ivory rounded-xl border border-line space-y-2 text-xs">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-stone-700 uppercase text-[10px] tracking-wider">
+              <span className="eyebrow">
                 Godown Warehouse Location
               </span>
               <button
                 onClick={() => setIsEditingRack(!isEditingRack)}
-                className="text-[11px] text-[#4B1835] font-semibold flex items-center gap-1 hover:underline"
+                className="text-[11px] text-plum font-semibold flex items-center gap-1 hover:underline"
               >
                 <Edit2 className="w-3 h-3" />
                 <span>{isEditingRack ? "Cancel" : "Change"}</span>
@@ -312,19 +310,19 @@ function GarmentDetailContent() {
                   value={rack}
                   onChange={(e) => setRack(e.target.value)}
                   placeholder="Rack name (e.g. Rack A-01)"
-                  className="w-full p-2 bg-white border border-stone-300 rounded-lg text-xs"
+                  className="w-full p-2 bg-white border border-line rounded-lg text-xs min-h-10"
                 />
                 <input
                   type="text"
                   value={shelf}
                   onChange={(e) => setShelf(e.target.value)}
                   placeholder="Shelf (e.g. Shelf 2)"
-                  className="w-full p-2 bg-white border border-stone-300 rounded-lg text-xs"
+                  className="w-full p-2 bg-white border border-line rounded-lg text-xs min-h-10"
                 />
                 <button
                   onClick={handleSaveRack}
                   disabled={savingRack}
-                  className="w-full py-1.5 bg-[#4B1835] text-white rounded-lg font-semibold text-xs flex items-center justify-center gap-1 min-h-10"
+                  className="w-full bg-plum hover:bg-plum-dark text-white rounded-lg font-semibold text-xs flex items-center justify-center gap-1 min-h-10"
                 >
                   {savingRack ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                   <span>Save Location</span>
@@ -332,7 +330,7 @@ function GarmentDetailContent() {
               </div>
             ) : (
               <div className="flex items-center gap-2 text-stone-800 font-semibold">
-                <MapPin className="w-4 h-4 text-[#4B1835] shrink-0" />
+                <MapPin className="w-4 h-4 text-plum shrink-0" />
                 <span>
                   {garment.rack} {garment.shelf ? `· ${garment.shelf}` : ""}
                 </span>
@@ -345,25 +343,25 @@ function GarmentDetailContent() {
         <div className="lg:col-span-2 space-y-6">
           {/* Tariffs & Key Numbers */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
-              <span className="text-[11px] text-stone-500 font-medium">Rental Tariff</span>
-              <div className="font-mono font-bold text-lg text-[#4B1835] mt-0.5">
+            <div className="surface p-4">
+              <span className="eyebrow-mute">Rental Tariff</span>
+              <div className="num font-display font-semibold text-2xl text-plum mt-1">
                 {formatINR(garment.rentalPrice)}
               </div>
               <span className="text-[10px] text-stone-400">per 3-day booking</span>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
-              <span className="text-[11px] text-stone-500 font-medium">Refundable Deposit</span>
-              <div className="font-mono font-bold text-lg text-stone-900 mt-0.5">
+            <div className="surface p-4">
+              <span className="eyebrow-mute">Refundable Deposit</span>
+              <div className="num font-display font-semibold text-2xl text-ink mt-1">
                 {formatINR(garment.securityDeposit)}
               </div>
               <span className="text-[10px] text-stone-400">returned on inspection</span>
             </div>
 
             {isAdmin && garment.purchaseCost !== undefined && (
-              <div className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
-                <span className="text-[11px] text-stone-500 font-medium">Purchase Cost</span>
+              <div className="surface p-4">
+                <span className="eyebrow-mute">Purchase Cost</span>
                 <div className="font-mono font-bold text-lg text-stone-600 mt-0.5">
                   {formatINR(garment.purchaseCost)}
                 </div>
@@ -373,7 +371,7 @@ function GarmentDetailContent() {
           </div>
 
           {/* Specifications Card */}
-          <div className="bg-white rounded-2xl border border-[#E8DFD1] p-5 shadow-2xs space-y-4">
+          <div className="surface p-5 space-y-4">
             <h3 className="font-bold text-stone-900 text-sm border-b border-stone-100 pb-2">
               Garment Specifications &amp; Sizing
             </h3>
@@ -402,7 +400,7 @@ function GarmentDetailContent() {
                 <span className="text-stone-400 text-[10px] uppercase font-bold block mb-1">
                   Design &amp; Fitting Description
                 </span>
-                <p className="text-stone-700 leading-relaxed bg-[#FBF8F2] p-3 rounded-xl border border-stone-200/60">
+                <p className="text-stone-700 leading-relaxed bg-ivory p-3 rounded-xl border border-stone-200/60">
                   {garment.description}
                 </p>
               </div>
@@ -410,7 +408,7 @@ function GarmentDetailContent() {
           </div>
 
           {/* Status Update Card */}
-          <div className="bg-white rounded-2xl border border-[#E8DFD1] p-5 shadow-2xs space-y-3">
+          <div className="surface p-5 space-y-3">
             <h3 className="font-bold text-stone-900 text-sm">Update Asset Status</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
@@ -420,7 +418,7 @@ function GarmentDetailContent() {
                 <select
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value as GarmentStatus)}
-                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-semibold text-stone-800"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl font-semibold text-stone-800"
                 >
                   <option value="AVAILABLE">Available</option>
                   <option value="OUT_ON_RENT">Out on Rent</option>
@@ -440,7 +438,7 @@ function GarmentDetailContent() {
                   value={statusNote}
                   onChange={(e) => setStatusNote(e.target.value)}
                   placeholder="e.g. Sent for minor zari repair"
-                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl text-xs"
+                  className="w-full p-2.5 bg-ivory border border-line rounded-xl text-xs"
                 />
               </div>
             </div>
@@ -458,7 +456,7 @@ function GarmentDetailContent() {
           </div>
 
           {/* Booking History & Lifetime Utilization */}
-          <div className="bg-white rounded-2xl border border-[#E8DFD1] p-5 shadow-2xs space-y-3">
+          <div className="surface p-5 space-y-3">
             <div className="flex items-center justify-between border-b border-stone-100 pb-2">
               <h3 className="font-bold text-stone-900 text-sm flex items-center gap-2">
                 <History className="w-4 h-4 text-stone-500" />

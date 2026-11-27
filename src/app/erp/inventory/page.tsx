@@ -25,6 +25,8 @@ import {
 import { garmentsApi } from "@/lib/api";
 import { formatINR } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { CostumeThumb } from "@/components/ui/CostumeThumb";
 import type { GarmentDto, GarmentStatus } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 
@@ -37,7 +39,7 @@ export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
-  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+  const [viewMode, setViewMode] = useState<"table" | "grid">("grid");
 
   // Selected item for Bottom Sheet (Mobile / Tablet quick preview)
   const [selectedGarment, setSelectedGarment] = useState<GarmentDto | null>(null);
@@ -158,22 +160,50 @@ export default function InventoryPage() {
     }
   };
 
+  const openRackEditor = (g: GarmentDto) => {
+    setEditingRackGarment(g);
+    setNewRack(g.rack);
+    setNewShelf(g.shelf || "");
+  };
+
+  /** Rack tag: location pill with quick-edit affordance. */
+  const rackTag = (g: GarmentDto) => (
+    <div className="flex items-center justify-between gap-2 bg-ivory border border-line rounded-lg pl-2.5 pr-1 min-h-10">
+      <div className="flex items-center gap-1.5 text-[11px] text-ink-soft min-w-0">
+        <MapPin className="w-3.5 h-3.5 text-plum shrink-0" />
+        <span className="num font-semibold truncate">
+          {g.rack}
+          {g.shelf ? ` · ${g.shelf}` : ""}
+        </span>
+      </div>
+      <button
+        onClick={() => openRackEditor(g)}
+        className="w-9 h-9 flex items-center justify-center text-mute hover:text-plum rounded-md"
+        title="Edit rack location"
+        aria-label={`Edit rack location for ${g.id}`}
+      >
+        <Edit2 className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+
+  const sizePill = (g: GarmentDto) => (
+    <span className="num text-[10px] font-semibold bg-white border border-line text-ink-soft px-2 py-0.5 rounded-full">{g.size}</span>
+  );
+
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-5 md:space-y-6 animate-in fade-in">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="font-serif font-bold text-xl md:text-2xl text-stone-900 tracking-tight">
-              Costumes &amp; Inventory Assets
-            </h1>
-            <span className="text-xs font-mono font-semibold bg-[#4B1835]/10 text-[#4B1835] px-2.5 py-0.5 rounded-full">
-              {garments.length} Pieces
+          <span className="eyebrow">The wardrobe</span>
+          <div className="flex items-center gap-3 mt-1 flex-wrap">
+            <h1 className="page-title text-2xl md:text-3xl">Costumes &amp; Inventory</h1>
+            <span className="num text-[11px] font-semibold bg-plum/10 text-plum px-2.5 py-0.5 rounded-full">
+              {garments.length} piece{garments.length === 1 ? "" : "s"}
             </span>
           </div>
-          <p className="text-xs text-stone-500 mt-1">
-            Real-time godown rack tracking, booking availability &amp; care states.
-          </p>
+          <p className="text-xs text-mute mt-1.5">Godown rack tracking, booking availability and care states.</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -183,38 +213,40 @@ export default function InventoryPage() {
                 setCostumeId(`LF-${String(garments.length + 1).padStart(3, "0")}`);
                 setShowAddModal(true);
               }}
-              className="flex items-center gap-2 px-3.5 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors shrink-0"
+              className="flex items-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white rounded-xl text-sm font-semibold shadow-[0_1px_2px_rgba(75,24,53,0.3)] transition-colors shrink-0"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-gold" />
               <span>Add Costume</span>
             </button>
           )}
 
-          <div className="flex items-center bg-stone-100 p-0.5 rounded-xl border border-stone-200">
-            <button
-              onClick={() => setViewMode("table")}
-              className={`p-2 rounded-lg text-xs font-medium transition-colors ${
-                viewMode === "table" ? "bg-white text-stone-900 shadow-2xs" : "text-stone-500"
-              }`}
-              title="Table View"
-            >
-              <List className="w-4 h-4" />
-            </button>
+          <div className="flex items-center bg-ivory-deep p-1 rounded-xl border border-line" role="group" aria-label="View mode">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-lg text-xs font-medium transition-colors ${
-                viewMode === "grid" ? "bg-white text-stone-900 shadow-2xs" : "text-stone-500"
+              aria-pressed={viewMode === "grid"}
+              className={`w-10 h-9 flex items-center justify-center rounded-lg transition-colors ${
+                viewMode === "grid" ? "bg-white text-plum shadow-xs" : "text-mute hover:text-ink"
               }`}
-              title="Grid View"
+              title="Grid view"
             >
               <Grid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("table")}
+              aria-pressed={viewMode === "table"}
+              className={`w-10 h-9 flex items-center justify-center rounded-lg transition-colors ${
+                viewMode === "table" ? "bg-white text-plum shadow-xs" : "text-mute hover:text-ink"
+              }`}
+              title="Table view"
+            >
+              <List className="w-4 h-4" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Search & Category Filter Bar */}
-      <div className="space-y-3 bg-white p-3.5 md:p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+      <div className="space-y-3 surface p-3.5 md:p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="relative md:col-span-2">
             <input
@@ -222,13 +254,14 @@ export default function InventoryPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by SKU (e.g. LF-001), garment name, fabric or rack..."
-              className="w-full pl-9 pr-4 py-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl text-xs font-medium text-stone-800 placeholder-stone-400 focus:outline-none focus:border-[#4B1835]"
+              className="w-full pl-9 pr-10 min-h-11 bg-ivory border border-line rounded-xl text-xs font-medium text-ink placeholder-stone-400 focus:outline-none focus:border-plum"
             />
-            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-mute absolute left-3 top-3.5" />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
-                className="absolute right-3 top-3 text-stone-400 hover:text-stone-600"
+                aria-label="Clear search"
+                className="absolute right-1 top-1 w-9 h-9 flex items-center justify-center text-mute hover:text-ink"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -239,7 +272,7 @@ export default function InventoryPage() {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full py-2.5 px-3 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl text-xs font-medium text-stone-800 focus:outline-none focus:border-[#4B1835]"
+              className="w-full min-h-11 px-3 bg-ivory border border-line rounded-xl text-xs font-medium text-ink focus:outline-none focus:border-plum"
             >
               <option value="ALL">All Statuses</option>
               <option value="AVAILABLE">Available Now</option>
@@ -253,15 +286,16 @@ export default function InventoryPage() {
         </div>
 
         {/* Scrollable Category Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-1 border-t border-stone-100">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-3 border-t border-line-soft">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-colors shrink-0 ${
+              aria-pressed={selectedCategory === cat}
+              className={`px-4 min-h-10 rounded-full text-[11px] whitespace-nowrap transition-colors shrink-0 border ${
                 selectedCategory === cat
-                  ? "bg-[#4B1835] text-white font-semibold"
-                  : "bg-stone-50 hover:bg-stone-100 text-stone-600 border border-stone-200/80"
+                  ? "bg-plum text-white font-semibold border-plum"
+                  : "bg-white hover:bg-ivory-deep text-ink-soft font-medium border-line"
               }`}
             >
               {cat === "ALL" ? "All Categories" : cat}
@@ -272,213 +306,161 @@ export default function InventoryPage() {
 
       {/* Main Inventory Display */}
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center">
-          <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
-          <div className="text-xs text-stone-500">Loading inventory assets from database...</div>
+        <div className="surface p-12 text-center">
+          <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
+          <div className="text-xs text-mute">Loading inventory...</div>
         </div>
       ) : garments.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center space-y-3">
-          <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
-            <Shirt className="w-6 h-6" />
-          </div>
-          <div className="text-sm font-bold text-stone-800">No costumes match your filters</div>
-          <p className="text-xs text-stone-500 max-w-sm mx-auto">
-            Try clearing search keywords or switching category filters.
-          </p>
-          <button
-            onClick={() => {
-              setSearchTerm("");
-              setSelectedCategory("ALL");
-              setSelectedStatus("ALL");
-            }}
-            className="px-3.5 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold rounded-lg"
-          >
-            Clear Filters
-          </button>
+        <div className="surface">
+          <EmptyState
+            icon={Shirt}
+            title="No costumes match your filters"
+            hint="Try clearing search keywords or switching the category."
+            action={
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("ALL");
+                  setSelectedStatus("ALL");
+                }}
+                className="px-4 min-h-10 bg-white hover:bg-ivory-deep border border-line text-ink-soft text-xs font-semibold rounded-lg"
+              >
+                Clear Filters
+              </button>
+            }
+          />
         </div>
       ) : viewMode === "grid" ? (
         /* Grid View */
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {garments.map((g) => (
-            <div
-              key={g.id}
-              className="bg-white rounded-2xl border border-[#E8DFD1] overflow-hidden shadow-2xs hover:shadow-md transition-shadow flex flex-col group"
-            >
-              <div className="h-56 bg-stone-100 relative overflow-hidden">
-                <img
-                  src={
-                    g.mainPhotoUrl ||
-                    "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=600"
-                  }
+            <article key={g.id} className="surface surface-interactive overflow-hidden flex flex-col group">
+              <div className="aspect-[4/5] relative overflow-hidden bg-ivory-deep">
+                <CostumeThumb
+                  src={g.mainPhotoUrl}
                   alt={g.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
+                  code={g.id}
+                  className="absolute inset-0"
+                  imgClassName="group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute top-2.5 left-2.5">
-                  <span className="font-mono font-bold text-xs bg-black/75 text-white px-2 py-0.5 rounded-md backdrop-blur-xs">
-                    {g.id}
-                  </span>
+                  <span className="num font-bold text-[11px] bg-ink/80 text-white px-2 py-0.5 rounded-md backdrop-blur-xs">{g.id}</span>
                 </div>
                 <div className="absolute top-2.5 right-2.5">
                   <StatusBadge status={g.status} />
                 </div>
               </div>
 
-              <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+              <div className="p-4 flex-1 flex flex-col gap-3">
                 <div>
-                  <div className="text-[11px] text-stone-400 font-medium">{g.category}</div>
-                  <h3 className="font-serif font-bold text-sm text-stone-900 line-clamp-1 mt-0.5">
-                    {g.name}
-                  </h3>
-                  <div className="flex items-center gap-2 text-[11px] text-stone-500 mt-1">
-                    <span>Size: {g.size}</span>
-                    {g.colour && <span>• {g.colour}</span>}
+                  <div className="eyebrow-mute">{g.category}</div>
+                  <h3 className="font-display font-semibold text-[15px] text-ink line-clamp-1 mt-1">{g.name}</h3>
+                  <div className="flex items-center flex-wrap gap-1.5 mt-1.5">
+                    {sizePill(g)}
+                    {g.colour && <span className="text-[11px] text-mute">{g.colour}</span>}
                   </div>
+                  {g.nextBooking && (
+                    <div className="num text-[10px] text-amber-800 font-medium mt-1.5">
+                      Next: {g.nextBooking.from} · {g.nextBooking.customerName}
+                    </div>
+                  )}
                 </div>
 
-                <div className="pt-2 border-t border-stone-100 space-y-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-stone-500 text-[11px]">Rental Tariff:</span>
-                    <span className="font-bold text-[#4B1835] font-mono">
-                      {formatINR(g.rentalPrice)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-[11px] bg-stone-50 p-2 rounded-lg">
-                    <div className="flex items-center gap-1.5 text-stone-600 truncate">
-                      <MapPin className="w-3.5 h-3.5 text-[#4B1835] shrink-0" />
-                      <span className="truncate">
-                        {g.rack} {g.shelf ? `· ${g.shelf}` : ""}
-                      </span>
+                <div className="mt-auto space-y-2.5">
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <div className="eyebrow-mute">Rental</div>
+                      <div className="num font-display font-semibold text-lg text-plum leading-tight">{formatINR(g.rentalPrice)}</div>
                     </div>
-                    <button
-                      onClick={() => {
-                        setEditingRackGarment(g);
-                        setNewRack(g.rack);
-                        setNewShelf(g.shelf || "");
-                      }}
-                      className="text-stone-400 hover:text-[#4B1835] p-0.5"
-                      title="Edit Rack Location"
-                    >
-                      <Edit2 className="w-3 h-3" />
-                    </button>
+                    <div className="text-right">
+                      <div className="eyebrow-mute">Deposit</div>
+                      <div className="num text-xs font-semibold text-ink-soft">{formatINR(g.securityDeposit)}</div>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-1">
+                  {rackTag(g)}
+
+                  <div className="grid grid-cols-2 gap-2">
                     <Link
                       href={`/erp/inventory/${g.id}`}
-                      className="flex-1 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-800 text-center font-semibold rounded-lg text-[11px] transition-colors min-h-10"
+                      className="min-h-10 flex items-center justify-center bg-white hover:bg-ivory-deep border border-line text-ink-soft font-semibold rounded-lg text-[11px] transition-colors"
                     >
                       Details
                     </Link>
                     <Link
                       href={`/erp/bookings/new?sku=${g.id}`}
-                      className="flex-1 py-1.5 bg-[#4B1835] hover:bg-[#521624] text-white text-center font-semibold rounded-lg text-[11px] transition-colors min-h-10"
+                      className="min-h-10 flex items-center justify-center bg-plum hover:bg-plum-dark text-white font-semibold rounded-lg text-[11px] transition-colors"
                     >
                       Book Now
                     </Link>
                   </div>
                 </div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       ) : (
         /* Table View */
-        <div className="bg-white rounded-2xl border border-[#E8DFD1] shadow-2xs overflow-hidden">
+        <div className="surface overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-xs border-collapse min-w-[780px]">
               <thead>
-                <tr className="bg-[#FBF8F2] border-b border-[#E8DFD1] text-[11px] font-bold uppercase text-stone-500">
-                  <th className="py-3 px-4">Garment SKU</th>
-                  <th className="py-3 px-4">Category &amp; Specs</th>
-                  <th className="py-3 px-4">Current Status</th>
-                  <th className="py-3 px-4">Godown Location</th>
-                  <th className="py-3 px-4 text-right">Rental / Deposit</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                <tr className="bg-ivory border-b border-line">
+                  {["Garment SKU", "Category & Specs", "Current Status", "Godown Location", "Rental / Deposit", "Actions"].map((h, i) => (
+                    <th key={h} className={`py-3.5 px-4 eyebrow-mute ${i >= 4 ? "text-right" : ""}`}>
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#EFE8DB]">
+              <tbody className="divide-y divide-line-soft">
                 {garments.map((g) => (
-                  <tr key={g.id} className="hover:bg-stone-50/70 transition-colors">
+                  <tr key={g.id} className="hover:bg-ivory transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <img
-                          src={
-                            g.mainPhotoUrl ||
-                            "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=200"
-                          }
-                          alt={g.name}
-                          className="w-11 h-11 object-cover rounded-lg border border-stone-200 shrink-0"
-                          loading="lazy"
-                        />
-                        <div>
-                          <span className="font-mono font-bold text-xs text-[#4B1835]">
-                            {g.id}
-                          </span>
-                          <div className="font-serif font-semibold text-stone-900 line-clamp-1">
-                            {g.name}
-                          </div>
+                        <CostumeThumb src={g.mainPhotoUrl} alt={g.name} className="w-12 h-14 rounded-lg border border-line shrink-0" />
+                        <div className="min-w-0">
+                          <span className="num font-bold text-xs text-plum">{g.id}</span>
+                          <div className="font-display font-semibold text-ink line-clamp-1">{g.name}</div>
                         </div>
                       </div>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <div className="text-stone-800 font-medium">{g.category}</div>
-                      <div className="text-[11px] text-stone-500">
-                        Size: <span className="font-semibold text-stone-700">{g.size}</span>
-                        {g.colour && <span> · {g.colour}</span>}
+                      <div className="text-ink-soft font-medium">{g.category}</div>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        {sizePill(g)}
+                        {g.colour && <span className="text-[11px] text-mute">{g.colour}</span>}
                       </div>
                     </td>
 
                     <td className="py-3.5 px-4">
                       <StatusBadge status={g.status} />
                       {g.nextBooking && (
-                        <div className="text-[10px] text-amber-800 font-medium mt-1">
+                        <div className="num text-[10px] text-amber-800 font-medium mt-1">
                           Next: {g.nextBooking.from} ({g.nextBooking.customerName})
                         </div>
                       )}
                     </td>
 
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-1.5 text-stone-700 font-medium">
-                        <MapPin className="w-3.5 h-3.5 text-[#4B1835] shrink-0" />
-                        <span>{g.rack}</span>
-                        {g.shelf && <span className="text-stone-400">· {g.shelf}</span>}
-                        <button
-                          onClick={() => {
-                            setEditingRackGarment(g);
-                            setNewRack(g.rack);
-                            setNewShelf(g.shelf || "");
-                          }}
-                          className="text-stone-400 hover:text-[#4B1835] ml-1 p-0.5"
-                          title="Quick update rack"
-                        >
-                          <Edit2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </td>
+                    <td className="py-3.5 px-4 min-w-44">{rackTag(g)}</td>
 
                     <td className="py-3.5 px-4 text-right">
-                      <div className="font-mono font-bold text-stone-900 text-xs">
-                        {formatINR(g.rentalPrice)}
-                      </div>
-                      <div className="text-[10px] text-stone-400 font-mono">
-                        Dep: {formatINR(g.securityDeposit)}
-                      </div>
+                      <div className="num font-display font-semibold text-ink text-sm">{formatINR(g.rentalPrice)}</div>
+                      <div className="num text-[10px] text-mute">Dep: {formatINR(g.securityDeposit)}</div>
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <Link
                           href={`/erp/inventory/${g.id}`}
-                          className="px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-lg text-[11px] transition-colors min-h-10"
+                          className="px-3 min-h-10 inline-flex items-center bg-white hover:bg-ivory-deep border border-line text-ink-soft font-semibold rounded-lg text-[11px] transition-colors"
                         >
                           Details
                         </Link>
                         <Link
                           href={`/erp/bookings/new?sku=${g.id}`}
-                          className="px-2.5 py-1.5 bg-[#4B1835] hover:bg-[#521624] text-white font-semibold rounded-lg text-[11px] transition-colors min-h-10"
+                          className="px-3 min-h-10 inline-flex items-center bg-plum hover:bg-plum-dark text-white font-semibold rounded-lg text-[11px] transition-colors"
                         >
                           Book
                         </Link>
