@@ -333,21 +333,21 @@ function BookingsContent() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="eyebrow text-gold">COUNTER LEDGER</span>
+          <span className="eyebrow text-[#7C3AED]">COUNTER LEDGER</span>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
-            <h1 className="page-title text-2xl md:text-3xl text-ink">Rental Orders</h1>
-            <span className="num text-[11px] font-semibold bg-gold-soft text-plum border border-line-strong px-3 py-0.5 rounded-full shadow-2xs">
+            <h1 className="text-[26px] md:text-[30px] font-semibold tracking-[-0.02em] text-[#18141E]">Rental Orders</h1>
+            <span className="num text-[11px] font-semibold bg-[#E0E7FF] text-[#4F46E5] border border-[#C7D2FE] px-3 py-0.5 rounded-full">
               {bookings.length} booking{bookings.length === 1 ? "" : "s"}
             </span>
           </div>
-          <p className="text-xs text-ink-soft mt-1.5">Selection, client, quote, handover and return settlement in one place.</p>
+          <p className="text-xs text-[#5B5566] mt-1.5">Selection, client, quote, handover and return settlement in one place.</p>
         </div>
 
         <Link
           href="/erp/bookings/new"
-          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-11 bg-gradient-to-r from-[#BE123C] to-[#7C3AED] hover:from-[#9F1239] hover:to-[#6D28D9] text-white text-sm font-medium rounded-full shadow-[0_6px_18px_-3px_rgba(190,18,60,0.35)] transition-all shrink-0"
         >
-          <Plus className="w-4 h-4 text-gold-soft" />
+          <Plus className="w-4 h-4 text-white" />
           <span>New Counter Booking</span>
         </Link>
       </div>
@@ -361,14 +361,14 @@ function BookingsContent() {
               placeholder="Search by customer name, phone, SKU (e.g. LF-001) or Order ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-xs pl-9 pr-10 min-h-10 bg-ivory border border-line rounded-xl text-ink placeholder-mute focus:outline-none focus:border-plum focus:ring-2 focus:ring-plum/15 transition-all"
+              className="w-full text-xs pl-10 pr-10 min-h-10 bg-[#F8F6FA] border border-[#E8E2F0] rounded-full text-[#18141E] placeholder-[#8C8499] focus:outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/15 transition-all"
             />
-            <Search className="w-4 h-4 text-mute absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-[#8C8499] absolute left-3.5 top-3" />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
                 aria-label="Clear search"
-                className="absolute right-0 top-0 w-10 h-10 flex items-center justify-center text-mute hover:text-ink"
+                className="absolute right-0 top-0 w-10 h-10 flex items-center justify-center text-[#8C8499] hover:text-[#18141E]"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -388,10 +388,10 @@ function BookingsContent() {
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
                 aria-pressed={statusFilter === tab.id}
-                className={`px-4 min-h-10 rounded-full text-xs whitespace-nowrap transition-colors shrink-0 border ${
+                className={`px-4 min-h-10 rounded-full text-xs whitespace-nowrap transition-all shrink-0 border ${
                   statusFilter === tab.id
-                    ? "bg-plum text-white font-semibold border-plum"
-                    : "bg-white text-ink-soft font-medium hover:bg-ivory-deep border-line"
+                    ? "bg-gradient-to-r from-[#BE123C] to-[#7C3AED] text-white font-semibold border-transparent shadow-xs"
+                    : "bg-white text-[#5B5566] font-medium hover:bg-[#F5F2F8] border-[#E8E2F0]"
                 }`}
               >
                 {tab.label}
@@ -1064,7 +1064,7 @@ function BookingsContent() {
 
 export default function BookingsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-xs text-gray-400">Loading bookings...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-xs text-[#8C8499]">Loading bookings...</div>}>
       <BookingsContent />
     </Suspense>
   );

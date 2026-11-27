@@ -2,16 +2,17 @@ import React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-type Tone = "gold" | "plum" | "amber" | "rose" | "violet" | "emerald" | "sky";
+type Tone = "gold" | "plum" | "amber" | "rose" | "violet" | "emerald" | "sky" | "coral";
 
-const TONES: Record<Tone, { chip: string; value: string }> = {
-  gold: { chip: "bg-gold-soft text-gold border border-line", value: "text-ink" },
-  plum: { chip: "bg-plum-soft text-plum border border-rose-200", value: "text-ink" },
-  amber: { chip: "bg-amber-100 text-amber-800 border border-amber-200", value: "text-ink" },
-  rose: { chip: "bg-rose-50 text-rose-800 border border-rose-200", value: "text-rose-800" },
-  violet: { chip: "bg-gray-100 text-gray-700 border border-gray-200", value: "text-ink" },
-  emerald: { chip: "bg-emerald-50 text-emerald-800 border border-emerald-200", value: "text-ink" },
-  sky: { chip: "bg-sky-50 text-sky-700 border border-sky-200", value: "text-ink" },
+const TONES: Record<Tone, { chip: string; value: string; hint: string }> = {
+  gold: { chip: "bg-[#FEF3C7] text-[#D97706]", value: "text-[#18141E]", hint: "text-[#D97706]" },
+  plum: { chip: "bg-[#FFE4E6] text-[#E11D48]", value: "text-[#18141E]", hint: "text-[#E11D48]" },
+  amber: { chip: "bg-[#FEF3C7] text-[#D97706]", value: "text-[#18141E]", hint: "text-[#D97706]" },
+  rose: { chip: "bg-[#FFEDD5] text-[#EA580C]", value: "text-[#EA580C]", hint: "text-[#EA580C]" },
+  violet: { chip: "bg-[#E0E7FF] text-[#4F46E5]", value: "text-[#18141E]", hint: "text-[#4F46E5]" },
+  emerald: { chip: "bg-[#D1FAE5] text-[#059669]", value: "text-[#18141E]", hint: "text-[#059669]" },
+  sky: { chip: "bg-[#E0F2FE] text-[#0284C7]", value: "text-[#18141E]", hint: "text-[#0284C7]" },
+  coral: { chip: "bg-[#FFEDD5] text-[#EA580C]", value: "text-[#EA580C]", hint: "text-[#EA580C]" },
 };
 
 interface StatCardProps {
@@ -24,24 +25,28 @@ interface StatCardProps {
   className?: string;
 }
 
-/** Editorial KPI tile: eyebrow label, big serif figure, quiet hint. Link when `href` is given. */
+/** Revive-AI-inspired luminous KPI tile: 40px pastel-tinted icon badge, crisp 32px tabular number, colored trend hint. */
 export function StatCard({ label, value, hint, icon: Icon, tone = "gold", href, className }: StatCardProps) {
   const t = TONES[tone] || TONES.gold;
   const body = (
     <>
       <div className="flex items-center justify-between gap-2">
-        <span className="eyebrow-mute">{label}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-[#5B5566]">{label}</span>
         {Icon && (
-          <span className={cn("w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-2xs", t.chip)}>
-            <Icon className="w-4 h-4" />
+          <span className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", t.chip)}>
+            <Icon className="w-5 h-5" />
           </span>
         )}
       </div>
-      <div className={cn("font-display font-semibold text-3xl mt-2 num leading-none", t.value)}>{value}</div>
-      {hint && <span className="text-[11px] text-mute mt-2 block">{hint}</span>}
+      <div className={cn("text-[32px] font-bold tracking-[-0.03em] mt-2.5 num leading-none", t.value)}>{value}</div>
+      {hint && <span className={cn("text-[11px] font-medium mt-2 block", t.hint)}>{hint}</span>}
     </>
   );
-  const cls = cn("surface p-4.5 block rounded-2xl border border-line bg-white shadow-2xs", href && "surface-interactive", className);
+  const cls = cn(
+    "surface p-5 block rounded-[20px]",
+    href && "surface-interactive",
+    className
+  );
   return href ? (
     <Link href={href} className={cls}>
       {body}

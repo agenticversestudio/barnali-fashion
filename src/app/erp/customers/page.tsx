@@ -120,15 +120,29 @@ export default function CustomersPage() {
 
   const getCleanPhone = (p: string) => p.replace(/\D/g, "").slice(-10);
 
+  const AVATAR_COLORS = [
+    "bg-[#FFE4E6] text-[#E11D48] border-[#FECDD3]",
+    "bg-[#E0E7FF] text-[#4F46E5] border-[#C7D2FE]",
+    "bg-[#D1FAE5] text-[#059669] border-[#A7F3D0]",
+    "bg-[#FEF3C7] text-[#D97706] border-[#FDE68A]",
+    "bg-[#EDE9FE] text-[#7C3AED] border-[#DDD6FE]",
+  ];
+
+  const getAvatarStyle = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+  };
+
   /** Display-only trust tier from order count (no stored field, nothing sent to the server). */
   const trustBadge = (n: number) =>
     n >= 5
-      ? { label: "Loyal client", cls: "bg-plum/10 text-plum border-plum/20", icon: ShieldCheck }
+      ? { label: "Loyal client", cls: "bg-[#FFE4E6]/80 text-[#9F1239] border-[#FECDD3]", icon: ShieldCheck }
       : n >= 2
-        ? { label: "Returning", cls: "bg-gold-soft text-gold-dark border-gold/40", icon: CheckCircle2 }
+        ? { label: "Returning", cls: "bg-[#FEF3C7]/80 text-[#92400E] border-[#FDE68A]", icon: CheckCircle2 }
         : n === 1
-          ? { label: "First order", cls: "bg-white text-ink-soft border-line", icon: CheckCircle2 }
-          : { label: "New contact", cls: "bg-white text-mute border-line", icon: Users };
+          ? { label: "First order", cls: "bg-[#E0E7FF]/80 text-[#3730A3] border-[#C7D2FE]", icon: CheckCircle2 }
+          : { label: "New contact", cls: "bg-[#F5F2F8] text-[#5B5566] border-[#E8E2F0]", icon: Users };
 
   const initials = (n: string) =>
     n
@@ -143,23 +157,23 @@ export default function CustomersPage() {
       {/* 1. Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="eyebrow text-gold">CLIENT BOOK</span>
+          <span className="eyebrow text-[#7C3AED]">CLIENT BOOK</span>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
-            <h1 className="page-title text-2xl md:text-3xl text-ink">Customer Directory</h1>
-            <span className="num text-[11px] font-semibold bg-gold-soft text-plum border border-line-strong px-3 py-0.5 rounded-full shadow-2xs">
+            <h1 className="text-[26px] md:text-[30px] font-semibold tracking-[-0.02em] text-[#18141E]">Customer Directory</h1>
+            <span className="num text-[11px] font-semibold bg-[#E0E7FF] text-[#4F46E5] border border-[#C7D2FE] px-3 py-0.5 rounded-full">
               {customers.length} client{customers.length === 1 ? "" : "s"}
             </span>
           </div>
-          <p className="text-xs text-ink-soft mt-1.5 max-w-xl">
-            Client profiles, active costume rentals, verified contact channels, and security deposit ledgers.
+          <p className="text-xs text-[#5B5566] mt-1.5 max-w-xl">
+            Client profiles, <span className="font-semibold text-[#E11D48]">{totalActiveRentals} active rentals</span>, verified contact channels, and deposit ledgers.
           </p>
         </div>
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-11 bg-gradient-to-r from-[#BE123C] to-[#7C3AED] hover:from-[#9F1239] hover:to-[#6D28D9] text-white text-sm font-medium rounded-full shadow-[0_6px_18px_-3px_rgba(190,18,60,0.35)] transition-all shrink-0"
         >
-          <Plus className="w-4 h-4 text-gold-soft" />
+          <Plus className="w-4 h-4 text-white" />
           <span>Add New Customer</span>
         </button>
       </div>
@@ -171,42 +185,42 @@ export default function CustomersPage() {
           value={customers.length}
           hint="Registered boutique contacts"
           icon={Users}
-          tone="gold"
+          tone="violet"
         />
         <StatCard
           label="Active Rentals Out"
           value={totalActiveRentals}
           hint="Pieces currently with clients"
           icon={ClipboardList}
-          tone="amber"
+          tone="plum"
         />
         <StatCard
           label="Held Deposits Ledger"
           value={formatINR(totalHeldDeposits)}
           hint="Refundable security held"
           icon={Wallet}
-          tone="plum"
+          tone="amber"
         />
       </div>
 
       {/* 3. Unified Listing Container */}
-      <div className="bg-white rounded-2xl border border-line shadow-2xs overflow-hidden">
+      <div className="surface overflow-hidden">
         {/* Search & View Controls */}
-        <div className="p-3.5 md:p-4 border-b border-line bg-white flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        <div className="p-3.5 md:p-4 border-b border-[#E8E2F0] bg-white/60 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           <div className="relative flex-1">
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by customer name, 10-digit mobile number, or address..."
-              className="w-full pl-9 pr-10 min-h-10 bg-ivory border border-line rounded-xl text-xs font-medium text-ink placeholder-mute focus:outline-none focus:border-plum focus:ring-2 focus:ring-plum/15 transition-all"
+              className="w-full pl-10 pr-10 min-h-10 bg-[#F8F6FA] border border-[#E8E2F0] rounded-full text-xs font-medium text-[#18141E] placeholder-[#8C8499] focus:outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/15 transition-all"
             />
-            <Search className="w-4 h-4 text-mute absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-[#8C8499] absolute left-3.5 top-3" />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
                 aria-label="Clear search"
-                className="absolute right-0 top-0 w-10 h-10 flex items-center justify-center text-mute hover:text-ink"
+                className="absolute right-0 top-0 w-10 h-10 flex items-center justify-center text-[#8C8499] hover:text-[#18141E]"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -214,16 +228,16 @@ export default function CustomersPage() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-[11px] text-mute hidden sm:inline">View:</span>
-            <div className="flex items-center p-0.5 bg-ivory border border-line rounded-xl">
+            <span className="text-[11px] text-[#8C8499] hidden sm:inline">View:</span>
+            <div className="flex items-center p-1 bg-[#F5F2F8] border border-[#E8E2F0] rounded-full">
               <button
                 onClick={() => setViewMode("grid")}
                 aria-pressed={viewMode === "grid"}
                 title="Grid view"
-                className={`flex items-center gap-1.5 px-3 min-h-10 rounded-lg text-xs font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-3.5 min-h-8 rounded-full text-xs font-medium transition-all ${
                   viewMode === "grid"
-                    ? "bg-white text-plum font-semibold shadow-2xs border border-line"
-                    : "text-ink-soft hover:text-ink"
+                    ? "bg-white text-[#BE123C] font-semibold shadow-xs border border-[#E8E2F0]"
+                    : "text-[#5B5566] hover:text-[#18141E]"
                 }`}
               >
                 <Grid className="w-3.5 h-3.5" />
@@ -233,10 +247,10 @@ export default function CustomersPage() {
                 onClick={() => setViewMode("table")}
                 aria-pressed={viewMode === "table"}
                 title="Table view"
-                className={`flex items-center gap-1.5 px-3 min-h-10 rounded-lg text-xs font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-3.5 min-h-8 rounded-full text-xs font-medium transition-all ${
                   viewMode === "table"
-                    ? "bg-white text-plum font-semibold shadow-2xs border border-line"
-                    : "text-ink-soft hover:text-ink"
+                    ? "bg-white text-[#BE123C] font-semibold shadow-xs border border-[#E8E2F0]"
+                    : "text-[#5B5566] hover:text-[#18141E]"
                 }`}
               >
                 <List className="w-3.5 h-3.5" />
@@ -248,9 +262,9 @@ export default function CustomersPage() {
 
         {/* Content Body */}
         {loading ? (
-          <div className="p-12 text-center bg-white">
-            <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
-            <div className="text-xs text-ink-soft">Loading customer records...</div>
+          <div className="p-12 text-center bg-white/50">
+            <Loader2 className="w-6 h-6 animate-spin text-[#BE123C] mx-auto mb-2" />
+            <div className="text-xs text-[#5B5566]">Loading customer records...</div>
           </div>
         ) : customers.length === 0 ? (
           <EmptyState
@@ -260,9 +274,9 @@ export default function CustomersPage() {
             action={
               <button
                 onClick={() => setShowAddModal(true)}
-                className="inline-flex items-center gap-1.5 px-4 min-h-10 bg-plum hover:bg-plum-dark text-white rounded-xl text-xs font-semibold shadow-xs"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-[#BE123C] to-[#7C3AED] text-white rounded-full text-xs font-semibold shadow-md"
               >
-                <Plus className="w-3.5 h-3.5 text-gold-soft" />
+                <Plus className="w-3.5 h-3.5" />
                 Add New Customer
               </button>
             }
@@ -272,43 +286,43 @@ export default function CustomersPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[760px]">
               <thead>
-                <tr className="bg-ivory-deep border-b border-line text-[11px] font-semibold uppercase tracking-wider text-ink-soft">
-                  <th className="py-3 px-4">Client ID &amp; Name</th>
-                  <th className="py-3 px-4">Trust Level</th>
-                  <th className="py-3 px-4">Phone / WhatsApp</th>
-                  <th className="py-3 px-4">Address</th>
-                  <th className="py-3 px-4 text-center">Orders</th>
-                  <th className="py-3 px-4 text-right">Deposit Held</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                <tr className="bg-[#F5F2F8] border-b border-[#E8E2F0] text-[11px] font-semibold uppercase tracking-wider text-[#5B5566]">
+                  <th className="py-3.5 px-4">Client ID &amp; Name</th>
+                  <th className="py-3.5 px-4">Trust Level</th>
+                  <th className="py-3.5 px-4">Phone / WhatsApp</th>
+                  <th className="py-3.5 px-4">Address</th>
+                  <th className="py-3.5 px-4 text-center">Orders</th>
+                  <th className="py-3.5 px-4 text-right">Deposit Held</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line-soft text-xs">
+              <tbody className="divide-y divide-[#E8E2F0]/70 text-xs">
                 {customers.map((c) => {
                   const cleanPhone = getCleanPhone(c.phone);
                   const trust = trustBadge(c.totalBookings);
                   const TrustIcon = trust.icon;
                   return (
-                    <tr key={c.id} className="hover:bg-ivory transition-colors group">
+                    <tr key={c.id} className="hover:bg-[#F8F6FA] transition-colors group">
                       <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-plum text-gold-soft flex items-center justify-center font-display font-semibold text-xs shrink-0 shadow-2xs">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-9 h-9 rounded-full border flex items-center justify-center font-bold text-xs shrink-0 ${getAvatarStyle(c.id)}`}>
                             {initials(c.name) || "?"}
                           </div>
                           <div>
-                            <span className="num text-[10px] text-mute font-semibold block">{c.id}</span>
-                            <span className="font-semibold text-ink">{c.name}</span>
+                            <span className="num text-[10px] text-[#8C8499] font-semibold block">{c.id}</span>
+                            <span className="font-semibold text-[#18141E]">{c.name}</span>
                           </div>
                         </div>
                       </td>
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${trust.cls}`}>
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${trust.cls}`}>
                           <TrustIcon className="w-3 h-3" />
                           {trust.label}
                         </span>
                       </td>
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          <a href={`tel:${cleanPhone}`} className="num font-semibold text-ink hover:text-plum">
+                          <a href={`tel:${cleanPhone}`} className="num font-semibold text-[#18141E] hover:text-[#BE123C]">
                             +91 {cleanPhone}
                           </a>
                           <a
@@ -317,26 +331,26 @@ export default function CustomersPage() {
                             )}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center hover:bg-emerald-100 transition-colors"
+                            className="w-9 h-9 rounded-full bg-[#D1FAE5] text-[#059669] flex items-center justify-center hover:bg-emerald-200 transition-colors"
                             title="Chat on WhatsApp"
                           >
-                            <MessageCircle className="w-3 h-3" />
+                            <MessageCircle className="w-3.5 h-3.5" />
                           </a>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 max-w-[200px] truncate text-ink-soft">
+                      <td className="py-3.5 px-4 max-w-[200px] truncate text-[#5B5566]">
                         {c.address ? `${c.address}, ${c.city}` : "—"}
                       </td>
                       <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                        <span className="num font-semibold text-ink">{c.totalBookings}</span>
+                        <span className="num font-semibold text-[#18141E]">{c.totalBookings}</span>
                         {c.activeRentals > 0 && (
-                          <span className="num ml-1.5 text-[10px] bg-amber-100 text-amber-800 border border-amber-200 px-1.5 py-0.2 rounded-full font-semibold">
+                          <span className="num ml-1.5 text-[10px] bg-[#FEF3C7] text-[#D97706] border border-[#FDE68A] px-2 py-0.5 rounded-full font-semibold">
                             {c.activeRentals} active
                           </span>
                         )}
                       </td>
                       <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                        <span className={`num font-semibold text-sm ${c.depositsHeld > 0 ? "text-amber-800" : "text-ink"}`}>
+                        <span className={`num font-semibold text-sm ${c.depositsHeld > 0 ? "text-[#D97706]" : "text-[#18141E]"}`}>
                           {formatINR(c.depositsHeld)}
                         </span>
                       </td>
@@ -344,13 +358,13 @@ export default function CustomersPage() {
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => setSelectedCustomer(c)}
-                            className="px-2.5 min-h-10 rounded-lg border border-line bg-white hover:bg-ivory-deep text-ink-soft text-xs font-semibold transition-colors"
+                            className="px-3.5 py-1.5 min-h-9 rounded-full bg-[#F5F2F8] hover:bg-[#E8E2F0] text-[#5B5566] text-xs font-semibold transition-colors"
                           >
                             Profile
                           </button>
                           <Link
                             href={`/erp/bookings/new?customerId=${c.id}&name=${encodeURIComponent(c.name)}&phone=${cleanPhone}`}
-                            className="px-3 min-h-10 rounded-lg bg-plum hover:bg-plum-dark text-white text-xs font-semibold inline-flex items-center shadow-2xs transition-colors"
+                            className="px-3.5 py-1.5 min-h-9 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs font-semibold inline-flex items-center shadow-2xs transition-colors"
                           >
                             New Order
                           </Link>
@@ -364,7 +378,7 @@ export default function CustomersPage() {
           </div>
         ) : (
           /* Cards Grid View */
-          <div className="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 bg-ivory">
+          <div className="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 bg-[#F8F6FA]/60">
             {customers.map((c) => {
               const cleanPhone = getCleanPhone(c.phone);
               const trust = trustBadge(c.totalBookings);
@@ -372,34 +386,34 @@ export default function CustomersPage() {
               return (
                 <article key={c.id} className="surface surface-interactive p-4 flex flex-col gap-3">
                   <div className="flex items-start gap-3">
-                    <div className="w-11 h-11 rounded-full bg-plum text-gold-soft flex items-center justify-center font-display font-semibold text-sm ring-1 ring-gold/40 shrink-0 shadow-2xs">
+                    <div className={`w-11 h-11 rounded-full border flex items-center justify-center font-bold text-sm shrink-0 ${getAvatarStyle(c.id)}`}>
                       {initials(c.name) || "?"}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <span className="num text-[10px] text-mute font-semibold">{c.id}</span>
-                      <h3 className="font-display font-semibold text-base text-ink leading-tight truncate">{c.name}</h3>
-                      <span className={`inline-flex items-center gap-1 mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${trust.cls}`}>
+                      <span className="num text-[10px] text-[#8C8499] font-semibold">{c.id}</span>
+                      <h3 className="font-semibold text-base text-[#18141E] leading-tight truncate">{c.name}</h3>
+                      <span className={`inline-flex items-center gap-1 mt-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${trust.cls}`}>
                         <TrustIcon className="w-3 h-3" />
                         {trust.label}
                       </span>
                     </div>
                     {c.activeRentals > 0 && (
-                      <span className="num text-[10px] bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full font-semibold shrink-0">
+                      <span className="num text-[10px] bg-[#FEF3C7] text-[#D97706] border border-[#FDE68A] px-2.5 py-0.5 rounded-full font-semibold shrink-0">
                         {c.activeRentals} active
                       </span>
                     )}
                   </div>
 
-                  <div className="space-y-1.5 text-xs text-ink-soft">
+                  <div className="space-y-1.5 text-xs text-[#5B5566]">
                     <div className="flex items-center gap-2">
-                      <Phone className="w-3.5 h-3.5 text-mute shrink-0" />
-                      <a href={`tel:${cleanPhone}`} className="num font-semibold text-ink hover:text-plum inline-flex items-center min-h-10">
+                      <Phone className="w-3.5 h-3.5 text-[#8C8499] shrink-0" />
+                      <a href={`tel:${cleanPhone}`} className="num font-semibold text-[#18141E] hover:text-[#BE123C] inline-flex items-center min-h-8">
                         +91 {cleanPhone}
                       </a>
                     </div>
                     {c.address && (
                       <div className="flex items-start gap-2">
-                        <MapPin className="w-3.5 h-3.5 text-mute shrink-0 mt-0.5" />
+                        <MapPin className="w-3.5 h-3.5 text-[#8C8499] shrink-0 mt-0.5" />
                         <span className="line-clamp-1">
                           {c.address}, {c.city}
                         </span>
@@ -408,20 +422,20 @@ export default function CustomersPage() {
                   </div>
 
                   {/* Deposit ledger strip */}
-                  <div className="grid grid-cols-3 gap-2 bg-ivory border border-line rounded-xl p-2.5 text-center">
+                  <div className="grid grid-cols-3 gap-2 bg-[#F8F6FA] border border-[#E8E2F0] rounded-2xl p-2.5 text-center">
                     <div>
                       <span className="eyebrow-mute block text-[9.5px]">Orders</span>
-                      <span className="num font-display font-semibold text-lg text-ink leading-tight">{c.totalBookings}</span>
+                      <span className="num font-bold text-lg text-[#18141E] leading-tight">{c.totalBookings}</span>
                     </div>
                     <div>
                       <span className="eyebrow-mute block text-[9.5px]">Deposit held</span>
-                      <span className={`num font-display font-semibold text-lg leading-tight ${c.depositsHeld > 0 ? "text-amber-800" : "text-ink"}`}>
+                      <span className={`num font-bold text-lg leading-tight ${c.depositsHeld > 0 ? "text-[#D97706]" : "text-[#18141E]"}`}>
                         {formatINR(c.depositsHeld)}
                       </span>
                     </div>
                     <div>
                       <span className="eyebrow-mute block text-[9.5px]">Spent</span>
-                      <span className="num font-display font-semibold text-lg text-ink leading-tight">
+                      <span className="num font-bold text-lg text-[#18141E] leading-tight">
                         {isAdmin && c.totalSpent !== undefined ? formatINR(c.totalSpent) : "—"}
                       </span>
                     </div>
@@ -434,7 +448,7 @@ export default function CustomersPage() {
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-10 h-10 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl transition-colors flex items-center justify-center shrink-0 shadow-2xs"
+                      className="w-10 h-10 bg-[#D1FAE5] hover:bg-emerald-200 text-[#059669] rounded-full transition-colors flex items-center justify-center shrink-0"
                       title="Open WhatsApp chat"
                       aria-label={`WhatsApp ${c.name}`}
                     >
@@ -443,14 +457,14 @@ export default function CustomersPage() {
 
                     <button
                       onClick={() => setSelectedCustomer(c)}
-                      className="flex-1 min-h-10 bg-white hover:bg-ivory-deep border border-line text-ink-soft text-center font-semibold rounded-xl text-xs transition-colors shadow-2xs"
+                      className="flex-1 min-h-10 bg-[#F5F2F8] hover:bg-[#E8E2F0] text-[#5B5566] text-center font-semibold rounded-full text-xs transition-colors"
                     >
                       View Profile
                     </button>
 
                     <Link
                       href={`/erp/bookings/new?customerId=${c.id}&name=${encodeURIComponent(c.name)}&phone=${cleanPhone}`}
-                      className="flex-1 min-h-10 inline-flex items-center justify-center bg-plum hover:bg-plum-dark text-white text-center font-semibold rounded-xl text-xs transition-colors shadow-2xs"
+                      className="flex-1 min-h-10 inline-flex items-center justify-center bg-[#4F46E5] hover:bg-[#4338CA] text-white text-center font-semibold rounded-full text-xs transition-colors shadow-xs"
                     >
                       New Booking
                     </Link>

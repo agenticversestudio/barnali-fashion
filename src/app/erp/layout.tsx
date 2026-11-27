@@ -7,13 +7,13 @@ import { AuthProvider } from "@/context/AuthContext";
 export default function ErpLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-ivory flex flex-col font-sans text-ink antialiased selection:bg-plum selection:text-white">
-        <Suspense fallback={<div className="w-64 bg-white fixed inset-y-0 left-0 hidden lg:block border-r border-line" />}>
+      <div className="min-h-screen bg-transparent flex flex-col font-sans text-[#18141E] antialiased selection:bg-[#BE123C] selection:text-white">
+        <Suspense fallback={<div className="w-64 bg-white/85 backdrop-blur-xl fixed inset-y-0 left-0 hidden lg:block border-r border-[#EBE6F0]" />}>
           <ErpSidebar />
         </Suspense>
 
         <div className="lg:pl-64 flex flex-col flex-1">
-          <Suspense fallback={<div className="h-14 md:h-16 bg-white border-b border-line" />}>
+          <Suspense fallback={<div className="h-16 bg-white/80 backdrop-blur-md border-b border-[#E8E2F0]" />}>
             <ErpHeader />
           </Suspense>
 

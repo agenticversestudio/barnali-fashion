@@ -102,7 +102,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-gray-500">
+      <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-[#5B5566]">
         <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
         Loading system configuration &amp; sync status...
       </div>
@@ -117,7 +117,7 @@ export default function SettingsPage() {
           <span>Operational Parameters &amp; Configuration</span>
         </div>
         <h1 className="text-2xl page-title">Business Settings</h1>
-        <p className="text-xs text-gray-500 mt-0.5">
+        <p className="text-xs text-[#5B5566] mt-0.5">
           Manage store location profile, buffer turnaround days, late fee policies, and Google Sheets sync.
         </p>
       </div>
@@ -125,14 +125,14 @@ export default function SettingsPage() {
       <form onSubmit={handleSave} className="space-y-6">
         {/* Store Location Profile */}
         <div className="bg-white rounded-2xl border border-line-soft p-6 shadow-xs space-y-4">
-          <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center gap-2">
+          <div className="font-bold text-[#18141E] text-sm pb-2 border-b border-line-soft flex items-center gap-2">
             <Building2 className="w-4 h-4 text-gold" />
             <span>Store Profile &amp; Invoice Header</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+              <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                 Store Trade Name *
               </label>
               <input
@@ -145,7 +145,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+              <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                 Official Phone / WhatsApp *
               </label>
               <input
@@ -159,7 +159,7 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+            <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
               Store Physical Address *
             </label>
             <input
@@ -174,14 +174,14 @@ export default function SettingsPage() {
 
         {/* Rental Business Policy Parameters */}
         <div className="bg-white rounded-2xl border border-line-soft p-6 shadow-xs space-y-4">
-          <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center gap-2">
+          <div className="font-bold text-[#18141E] text-sm pb-2 border-b border-line-soft flex items-center gap-2">
             <Clock className="w-4 h-4 text-gold" />
             <span>Rental Policies &amp; Cleaning Quarantine Buffers</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+              <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                 Post-Return Cleaning Buffer
               </label>
               <div className="flex items-center gap-2">
@@ -193,13 +193,13 @@ export default function SettingsPage() {
                   onChange={(e) => setBufferDays(e.target.value)}
                   className="w-full p-2.5 bg-ivory border border-line rounded-xl font-bold font-mono"
                 />
-                <span className="text-gray-500 font-semibold">Days</span>
+                <span className="text-[#5B5566] font-semibold">Days</span>
               </div>
-              <div className="text-[10px] text-gray-400 mt-1">Automatic conflict protection window</div>
+              <div className="text-[10px] text-[#8C8499] mt-1">Automatic conflict protection window</div>
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+              <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                 Late Fee Rate (% / day)
               </label>
               <div className="flex items-center gap-2">
@@ -211,13 +211,13 @@ export default function SettingsPage() {
                   onChange={(e) => setLateFeePercent(e.target.value)}
                   className="w-full p-2.5 bg-ivory border border-line rounded-xl font-bold font-mono text-rose-700"
                 />
-                <span className="text-gray-500 font-semibold">%</span>
+                <span className="text-[#5B5566] font-semibold">%</span>
               </div>
-              <div className="text-[10px] text-gray-400 mt-1">% of rental tariff charged per overdue day</div>
+              <div className="text-[10px] text-[#8C8499] mt-1">% of rental tariff charged per overdue day</div>
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+              <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                 Default Care Vendor
               </label>
               <input
@@ -227,7 +227,7 @@ export default function SettingsPage() {
                 placeholder="e.g. Royal Dry Cleaners"
                 className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium"
               />
-              <div className="text-[10px] text-gray-400 mt-1">Primary dry cleaning partner</div>
+              <div className="text-[10px] text-[#8C8499] mt-1">Primary dry cleaning partner</div>
             </div>
           </div>
 
@@ -252,7 +252,7 @@ export default function SettingsPage() {
 
       {/* Google Sheets Sync & Disaster Recovery */}
       <div className="bg-white rounded-2xl border border-line-soft p-6 shadow-xs space-y-4">
-        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center justify-between">
+        <div className="font-bold text-[#18141E] text-sm pb-2 border-b border-line-soft flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
             <span>Google Sheets Live Mirror &amp; Backup Sync</span>
@@ -268,18 +268,18 @@ export default function SettingsPage() {
           </span>
         </div>
 
-        <p className="text-gray-600 leading-relaxed">
+        <p className="text-[#5B5566] leading-relaxed">
           The ERP automatically maintains an off-site readable replica of all business records in Google Sheets across 6 dedicated tabs (Garments, Customers, Bookings, Care, Cash, Expenses).
         </p>
 
         {syncStatus && (
           <div className="p-3 bg-gold-soft rounded-xl border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <div className="text-[11px] text-gray-700">
+              <div className="text-[11px] text-[#5B5566]">
                 Last Sync: <strong>{syncStatus.lastSyncAt ? formatDate(syncStatus.lastSyncAt) : "Never"}</strong>
               </div>
               {syncStatus.lastMessage && (
-                <div className="text-[10px] text-gray-500 mt-0.5">{syncStatus.lastMessage}</div>
+                <div className="text-[10px] text-[#5B5566] mt-0.5">{syncStatus.lastMessage}</div>
               )}
             </div>
 
@@ -304,28 +304,28 @@ export default function SettingsPage() {
 
       {/* Database & Infrastructure Specifications */}
       <div className="bg-white rounded-2xl border border-line-soft p-6 shadow-xs space-y-3">
-        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center gap-2">
+        <div className="font-bold text-[#18141E] text-sm pb-2 border-b border-line-soft flex items-center gap-2">
           <Database className="w-4 h-4 text-gold" />
           <span>Database Architecture &amp; Zero-Cost Hosting</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
           <div className="p-3 bg-ivory rounded-xl border border-line">
-            <div className="text-gray-400 font-semibold uppercase text-[9px]">Primary Database</div>
-            <div className="font-bold text-gray-900 mt-0.5">Turso Edge SQLite</div>
-            <div className="text-gray-500 text-[10px]">Region: AWS Mumbai (bom1)</div>
+            <div className="text-[#8C8499] font-semibold uppercase text-[9px]">Primary Database</div>
+            <div className="font-bold text-[#18141E] mt-0.5">Turso Edge SQLite</div>
+            <div className="text-[#5B5566] text-[10px]">Region: AWS Mumbai (bom1)</div>
           </div>
 
           <div className="p-3 bg-ivory rounded-xl border border-line">
-            <div className="text-gray-400 font-semibold uppercase text-[9px]">Application Runtime</div>
-            <div className="font-bold text-gray-900 mt-0.5">Next.js 16 (Node.js)</div>
-            <div className="text-gray-500 text-[10px]">Zero server cost tier</div>
+            <div className="text-[#8C8499] font-semibold uppercase text-[9px]">Application Runtime</div>
+            <div className="font-bold text-[#18141E] mt-0.5">Next.js 16 (Node.js)</div>
+            <div className="text-[#5B5566] text-[10px]">Zero server cost tier</div>
           </div>
 
           <div className="p-3 bg-ivory rounded-xl border border-line">
-            <div className="text-gray-400 font-semibold uppercase text-[9px]">Concurrency Protection</div>
-            <div className="font-bold text-gray-900 mt-0.5">SQL Trigger Locks</div>
-            <div className="text-gray-500 text-[10px]">Zero double booking guarantee</div>
+            <div className="text-[#8C8499] font-semibold uppercase text-[9px]">Concurrency Protection</div>
+            <div className="font-bold text-[#18141E] mt-0.5">SQL Trigger Locks</div>
+            <div className="text-[#5B5566] text-[10px]">Zero double booking guarantee</div>
           </div>
         </div>
       </div>

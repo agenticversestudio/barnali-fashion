@@ -113,12 +113,12 @@ export function PhotoCapture({
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <div>
-          <label className="block text-[11px] font-bold text-gray-800 uppercase tracking-wide">
+          <label className="block text-[11px] font-bold text-[#18141E] uppercase tracking-wide">
             {label}
           </label>
-          <p className="text-[10px] text-gray-500">{sublabel}</p>
+          <p className="text-[10px] text-[#5B5566]">{sublabel}</p>
         </div>
-        <span className="text-[10px] font-mono font-bold text-gray-400">
+        <span className="text-[10px] font-mono font-bold text-[#8C8499]">
           {photoIds.length} / {maxPhotos}
         </span>
       </div>
@@ -135,7 +135,7 @@ export function PhotoCapture({
         {photos.map((item) => (
           <div
             key={item.id}
-            className="relative group w-20 h-20 rounded-xl overflow-hidden border border-gray-300 bg-gray-100 shadow-xs"
+            className="relative group w-20 h-20 rounded-xl overflow-hidden border border-[#E8E2F0] bg-[#F5F2F8] shadow-xs"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -171,7 +171,7 @@ export function PhotoCapture({
             {uploading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin text-gold-dark mb-1" />
-                <span className="text-[9px] font-semibold text-gray-600 leading-tight">
+                <span className="text-[9px] font-semibold text-[#5B5566] leading-tight">
                   {uploadProgressText || "Uploading..."}
                 </span>
               </>
@@ -181,7 +181,7 @@ export function PhotoCapture({
                 <span className="text-[9px] font-bold text-gold-dark leading-tight">
                   Take Photo
                 </span>
-                <span className="text-[8px] text-gray-400">or upload</span>
+                <span className="text-[8px] text-[#8C8499]">or upload</span>
               </>
             )}
           </button>

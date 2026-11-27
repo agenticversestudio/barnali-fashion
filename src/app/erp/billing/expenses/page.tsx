@@ -137,7 +137,7 @@ export default function ExpensesPage() {
             <span>Operational Outflow &amp; Maintenance Costs</span>
           </div>
           <h1 className="text-2xl page-title">Expense Tracker</h1>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-xs text-[#5B5566] mt-0.5">
             Record day-to-day store expenditures including laundry dry cleaning, tailoring, packaging bags, and utilities.
           </p>
         </div>
@@ -154,34 +154,34 @@ export default function ExpensesPage() {
       {/* Top Banner KPI */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
         <div className="bg-white p-5 rounded-2xl border border-line-soft shadow-xs">
-          <div className="text-gray-400 font-semibold uppercase text-[10px]">
+          <div className="text-[#8C8499] font-semibold uppercase text-[10px]">
             Total Expenses ({filteredExpenses.length})
           </div>
-          <div className="text-2xl font-bold text-gray-900 mt-1 font-mono">{formatINR(totalExpense)}</div>
-          <div className="text-gray-500 text-[11px] mt-1">Based on current filter view</div>
+          <div className="text-2xl font-bold text-[#18141E] mt-1 font-mono">{formatINR(totalExpense)}</div>
+          <div className="text-[#5B5566] text-[11px] mt-1">Based on current filter view</div>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-line-soft shadow-xs">
-          <div className="text-gray-400 font-semibold uppercase text-[10px]">
+          <div className="text-[#8C8499] font-semibold uppercase text-[10px]">
             Cash Drawer Outflow
           </div>
           <div className="text-2xl font-bold text-amber-700 mt-1 font-mono">{formatINR(cashExpense)}</div>
-          <div className="text-gray-500 text-[11px] mt-1">Directly deducted from cash drawer</div>
+          <div className="text-[#5B5566] text-[11px] mt-1">Directly deducted from cash drawer</div>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-line-soft shadow-xs">
-          <div className="text-gray-400 font-semibold uppercase text-[10px]">
+          <div className="text-[#8C8499] font-semibold uppercase text-[10px]">
             UPI / Bank Outflow
           </div>
           <div className="text-2xl font-bold text-blue-700 mt-1 font-mono">{formatINR(upiExpense)}</div>
-          <div className="text-gray-500 text-[11px] mt-1">Direct digital vendor payments</div>
+          <div className="text-[#5B5566] text-[11px] mt-1">Direct digital vendor payments</div>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
       <div className="bg-white rounded-2xl border border-line-soft p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 text-xs">
         <div className="flex-1 relative">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#8C8499] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search expense description, category, or receipt #..."
@@ -192,11 +192,11 @@ export default function ExpensesPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-gray-400" />
+          <Filter className="w-4 h-4 text-[#8C8499]" />
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="p-2 bg-ivory border border-line rounded-xl text-xs font-semibold text-gray-700"
+            className="p-2 bg-ivory border border-line rounded-xl text-xs font-semibold text-[#5B5566]"
           >
             <option value="ALL">All Categories</option>
             {CATEGORIES.map((c) => (
@@ -211,7 +211,7 @@ export default function ExpensesPage() {
       {/* Expense List Table */}
       <div className="bg-white rounded-2xl border border-line-soft shadow-xs overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-xs text-gray-500">
+          <div className="p-12 text-center text-xs text-[#5B5566]">
             <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
             Loading store expense records...
           </div>
@@ -234,14 +234,14 @@ export default function ExpensesPage() {
               <tbody className="divide-y divide-line-soft">
                 {filteredExpenses.map((exp) => (
                   <tr key={exp.id} className="hover:bg-ivory transition-colors">
-                    <td className="py-3 px-4 font-mono text-gray-600">{formatDate(exp.date)}</td>
-                    <td className="py-3 px-3 font-semibold text-gray-900">
+                    <td className="py-3 px-4 font-mono text-[#5B5566]">{formatDate(exp.date)}</td>
+                    <td className="py-3 px-3 font-semibold text-[#18141E]">
                       <span className="bg-gold-soft text-gold-dark px-2 py-0.5 rounded text-[11px] border border-line">
                         {exp.category}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-gray-700 font-medium">{exp.description}</td>
-                    <td className="py-3 px-3 font-mono font-semibold text-gray-600">
+                    <td className="py-3 px-3 text-[#5B5566] font-medium">{exp.description}</td>
+                    <td className="py-3 px-3 font-mono font-semibold text-[#5B5566]">
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                           exp.mode === "CASH"
@@ -254,7 +254,7 @@ export default function ExpensesPage() {
                         {exp.mode}
                       </span>
                     </td>
-                    <td className="py-3 px-3 font-mono text-gray-500 text-[11px]">
+                    <td className="py-3 px-3 font-mono text-[#5B5566] text-[11px]">
                       {exp.receiptNo || "—"}
                     </td>
                     <td className="py-3 px-4 text-right font-mono font-bold text-rose-700">
@@ -264,7 +264,7 @@ export default function ExpensesPage() {
                       <td className="py-3 px-4 text-right">
                         <button
                           onClick={() => handleDeleteExpense(exp.id)}
-                          className="text-gray-400 hover:text-rose-600 p-1 rounded-md transition-colors cursor-pointer"
+                          className="text-[#8C8499] hover:text-rose-600 p-1 rounded-md transition-colors cursor-pointer"
                           title="Delete expense"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -290,7 +290,7 @@ export default function ExpensesPage() {
               </div>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                className="text-[#8C8499] hover:text-[#5B5566] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -298,7 +298,7 @@ export default function ExpensesPage() {
 
             <form onSubmit={handleAddExpense} className="mt-4 space-y-3">
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                   Expense Date *
                 </label>
                 <input
@@ -311,7 +311,7 @@ export default function ExpensesPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                   Expense Category *
                 </label>
                 <select
@@ -328,7 +328,7 @@ export default function ExpensesPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                   Description / Purpose *
                 </label>
                 <input
@@ -343,7 +343,7 @@ export default function ExpensesPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                     Amount (₹) *
                   </label>
                   <input
@@ -358,7 +358,7 @@ export default function ExpensesPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                     Payment Mode *
                   </label>
                   <select
@@ -374,7 +374,7 @@ export default function ExpensesPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                   Voucher / Receipt # (Optional)
                 </label>
                 <input
@@ -390,7 +390,7 @@ export default function ExpensesPage() {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-xl font-semibold text-gray-700 cursor-pointer"
+                  className="px-4 py-2 border border-[#E8E2F0] rounded-xl font-semibold text-[#5B5566] cursor-pointer"
                 >
                   Cancel
                 </button>

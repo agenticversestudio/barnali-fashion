@@ -80,14 +80,14 @@ export default function ReportsPage() {
       <div className="no-print bg-white p-4 rounded-2xl border border-line-soft shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 text-xs">
         <div className="flex items-center gap-2 flex-wrap">
           <Calendar className="w-4 h-4 text-plum" />
-          <span className="font-bold text-gray-700">Period:</span>
+          <span className="font-bold text-[#5B5566]">Period:</span>
           <input
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
             className="p-1.5 bg-ivory border border-line rounded-lg font-mono text-xs"
           />
-          <span className="text-gray-400">to</span>
+          <span className="text-[#8C8499]">to</span>
           <input
             type="date"
             value={toDate}
@@ -104,11 +104,11 @@ export default function ReportsPage() {
 
         {/* CSV Export Links */}
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-gray-400 font-semibold text-[11px]">Download Raw CSV:</span>
+          <span className="text-[#8C8499] font-semibold text-[11px]">Download Raw CSV:</span>
           <a
             href={reportsApi.getExportUrl("bookings")}
             download
-            className="bg-ivory hover:bg-gold-soft text-gray-700 border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
+            className="bg-ivory hover:bg-gold-soft text-[#5B5566] border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
           >
             <Download className="w-3 h-3 text-gold" />
             <span>Bookings</span>
@@ -116,7 +116,7 @@ export default function ReportsPage() {
           <a
             href={reportsApi.getExportUrl("payments")}
             download
-            className="bg-ivory hover:bg-gold-soft text-gray-700 border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
+            className="bg-ivory hover:bg-gold-soft text-[#5B5566] border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
           >
             <Download className="w-3 h-3 text-gold" />
             <span>Payments</span>
@@ -124,7 +124,7 @@ export default function ReportsPage() {
           <a
             href={reportsApi.getExportUrl("expenses")}
             download
-            className="bg-ivory hover:bg-gold-soft text-gray-700 border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
+            className="bg-ivory hover:bg-gold-soft text-[#5B5566] border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
           >
             <Download className="w-3 h-3 text-gold" />
             <span>Expenses</span>
@@ -132,7 +132,7 @@ export default function ReportsPage() {
           <a
             href={reportsApi.getExportUrl("garments")}
             download
-            className="bg-ivory hover:bg-gold-soft text-gray-700 border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
+            className="bg-ivory hover:bg-gold-soft text-[#5B5566] border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
           >
             <Download className="w-3 h-3 text-gold" />
             <span>Garments</span>
@@ -141,7 +141,7 @@ export default function ReportsPage() {
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-gray-500">
+        <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-[#5B5566]">
           <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
           Aggregating financial and asset utilization analytics...
         </div>
@@ -152,47 +152,47 @@ export default function ReportsPage() {
           {/* Top 3 Primary Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
             <div className="bg-white p-5 rounded-2xl border border-line-soft shadow-xs">
-              <div className="text-gray-400 font-semibold uppercase text-[10px]">
+              <div className="text-[#8C8499] font-semibold uppercase text-[10px]">
                 Total Turnover Revenue
               </div>
               <div className="text-3xl font-bold text-plum mt-1 font-mono">
                 {formatINR(summary.revenue.total)}
               </div>
-              <div className="text-gray-500 text-[11px] mt-1">
+              <div className="text-[#5B5566] text-[11px] mt-1">
                 Net Profit: <strong className="text-emerald-700">{formatINR(summary.profit)}</strong>
               </div>
             </div>
 
             <div className="bg-white p-5 rounded-2xl border border-line-soft shadow-xs">
-              <div className="text-gray-400 font-semibold uppercase text-[10px]">
+              <div className="text-[#8C8499] font-semibold uppercase text-[10px]">
                 Store Expenses
               </div>
               <div className="text-3xl font-bold text-rose-700 mt-1 font-mono">
                 {formatINR(summary.expenses.total)}
               </div>
-              <div className="text-gray-500 text-[11px] mt-1">
+              <div className="text-[#5B5566] text-[11px] mt-1">
                 Across {summary.expenses.byCategory.length} categories
               </div>
             </div>
 
             <div className="bg-white p-5 rounded-2xl border border-line-soft shadow-xs">
-              <div className="text-gray-400 font-semibold uppercase text-[10px]">
+              <div className="text-[#8C8499] font-semibold uppercase text-[10px]">
                 Active Deposit Liability
               </div>
               <div className="text-3xl font-bold text-gold mt-1 font-mono">
                 {formatINR(summary.depositsHeld)}
               </div>
-              <div className="text-gray-500 text-[11px] mt-1">Held in vault against rented items</div>
+              <div className="text-[#5B5566] text-[11px] mt-1">Held in vault against rented items</div>
             </div>
 
             <div className="bg-white p-5 rounded-2xl border border-line-soft shadow-xs">
-              <div className="text-gray-400 font-semibold uppercase text-[10px]">
+              <div className="text-[#8C8499] font-semibold uppercase text-[10px]">
                 Garment Fleet Utilisation
               </div>
-              <div className="text-3xl font-bold text-gray-900 mt-1 font-mono">
+              <div className="text-3xl font-bold text-[#18141E] mt-1 font-mono">
                 {summary.utilisation.percent}%
               </div>
-              <div className="text-gray-500 text-[11px] mt-1">
+              <div className="text-[#5B5566] text-[11px] mt-1">
                 {summary.utilisation.bookedDays} booked / {summary.utilisation.availableDays} active days
               </div>
             </div>
@@ -201,42 +201,42 @@ export default function ReportsPage() {
           {/* Revenue Breakdown by Head */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-white rounded-2xl border border-line-soft p-5 shadow-xs space-y-3 text-xs">
-              <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center justify-between">
+              <div className="font-bold text-[#18141E] text-sm pb-2 border-b border-line-soft flex items-center justify-between">
                 <span>Revenue Breakdown by Stream</span>
                 <span className="font-mono text-plum font-bold">{formatINR(summary.revenue.total)}</span>
               </div>
 
               <div className="space-y-2">
-                <div className="flex justify-between py-1 border-b border-gray-100">
-                  <span className="text-gray-600">Base Garment Rental:</span>
-                  <span className="font-mono font-bold text-gray-900">{formatINR(summary.revenue.rental)}</span>
+                <div className="flex justify-between py-1 border-b border-[#E8E2F0]">
+                  <span className="text-[#5B5566]">Base Garment Rental:</span>
+                  <span className="font-mono font-bold text-[#18141E]">{formatINR(summary.revenue.rental)}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-gray-100">
-                  <span className="text-gray-600">Dry Cleaning Charges:</span>
-                  <span className="font-mono font-bold text-gray-900">{formatINR(summary.revenue.dryClean)}</span>
+                <div className="flex justify-between py-1 border-b border-[#E8E2F0]">
+                  <span className="text-[#5B5566]">Dry Cleaning Charges:</span>
+                  <span className="font-mono font-bold text-[#18141E]">{formatINR(summary.revenue.dryClean)}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-gray-100">
-                  <span className="text-gray-600">Transit &amp; Delivery:</span>
-                  <span className="font-mono font-bold text-gray-900">{formatINR(summary.revenue.transit)}</span>
+                <div className="flex justify-between py-1 border-b border-[#E8E2F0]">
+                  <span className="text-[#5B5566]">Transit &amp; Delivery:</span>
+                  <span className="font-mono font-bold text-[#18141E]">{formatINR(summary.revenue.transit)}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-gray-100">
-                  <span className="text-gray-600">Late Fees Collected (15%/day):</span>
+                <div className="flex justify-between py-1 border-b border-[#E8E2F0]">
+                  <span className="text-[#5B5566]">Late Fees Collected (15%/day):</span>
                   <span className="font-mono font-bold text-amber-700">{formatINR(summary.revenue.lateFees)}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-gray-100">
-                  <span className="text-gray-600">Damage &amp; Deep-Stain Deductions:</span>
+                <div className="flex justify-between py-1 border-b border-[#E8E2F0]">
+                  <span className="text-[#5B5566]">Damage &amp; Deep-Stain Deductions:</span>
                   <span className="font-mono font-bold text-rose-700">{formatINR(summary.revenue.damageAndCleaning)}</span>
                 </div>
                 <div className="flex justify-between py-1">
-                  <span className="text-gray-600">Cancellation Retentions:</span>
-                  <span className="font-mono font-bold text-gray-700">{formatINR(summary.revenue.cancellationIncome)}</span>
+                  <span className="text-[#5B5566]">Cancellation Retentions:</span>
+                  <span className="font-mono font-bold text-[#5B5566]">{formatINR(summary.revenue.cancellationIncome)}</span>
                 </div>
               </div>
             </div>
 
             {/* Expenses by Category */}
             <div className="bg-white rounded-2xl border border-line-soft p-5 shadow-xs space-y-3 text-xs">
-              <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center justify-between">
+              <div className="font-bold text-[#18141E] text-sm pb-2 border-b border-line-soft flex items-center justify-between">
                 <span>Expenses by Category</span>
                 <span className="font-mono text-rose-700 font-bold">{formatINR(summary.expenses.total)}</span>
               </div>
@@ -246,9 +246,9 @@ export default function ReportsPage() {
               ) : (
                 <div className="space-y-2">
                   {summary.expenses.byCategory.map((cat) => (
-                    <div key={cat.category} className="flex justify-between py-1 border-b border-gray-100">
-                      <span className="text-gray-700 font-medium">{cat.category}</span>
-                      <span className="font-mono font-bold text-gray-900">{formatINR(cat.amount)}</span>
+                    <div key={cat.category} className="flex justify-between py-1 border-b border-[#E8E2F0]">
+                      <span className="text-[#5B5566] font-medium">{cat.category}</span>
+                      <span className="font-mono font-bold text-[#18141E]">{formatINR(cat.amount)}</span>
                     </div>
                   ))}
                 </div>
@@ -258,12 +258,12 @@ export default function ReportsPage() {
 
           {/* Highest Earning Physical Garments */}
           <div className="bg-white rounded-2xl border border-line-soft p-6 shadow-xs space-y-4 text-xs">
-            <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center justify-between">
+            <div className="font-bold text-[#18141E] text-sm pb-2 border-b border-line-soft flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Award className="w-4 h-4 text-gold" />
                 <span>Top Performing Physical Garment Assets</span>
               </div>
-              <span className="text-gray-400 text-xs font-normal">Ranked by rental turnover</span>
+              <span className="text-[#8C8499] text-xs font-normal">Ranked by rental turnover</span>
             </div>
 
             {summary.topGarments.length === 0 ? (
@@ -278,8 +278,8 @@ export default function ReportsPage() {
                         #{idx + 1}
                       </span>
                     </div>
-                    <div className="font-bold text-gray-900">{g.name}</div>
-                    <div className="text-[11px] text-gray-500">Rented: {g.timesRented} times</div>
+                    <div className="font-bold text-[#18141E]">{g.name}</div>
+                    <div className="text-[11px] text-[#5B5566]">Rented: {g.timesRented} times</div>
                     <div className="text-emerald-700 font-bold font-mono text-sm pt-1">
                       Turnover: {formatINR(g.revenue)}
                     </div>

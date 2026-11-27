@@ -1,90 +1,79 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------------------------------------
-   Barnali Fashion design tokens (boutique editorial & modern SaaS ergonomics).
-   Surfaces: Warm Silk Ivory (#FAF7F2), White cards (#FFFFFF), Soft Champagne (#F4EDE3), Warm Sand Sidebar (#F5EFE6).
-   Brand Accents: Royal Bridal Crimson (#7A1624) + Deep Wine (#5C0F1A) + Antique Champagne Gold (#B8893A).
-   Typography: Playfair Display (editorial headings), Plus Jakarta Sans (UI body/tables), Geist Mono (numbers/SKUs).
+   Barnali Fashion design tokens (Revive AI SaaS Luminance + Bridal Couture Studio).
+   Canvas: Luminous Warm-Pastel Ambient Mesh (#F8F6FA + soft rose/amber/violet ambient glows).
+   Surfaces: Frosted white glassmorphism (bg-white/95 backdrop-blur-md) with #E8E2F0 border.
+   Typography: Plus Jakarta Sans (Display & UI), Inter (secondary), Geist Mono (tabular-nums).
    ------------------------------------------------------------------------------------------------ */
 @theme inline {
-  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: var(--font-sans), var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-serif: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", serif;
-  --font-display: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-display: var(--font-sans), var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --color-ivory: #faf7f2;
-  --color-ivory-deep: #f4ede3;
-  --color-sand: #f5efe6;
-  --color-line: #eae0d2;
-  --color-line-soft: #f0e8dc;
-  --color-line-strong: #d6c6b0;
-  --color-ink: #1f1815;
-  --color-ink-soft: #6b5e55;
-  --color-mute: #9c8e83;
-  --color-plum: #7a1624;
-  --color-plum-dark: #5c0f1a;
-  --color-plum-soft: #fbf2f4;
-  --color-crimson: #7a1624;
-  --color-wine: #5c0f1a;
-  --color-gold: #b8893a;
-  --color-gold-dark: #966e2c;
-  --color-gold-light: #d4a95a;
-  --color-gold-soft: #f9f2e4;
+  --color-ivory: #f8f6fa;
+  --color-ivory-deep: #f5f2f8;
+  --color-sand: #ffffff;
+  --color-line: #e8e2f0;
+  --color-line-soft: #f0ecf5;
+  --color-line-strong: #d8cfe6;
+  --color-ink: #18141e;
+  --color-ink-soft: #5b5566;
+  --color-mute: #8c8499;
+  --color-plum: #be123c;
+  --color-plum-dark: #9f1239;
+  --color-plum-soft: #fff1f2;
+  --color-crimson: #be123c;
+  --color-wine: #881337;
+  --color-gold: #d97706;
+  --color-gold-dark: #b45309;
+  --color-gold-light: #fde68a;
+  --color-gold-soft: #fef3c7;
 }
 
 @layer base {
   :root {
-    --bg-canvas: #faf7f2;
-    --bg-surface: #ffffff;
-    --bg-subtle: #f4ede3;
-    --sidebar-bg: #f5efe6;
+    --bg-canvas: #f8f6fa;
+    --bg-surface: rgba(255, 255, 255, 0.95);
+    --bg-subtle: #f5f2f8;
+    --sidebar-bg: rgba(255, 255, 255, 0.85);
 
-    --brand-primary: #7a1624;
-    --brand-primary-hover: #5c0f1a;
-    --brand-gold: #b8893a;
-    --brand-gold-soft: #f9f2e4;
+    --brand-primary: #be123c;
+    --brand-primary-hover: #9f1239;
+    --brand-violet: #7c3aed;
+    --brand-gold: #d97706;
+    --brand-gold-soft: #fef3c7;
 
-    --border-subtle: #eae0d2;
-    --border-strong: #d6c6b0;
-    --card-shadow: 0 2px 10px -2px rgba(31, 24, 21, 0.04);
+    --border-subtle: rgba(232, 226, 240, 0.9);
+    --border-strong: #d8cfe6;
+    --card-shadow: 0 4px 20px -4px rgba(30, 20, 45, 0.05);
 
-    --text-primary: #1f1815;
-    --text-secondary: #6b5e55;
-    --text-muted: #9c8e83;
-
-    /* legacy aliases to keep existing pages working 100% */
-    --brand-plum: #7a1624;
-    --brand-plum-dark: #5c0f1a;
-    --brand-plum-light: #942031;
-    --brand-plum-soft: #fbf2f4;
-    --brand-gold: #b8893a;
-    --brand-gold-dark: #966e2c;
-    --brand-gold-light: #d4a95a;
-    --brand-gold-soft: #f9f2e4;
-    --brand-ivory: #faf7f2;
-    --brand-ivory-warm: #f4ede3;
-    --brand-charcoal: #1f1815;
-    --brand-sage: #065f46;
-    --brand-sage-light: #ecfdf3;
+    --text-primary: #18141e;
+    --text-secondary: #5b5566;
+    --text-muted: #8c8499;
   }
 
   html {
     -webkit-text-size-adjust: 100%;
   }
 
-  /* a visible, on-brand focus ring for keyboard users everywhere */
   :focus-visible {
-    outline: 2px solid var(--color-gold);
+    outline: 2px solid #7c3aed;
     outline-offset: 2px;
-    border-radius: 6px;
+    border-radius: 8px;
   }
 }
 
 body {
-  background-color: #faf7f2;
-  color: #1f1815;
+  background-color: #f8f6fa;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(254, 205, 211, 0.28) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(253, 230, 138, 0.22) 0px, transparent 45%),
+    radial-gradient(at 80% 100%, rgba(221, 214, 254, 0.22) 0px, transparent 50%);
+  background-attachment: fixed;
+  color: #18141e;
   font-family: var(--font-sans);
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -96,42 +85,40 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f4ede3;
+  background: #f5f2f8;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d6c6b0;
+  background: #d8cfe6;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #b8893a;
+  background: #be123c;
 }
 
 /* ------------------------------------------------------------------------------------------------
-   Reusable building blocks (used from Phase 1 onward by every ERP page)
+   Reusable building blocks
    ------------------------------------------------------------------------------------------------ */
 @layer components {
-  /* editorial page / stat headings */
   .page-title {
-    font-family: var(--font-display);
+    font-family: var(--font-sans);
     font-weight: 600;
-    letter-spacing: -0.01em;
-    line-height: 1.15;
-    color: var(--color-ink);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: #18141e;
   }
   .section-title {
-    font-family: var(--font-display);
+    font-family: var(--font-sans);
     font-weight: 600;
-    letter-spacing: -0.005em;
-    color: var(--color-ink);
+    letter-spacing: -0.015em;
+    color: #18141e;
   }
-  /* micro label: uppercase, tracked, never crowds neighbours */
   .eyebrow {
     font-size: 10px;
     line-height: 1.2;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-gold-dark);
+    color: #7c3aed;
   }
   .eyebrow-mute {
     font-size: 10px;
@@ -139,31 +126,32 @@ body {
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-mute);
+    color: #8c8499;
   }
-  /* currency, dates, counts, SKUs, phones: aligned digits */
   .num {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum" 1;
     letter-spacing: -0.01em;
   }
-  /* white card on ivory: hairline warm border, soft elevation */
   .surface {
-    background: #ffffff;
-    border: 1px solid var(--color-line);
-    border-radius: 16px;
-    box-shadow: 0 2px 10px -2px rgba(31, 24, 21, 0.04);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(232, 226, 240, 0.9);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px -4px rgba(30, 20, 45, 0.05);
   }
   .surface-interactive {
-    transition: box-shadow 150ms ease, border-color 150ms ease, transform 150ms ease;
+    transition: box-shadow 180ms ease, border-color 180ms ease, transform 180ms ease;
   }
   .surface-interactive:hover {
-    border-color: #d6c6b0;
-    box-shadow: 0 4px 14px rgba(31, 24, 21, 0.08);
+    border-color: #d8cfe6;
+    box-shadow: 0 8px 28px -6px rgba(30, 20, 45, 0.1);
+    transform: translateY(-1px);
   }
   .hairline {
-    border-color: var(--color-line);
+    border-color: #e8e2f0;
   }
 }
 

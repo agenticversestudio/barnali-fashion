@@ -196,14 +196,14 @@ export default function InventoryPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <span className="eyebrow">The wardrobe</span>
+          <span className="eyebrow text-[#059669]">THE WARDROBE</span>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
-            <h1 className="page-title text-2xl md:text-3xl text-ink">Costumes &amp; Inventory</h1>
-            <span className="num text-[11px] font-semibold bg-gold-soft text-plum border border-line-strong px-3 py-0.5 rounded-full shadow-2xs">
+            <h1 className="text-[26px] md:text-[30px] font-semibold tracking-[-0.02em] text-[#18141E]">Costumes &amp; Inventory</h1>
+            <span className="num text-[11px] font-semibold bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0] px-3 py-0.5 rounded-full">
               {garments.length} piece{garments.length === 1 ? "" : "s"}
             </span>
           </div>
-          <p className="text-xs text-ink-soft mt-1.5">Godown rack tracking, booking availability and care states.</p>
+          <p className="text-xs text-[#5B5566] mt-1.5">Godown rack tracking, booking availability and care states.</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -214,19 +214,19 @@ export default function InventoryPage() {
                 setAddError(null);
                 setShowAddModal(true);
               }}
-              className="flex items-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white rounded-xl text-xs font-semibold shadow-xs transition-colors shrink-0"
+              className="flex items-center gap-2 px-5 py-2.5 min-h-11 bg-gradient-to-r from-[#BE123C] to-[#7C3AED] hover:from-[#9F1239] hover:to-[#6D28D9] text-white rounded-full text-sm font-medium shadow-[0_6px_18px_-3px_rgba(190,18,60,0.35)] transition-all shrink-0"
             >
-              <Plus className="w-4 h-4 text-gold-soft" />
+              <Plus className="w-4 h-4 text-white" />
               <span>Add Costume</span>
             </button>
           )}
 
-          <div className="flex items-center bg-ivory-deep p-1 rounded-xl border border-line" role="group" aria-label="View mode">
+          <div className="flex items-center bg-[#F5F2F8] p-1 rounded-full border border-[#E8E2F0]" role="group" aria-label="View mode">
             <button
               onClick={() => setViewMode("grid")}
               aria-pressed={viewMode === "grid"}
-              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${
-                viewMode === "grid" ? "bg-white text-plum shadow-2xs border border-line" : "text-ink-soft hover:text-ink"
+              className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
+                viewMode === "grid" ? "bg-white text-[#BE123C] shadow-xs border border-[#E8E2F0]" : "text-[#5B5566] hover:text-[#18141E]"
               }`}
               title="Grid view"
             >
@@ -235,8 +235,8 @@ export default function InventoryPage() {
             <button
               onClick={() => setViewMode("table")}
               aria-pressed={viewMode === "table"}
-              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${
-                viewMode === "table" ? "bg-white text-plum shadow-2xs border border-line" : "text-ink-soft hover:text-ink"
+              className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
+                viewMode === "table" ? "bg-white text-[#BE123C] shadow-xs border border-[#E8E2F0]" : "text-[#5B5566] hover:text-[#18141E]"
               }`}
               title="Table view"
             >

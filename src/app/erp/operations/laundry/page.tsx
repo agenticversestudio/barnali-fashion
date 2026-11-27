@@ -196,21 +196,21 @@ export default function StitchingAndDryCleanPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="eyebrow text-gold">VENDOR DISPATCH</span>
+          <span className="eyebrow text-[#0284C7]">VENDOR DISPATCH</span>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
-            <h1 className="page-title text-2xl md:text-3xl text-ink">Care &amp; Laundry</h1>
-            <span className="num text-[11px] font-semibold bg-gold-soft text-plum border border-line-strong px-3 py-0.5 rounded-full shadow-2xs">
+            <h1 className="text-[26px] md:text-[30px] font-semibold tracking-[-0.02em] text-[#18141E]">Care &amp; Laundry</h1>
+            <span className="num text-[11px] font-semibold bg-[#E0F2FE] text-[#0284C7] border border-[#BAE6FD] px-3 py-0.5 rounded-full">
               {filteredJobs.length} job{filteredJobs.length === 1 ? "" : "s"}
             </span>
           </div>
-          <p className="text-xs text-ink-soft mt-1.5">Dry cleaning, tailoring alterations and repair turnaround at outside vendors.</p>
+          <p className="text-xs text-[#5B5566] mt-1.5">Dry cleaning, tailoring alterations and repair turnaround at outside vendors.</p>
         </div>
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-11 bg-gradient-to-r from-[#BE123C] to-[#7C3AED] hover:from-[#9F1239] hover:to-[#6D28D9] text-white text-sm font-medium rounded-full shadow-[0_6px_18px_-3px_rgba(190,18,60,0.35)] transition-all shrink-0"
         >
-          <Plus className="w-4 h-4 text-gold-soft" />
+          <Plus className="w-4 h-4 text-white" />
           <span>Dispatch New Job</span>
         </button>
       </div>

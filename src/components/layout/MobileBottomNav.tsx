@@ -30,7 +30,7 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="Main"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-ivory/95 backdrop-blur-md border-t border-line shadow-[0_-4px_16px_rgba(31,24,21,0.06)] select-none"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/85 backdrop-blur-xl border-t border-[#EBE6F0] shadow-[0_-4px_20px_rgba(30,20,45,0.06)] select-none"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="h-16 flex items-stretch justify-around">
@@ -45,15 +45,15 @@ export function MobileBottomNav() {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex-1 min-h-11 flex flex-col items-center justify-center gap-1",
-                active ? "text-plum" : "text-mute active:text-ink"
+                "relative flex-1 min-h-11 flex flex-col items-center justify-center gap-1 transition-colors",
+                active ? "text-[#BE123C]" : "text-[#8C8499] active:text-[#18141E]"
               )}
             >
-              {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-8 rounded-b-full bg-gold" />}
+              {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-8 rounded-b-full bg-gradient-to-r from-[#BE123C] to-[#7C3AED]" />}
               <span className="relative">
                 <Icon className={cn("w-[22px] h-[22px]", active ? "stroke-[2.2]" : "stroke-[1.75]")} />
                 {badge !== undefined && (
-                  <span className="num absolute -top-1.5 -right-3 min-w-4 text-center bg-rose-800 text-white text-[9px] font-bold px-1 py-px rounded-full leading-tight ring-2 ring-white">
+                  <span className="num absolute -top-1.5 -right-3 min-w-4 text-center bg-[#E11D48] text-white text-[9px] font-bold px-1 py-px rounded-full leading-tight ring-2 ring-white">
                     {badge}
                   </span>
                 )}

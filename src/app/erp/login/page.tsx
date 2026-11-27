@@ -91,7 +91,7 @@ function LoginContent() {
           <h1 className="font-serif font-bold text-2xl text-ink pt-2">
             Staff &amp; ERP Access
           </h1>
-          <p className="text-gray-500 text-xs">
+          <p className="text-[#5B5566] text-xs">
             Rental billing, garment availability, laundry &amp; financial operations.
           </p>
         </div>
@@ -114,13 +114,13 @@ function LoginContent() {
               className={`p-2.5 rounded-xl border text-left transition-colors font-medium flex items-center gap-2 ${
                 username === "admin"
                   ? "bg-white border-plum shadow-xs text-plum font-bold"
-                  : "bg-white/70 hover:bg-white border-line text-gray-700"
+                  : "bg-white/70 hover:bg-white border-line text-[#5B5566]"
               }`}
             >
               <ShieldCheck className="w-4 h-4 text-plum shrink-0" />
               <div>
                 <div className="font-bold text-xs">Admin / Owner</div>
-                <div className="text-[10px] text-gray-500 font-mono">admin / admin123</div>
+                <div className="text-[10px] text-[#5B5566] font-mono">admin / admin123</div>
               </div>
             </button>
             <button
@@ -129,13 +129,13 @@ function LoginContent() {
               className={`p-2.5 rounded-xl border text-left transition-colors font-medium flex items-center gap-2 ${
                 username === "staff"
                   ? "bg-white border-plum shadow-xs text-plum font-bold"
-                  : "bg-white/70 hover:bg-white border-line text-gray-700"
+                  : "bg-white/70 hover:bg-white border-line text-[#5B5566]"
               }`}
             >
               <User className="w-4 h-4 text-stone-600 shrink-0" />
               <div>
                 <div className="font-bold text-xs">Counter Staff</div>
-                <div className="text-[10px] text-gray-500 font-mono">staff / staff123</div>
+                <div className="text-[10px] text-[#5B5566] font-mono">staff / staff123</div>
               </div>
             </button>
           </div>
@@ -152,7 +152,7 @@ function LoginContent() {
         {/* Standard Form */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+            <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
               Username
             </label>
             <div className="relative">
@@ -164,12 +164,12 @@ function LoginContent() {
                 placeholder="e.g. admin or staff"
                 className="w-full p-2.5 pl-9 bg-ivory border border-line rounded-xl font-semibold text-stone-800 focus:outline-none focus:border-plum"
               />
-              <User className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
+              <User className="w-4 h-4 text-[#8C8499] absolute left-3 top-3" />
             </div>
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+            <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
               Password
             </label>
             <div className="relative">
@@ -181,11 +181,11 @@ function LoginContent() {
                 placeholder="Enter password"
                 className="w-full p-2.5 pl-9 pr-10 bg-ivory border border-line rounded-xl font-semibold text-stone-800 focus:outline-none focus:border-plum"
               />
-              <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
+              <Lock className="w-4 h-4 text-[#8C8499] absolute left-3 top-3" />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 p-0.5"
+                className="absolute right-3 top-2.5 text-[#8C8499] hover:text-[#5B5566] p-0.5"
                 aria-label="Toggle password visibility"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -212,13 +212,13 @@ function LoginContent() {
           </button>
         </form>
 
-        <div className="text-center text-[11px] text-gray-400 pt-2 border-t border-line-soft">
+        <div className="text-center text-[11px] text-[#8C8499] pt-2 border-t border-line-soft">
           Barnali Fashion Bargarh • Security Guarded Session
         </div>
       </div>
 
       {/* Footer info */}
-      <div className="text-center text-[11px] text-gray-400">
+      <div className="text-center text-[11px] text-[#8C8499]">
         In front of LIC Office, near Keshariya Restaurant, Bargarh, Odisha 768028 • Phone: +91 7978256488
       </div>
     </div>
@@ -227,7 +227,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-xs text-gray-400">Loading Barnali ERP...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-xs text-[#8C8499]">Loading Barnali ERP...</div>}>
       <LoginContent />
     </Suspense>
   );

@@ -46,19 +46,19 @@ function InspectionBayContent() {
           <span>Quality Audit &amp; Defect Classification</span>
         </div>
         <h1 className="text-2xl page-title">Inspection Bay</h1>
-        <p className="text-xs text-gray-500 mt-0.5">
+        <p className="text-xs text-[#5B5566] mt-0.5">
           Detailed condition logs of returned garments, stain assessments, and before/after verification history.
         </p>
       </div>
 
       <div className="bg-white rounded-2xl border border-line-soft p-5 shadow-xs space-y-4">
-        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex items-center justify-between">
+        <div className="font-bold text-[#18141E] text-sm pb-2 border-b border-line-soft flex items-center justify-between">
           <span>Inspection &amp; Return Logs ({completedBookings.length})</span>
-          <span className="text-xs text-gray-400 font-normal">Recent Settled Orders</span>
+          <span className="text-xs text-[#8C8499] font-normal">Recent Settled Orders</span>
         </div>
 
         {loading ? (
-          <div className="py-12 text-center text-xs text-gray-500">
+          <div className="py-12 text-center text-xs text-[#5B5566]">
             <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
             Loading inspection history...
           </div>
@@ -78,17 +78,17 @@ function InspectionBayContent() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-mono font-bold text-plum text-sm">{b.id}</span>
-                      <span className="font-bold text-gray-900">{b.customer?.name}</span>
-                      <span className="text-gray-400 text-[11px] font-mono">{b.customer?.phone}</span>
+                      <span className="font-bold text-[#18141E]">{b.customer?.name}</span>
+                      <span className="text-[#8C8499] text-[11px] font-mono">{b.customer?.phone}</span>
                     </div>
 
-                    <div className="text-gray-600">
+                    <div className="text-[#5B5566]">
                       Returned: <strong>{b.actualReturnDate ? formatDate(b.actualReturnDate) : "Returned"}</strong> •{" "}
                       Items: {b.items.map((i) => `${i.name} (${i.garmentId})`).join(", ")}
                     </div>
 
                     {b.returnNotes && (
-                      <div className="text-[11px] text-gray-500 italic mt-1">
+                      <div className="text-[11px] text-[#5B5566] italic mt-1">
                         &quot;{b.returnNotes}&quot;
                       </div>
                     )}
@@ -96,7 +96,7 @@ function InspectionBayContent() {
 
                   <div className="flex items-center gap-4 text-right shrink-0">
                     <div>
-                      <div className="text-[10px] text-gray-400">Deposit Settlement</div>
+                      <div className="text-[10px] text-[#8C8499]">Deposit Settlement</div>
                       <div
                         className={`font-mono font-bold ${
                           hasDefects ? "text-rose-700" : "text-emerald-700"
@@ -125,7 +125,7 @@ function InspectionBayContent() {
 
 export default function InspectionBayPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-xs text-gray-400">Loading inspection bay...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-xs text-[#8C8499]">Loading inspection bay...</div>}>
       <InspectionBayContent />
     </Suspense>
   );

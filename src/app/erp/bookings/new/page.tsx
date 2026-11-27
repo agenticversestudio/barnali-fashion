@@ -858,7 +858,7 @@ function NewBookingWizardContent() {
 
 export default function NewBookingWizardPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-xs text-gray-400">Loading booking wizard...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-xs text-[#8C8499]">Loading booking wizard...</div>}>
       <NewBookingWizardContent />
     </Suspense>
   );

@@ -136,7 +136,7 @@ export default function StaffPage() {
             <span>Role-Based Access Control (RBAC)</span>
           </div>
           <h1 className="text-2xl page-title">Staff &amp; Operator Accounts</h1>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-xs text-[#5B5566] mt-0.5">
             Manage authenticated user access, assign Admin vs Staff roles, and govern counter permissions.
           </p>
         </div>
@@ -154,7 +154,7 @@ export default function StaffPage() {
 
       {/* Staff Roster Cards */}
       {loading ? (
-        <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-gray-500">
+        <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-[#5B5566]">
           <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
           Loading user accounts...
         </div>
@@ -169,7 +169,7 @@ export default function StaffPage() {
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-bold text-gray-900 text-sm">{u.name}</h3>
+                  <h3 className="font-bold text-[#18141E] text-sm">{u.name}</h3>
                   <div className="flex items-center gap-2 mt-1">
                     <span
                       className={`font-mono font-bold text-[10px] px-2 py-0.5 rounded uppercase ${
@@ -189,14 +189,14 @@ export default function StaffPage() {
                     </span>
                   </div>
                 </div>
-                <span className="font-mono text-gray-400 text-[10px]">@{u.username}</span>
+                <span className="font-mono text-[#8C8499] text-[10px]">@{u.username}</span>
               </div>
 
-              <div className="text-gray-500 font-mono text-[11px]">
+              <div className="text-[#5B5566] font-mono text-[11px]">
                 {u.phone || "No phone registered"}
               </div>
 
-              <div className="text-[10px] text-gray-400">
+              <div className="text-[10px] text-[#8C8499]">
                 Created: {formatDate(u.createdAt)}
               </div>
 
@@ -216,7 +216,7 @@ export default function StaffPage() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleLogoutSessions(u)}
-                      className="text-gray-400 hover:text-gray-600 p-1"
+                      className="text-[#8C8499] hover:text-[#5B5566] p-1"
                       title="Log out from all devices"
                     >
                       <LogOut className="w-3.5 h-3.5" />
@@ -242,7 +242,7 @@ export default function StaffPage() {
 
       {/* Role & Permissions Explanation */}
       <div className="bg-white rounded-2xl border border-line-soft p-5 shadow-xs space-y-3">
-        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft">
+        <div className="font-bold text-[#18141E] text-sm pb-2 border-b border-line-soft">
           Role Permissions Matrix
         </div>
 
@@ -257,44 +257,44 @@ export default function StaffPage() {
             </thead>
             <tbody className="divide-y divide-line-soft">
               <tr>
-                <td className="py-2.5 px-4 font-semibold text-gray-800">New Booking &amp; Quote Calculation</td>
+                <td className="py-2.5 px-4 font-semibold text-[#18141E]">New Booking &amp; Quote Calculation</td>
                 <td className="py-2.5 px-4 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" /></td>
                 <td className="py-2.5 px-4 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" /></td>
               </tr>
               <tr>
-                <td className="py-2.5 px-4 font-semibold text-gray-800">Garment Handover &amp; Return Check-in</td>
+                <td className="py-2.5 px-4 font-semibold text-[#18141E]">Garment Handover &amp; Return Check-in</td>
                 <td className="py-2.5 px-4 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" /></td>
                 <td className="py-2.5 px-4 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" /></td>
               </tr>
               <tr>
-                <td className="py-2.5 px-4 font-semibold text-gray-800">Rack &amp; Shelf Location Management</td>
+                <td className="py-2.5 px-4 font-semibold text-[#18141E]">Rack &amp; Shelf Location Management</td>
                 <td className="py-2.5 px-4 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" /></td>
                 <td className="py-2.5 px-4 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" /></td>
               </tr>
               <tr>
-                <td className="py-2.5 px-4 font-semibold text-gray-800">Daily Cash Drawer Closing Count</td>
+                <td className="py-2.5 px-4 font-semibold text-[#18141E]">Daily Cash Drawer Closing Count</td>
                 <td className="py-2.5 px-4 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" /></td>
                 <td className="py-2.5 px-4 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" /></td>
               </tr>
               <tr>
-                <td className="py-2.5 px-4 font-semibold text-gray-800">Garment Purchase Cost &amp; Profit Visibility</td>
+                <td className="py-2.5 px-4 font-semibold text-[#18141E]">Garment Purchase Cost &amp; Profit Visibility</td>
                 <td className="py-2.5 px-4 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" /></td>
-                <td className="py-2.5 px-4 text-center"><XCircle className="w-4 h-4 text-gray-300 mx-auto" /></td>
+                <td className="py-2.5 px-4 text-center"><XCircle className="w-4 h-4 text-[#8C8499] mx-auto" /></td>
               </tr>
               <tr>
-                <td className="py-2.5 px-4 font-semibold text-gray-800">Turnover &amp; Financial Analytics Reports</td>
+                <td className="py-2.5 px-4 font-semibold text-[#18141E]">Turnover &amp; Financial Analytics Reports</td>
                 <td className="py-2.5 px-4 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" /></td>
-                <td className="py-2.5 px-4 text-center"><XCircle className="w-4 h-4 text-gray-300 mx-auto" /></td>
+                <td className="py-2.5 px-4 text-center"><XCircle className="w-4 h-4 text-[#8C8499] mx-auto" /></td>
               </tr>
               <tr>
-                <td className="py-2.5 px-4 font-semibold text-gray-800">User Creation &amp; Password Reset</td>
+                <td className="py-2.5 px-4 font-semibold text-[#18141E]">User Creation &amp; Password Reset</td>
                 <td className="py-2.5 px-4 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" /></td>
-                <td className="py-2.5 px-4 text-center"><XCircle className="w-4 h-4 text-gray-300 mx-auto" /></td>
+                <td className="py-2.5 px-4 text-center"><XCircle className="w-4 h-4 text-[#8C8499] mx-auto" /></td>
               </tr>
               <tr>
-                <td className="py-2.5 px-4 font-semibold text-gray-800">Google Sheets Sync &amp; Database Backups</td>
+                <td className="py-2.5 px-4 font-semibold text-[#18141E]">Google Sheets Sync &amp; Database Backups</td>
                 <td className="py-2.5 px-4 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto" /></td>
-                <td className="py-2.5 px-4 text-center"><XCircle className="w-4 h-4 text-gray-300 mx-auto" /></td>
+                <td className="py-2.5 px-4 text-center"><XCircle className="w-4 h-4 text-[#8C8499] mx-auto" /></td>
               </tr>
             </tbody>
           </table>
@@ -312,7 +312,7 @@ export default function StaffPage() {
               </div>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                className="text-[#8C8499] hover:text-[#5B5566] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -320,7 +320,7 @@ export default function StaffPage() {
 
             <form onSubmit={handleCreateUser} className="mt-4 space-y-3">
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                   Full Name *
                 </label>
                 <input
@@ -335,7 +335,7 @@ export default function StaffPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                     Username *
                   </label>
                   <input
@@ -349,7 +349,7 @@ export default function StaffPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                     Role *
                   </label>
                   <select
@@ -364,7 +364,7 @@ export default function StaffPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                   Password *
                 </label>
                 <input
@@ -378,7 +378,7 @@ export default function StaffPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                   Phone (Optional)
                 </label>
                 <input
@@ -394,7 +394,7 @@ export default function StaffPage() {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-xl font-semibold text-gray-700 cursor-pointer"
+                  className="px-4 py-2 border border-[#E8E2F0] rounded-xl font-semibold text-[#5B5566] cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -426,19 +426,19 @@ export default function StaffPage() {
                   setShowResetModal(false);
                   setSelectedUser(null);
                 }}
-                className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                className="text-[#8C8499] hover:text-[#5B5566] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleResetPassword} className="mt-4 space-y-3">
-              <p className="text-gray-600">
+              <p className="text-[#5B5566]">
                 Enter a new password for <strong>{selectedUser.username}</strong> ({selectedUser.name}):
               </p>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                   New Password *
                 </label>
                 <input
@@ -458,7 +458,7 @@ export default function StaffPage() {
                     setShowResetModal(false);
                     setSelectedUser(null);
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-xl font-semibold text-gray-700 cursor-pointer"
+                  className="px-4 py-2 border border-[#E8E2F0] rounded-xl font-semibold text-[#5B5566] cursor-pointer"
                 >
                   Cancel
                 </button>

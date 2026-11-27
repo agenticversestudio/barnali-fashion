@@ -126,13 +126,13 @@ function ReturnsCounterContent() {
           <span>Intake, Damage Check &amp; Deposit Settlement</span>
         </div>
         <h1 className="text-2xl page-title">Return Counter &amp; Inspection</h1>
-        <p className="text-xs text-gray-500 mt-0.5">
+        <p className="text-xs text-[#5B5566] mt-0.5">
           Process customer garment returns, execute multi-point condition checks, calculate damage deductions, and settle refundable deposits.
         </p>
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-gray-500">
+        <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-[#5B5566]">
           <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
           Loading active rentals queue...
         </div>
@@ -140,9 +140,9 @@ function ReturnsCounterContent() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left: Active Rentals Queue */}
           <div className="bg-white rounded-2xl border border-line-soft p-4 shadow-xs space-y-3">
-            <div className="font-bold text-gray-900 text-xs uppercase tracking-wider flex items-center justify-between pb-2 border-b border-line-soft">
+            <div className="font-bold text-[#18141E] text-xs uppercase tracking-wider flex items-center justify-between pb-2 border-b border-line-soft">
               <span>Active Out on Rent ({bookings.length})</span>
-              <span className="text-[10px] text-gray-400">Due / Overdue</span>
+              <span className="text-[10px] text-[#8C8499]">Due / Overdue</span>
             </div>
 
             {bookings.length === 0 ? (
@@ -165,7 +165,7 @@ function ReturnsCounterContent() {
                         : "bg-ivory border-line hover:border-gold"
                     }`}
                   >
-                    <div className="flex items-center justify-between font-bold text-gray-900">
+                    <div className="flex items-center justify-between font-bold text-[#18141E]">
                       <span>{b.customer?.name}</span>
                       {b.isOverdue && (
                         <span className="bg-rose-600 text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">
@@ -173,14 +173,14 @@ function ReturnsCounterContent() {
                         </span>
                       )}
                     </div>
-                    <div className="text-gray-500 text-[11px] mt-0.5 truncate">
+                    <div className="text-[#5B5566] text-[11px] mt-0.5 truncate">
                       {b.items.map((i) => i.name).join(", ")}
                     </div>
                     <div className="mt-2 flex items-center justify-between text-[11px]">
                       <span className={b.isOverdue ? "text-rose-700 font-bold" : "text-gold-dark font-semibold"}>
                         Due: {formatDate(b.returnDueDate)}
                       </span>
-                      <span className="font-mono text-gray-500">Dep: {formatINR(b.depositTotal)}</span>
+                      <span className="font-mono text-[#5B5566]">Dep: {formatINR(b.depositTotal)}</span>
                     </div>
                   </div>
                 ))}
@@ -197,16 +197,16 @@ function ReturnsCounterContent() {
                     <div className="text-[10px] text-gold-dark font-bold uppercase">
                       Return Check-in &amp; Quality Inspection
                     </div>
-                    <h2 className="text-lg font-bold text-gray-900 mt-0.5">
+                    <h2 className="text-lg font-bold text-[#18141E] mt-0.5">
                       {selectedBooking.customer?.name} ({selectedBooking.customer?.phone})
                     </h2>
-                    <div className="text-gray-500 text-[11px]">
+                    <div className="text-[#5B5566] text-[11px]">
                       Booking: <strong>{selectedBooking.id}</strong> • Return Due:{" "}
                       <strong>{formatDate(selectedBooking.returnDueDate)}</strong>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-[10px] text-gray-400">Deposit In Vault</div>
+                    <div className="text-[10px] text-[#8C8499]">Deposit In Vault</div>
                     <div className="text-lg font-bold text-gold font-mono">
                       {formatINR(depositHeld)}
                     </div>
@@ -215,7 +215,7 @@ function ReturnsCounterContent() {
 
                 {/* Items to verify */}
                 <div className="space-y-2">
-                  <div className="font-bold text-gray-800 uppercase text-[11px]">
+                  <div className="font-bold text-[#18141E] uppercase text-[11px]">
                     Garment Physical Units Handed Back
                   </div>
                   {selectedBooking.items.map((item) => (
@@ -225,17 +225,17 @@ function ReturnsCounterContent() {
                     >
                       <div className="flex items-center gap-2">
                         <span className="font-mono font-bold text-plum">{item.garmentId}</span>
-                        <span className="font-bold text-gray-900">{item.name}</span>
-                        <span className="text-gray-400 text-[11px]">({item.size})</span>
+                        <span className="font-bold text-[#18141E]">{item.name}</span>
+                        <span className="text-[#8C8499] text-[11px]">({item.size})</span>
                       </div>
-                      <span className="text-gray-500 font-mono">Deposit: {formatINR(item.securityDeposit)}</span>
+                      <span className="text-[#5B5566] font-mono">Deposit: {formatINR(item.securityDeposit)}</span>
                     </div>
                   ))}
                 </div>
 
                 {/* Inspection Multi-point Checklist */}
                 <div className="p-4 bg-gold-soft rounded-xl border border-line space-y-3">
-                  <div className="font-bold text-gray-900 uppercase text-[11px]">
+                  <div className="font-bold text-[#18141E] uppercase text-[11px]">
                     Physical Condition Checklist
                   </div>
 
@@ -247,7 +247,7 @@ function ReturnsCounterContent() {
                         onChange={(e) => setHasStains(e.target.checked)}
                         className="rounded text-plum"
                       />
-                      <span className="font-semibold text-gray-800">Stains / Spills</span>
+                      <span className="font-semibold text-[#18141E]">Stains / Spills</span>
                     </label>
 
                     <label className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-line cursor-pointer">
@@ -257,7 +257,7 @@ function ReturnsCounterContent() {
                         onChange={(e) => setHasTears(e.target.checked)}
                         className="rounded text-plum"
                       />
-                      <span className="font-semibold text-gray-800">Tears / Rips</span>
+                      <span className="font-semibold text-[#18141E]">Tears / Rips</span>
                     </label>
 
                     <label className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-line cursor-pointer">
@@ -267,7 +267,7 @@ function ReturnsCounterContent() {
                         onChange={(e) => setMissingAccessories(e.target.checked)}
                         className="rounded text-plum"
                       />
-                      <span className="font-semibold text-gray-800">Missing Parts</span>
+                      <span className="font-semibold text-[#18141E]">Missing Parts</span>
                     </label>
 
                     <label className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-line cursor-pointer">
@@ -277,13 +277,13 @@ function ReturnsCounterContent() {
                         onChange={(e) => setZipperFunctional(e.target.checked)}
                         className="rounded text-plum"
                       />
-                      <span className="font-semibold text-gray-800">Zip / Hooks OK</span>
+                      <span className="font-semibold text-[#18141E]">Zip / Hooks OK</span>
                     </label>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">
+                      <label className="block text-[10px] font-bold text-[#5B5566] uppercase mb-1">
                         Actual Return Date
                       </label>
                       <input
@@ -295,7 +295,7 @@ function ReturnsCounterContent() {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">
+                      <label className="block text-[10px] font-bold text-[#5B5566] uppercase mb-1">
                         Inspection Remarks &amp; Notes
                       </label>
                       <input
@@ -323,16 +323,16 @@ function ReturnsCounterContent() {
 
                 {/* Deductions Input & Late Fee Notice */}
                 <div className="p-4 bg-white rounded-xl border-2 border-gold/30 space-y-3">
-                  <div className="font-bold text-gray-900 text-xs uppercase flex items-center justify-between">
+                  <div className="font-bold text-[#18141E] text-xs uppercase flex items-center justify-between">
                     <span>Refundable Deposit Settlement Inputs</span>
-                    <span className="text-[10px] text-gray-400 font-normal">
+                    <span className="text-[10px] text-[#8C8499] font-normal">
                       Server computes 15%/day late fees &amp; final refund
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-600 uppercase mb-1">
+                      <label className="block text-[10px] font-bold text-[#5B5566] uppercase mb-1">
                         Damage Deduction (₹)
                       </label>
                       <input
@@ -345,7 +345,7 @@ function ReturnsCounterContent() {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-600 uppercase mb-1">
+                      <label className="block text-[10px] font-bold text-[#5B5566] uppercase mb-1">
                         Special Cleaning Charge (₹)
                       </label>
                       <input
@@ -358,7 +358,7 @@ function ReturnsCounterContent() {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-600 uppercase mb-1">
+                      <label className="block text-[10px] font-bold text-[#5B5566] uppercase mb-1">
                         Refund Payment Mode
                       </label>
                       <select
@@ -395,7 +395,7 @@ function ReturnsCounterContent() {
                             <div className="text-xs text-rose-800 font-bold">
                               Amount Client Still Owes: <span className="font-mono text-sm">{formatINR(settlementResult.additionalDue)}</span>
                             </div>
-                            <p className="text-[10px] text-gray-500">Collect difference from client and record immediately</p>
+                            <p className="text-[10px] text-[#5B5566]">Collect difference from client and record immediately</p>
                           </div>
                           <button
                             type="button"
@@ -423,7 +423,7 @@ function ReturnsCounterContent() {
                             <div className="text-xs text-amber-800 font-bold">
                               Deposit Refund Pending: <span className="font-mono text-sm">{formatINR(settlementResult.refund)}</span>
                             </div>
-                            <p className="text-[10px] text-gray-500">Pay deposit back to customer and record payout</p>
+                            <p className="text-[10px] text-[#5B5566]">Pay deposit back to customer and record payout</p>
                           </div>
                           <button
                             type="button"
@@ -451,7 +451,7 @@ function ReturnsCounterContent() {
 
                 {/* Next Routing Step */}
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-bold text-gray-700 uppercase">
+                  <label className="block text-[10px] font-bold text-[#5B5566] uppercase">
                     Route Garment to Next Operational State *
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -461,7 +461,7 @@ function ReturnsCounterContent() {
                       className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                         nextAction === "AVAILABLE"
                           ? "bg-plum text-white border-plum font-bold shadow-xs"
-                          : "bg-ivory text-gray-700 border-line"
+                          : "bg-ivory text-[#5B5566] border-line"
                       }`}
                     >
                       <CheckCircle2 className="w-4 h-4 mx-auto mb-1 text-gold-light" />
@@ -478,7 +478,7 @@ function ReturnsCounterContent() {
                       className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                         nextAction === "DRY_CLEAN"
                           ? "bg-plum text-white border-plum font-bold shadow-xs"
-                          : "bg-ivory text-gray-700 border-line"
+                          : "bg-ivory text-[#5B5566] border-line"
                       }`}
                     >
                       <Sparkles className="w-4 h-4 mx-auto mb-1 text-gold-light" />
@@ -495,7 +495,7 @@ function ReturnsCounterContent() {
                       className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                         nextAction === "REPAIR"
                           ? "bg-plum text-white border-plum font-bold shadow-xs"
-                          : "bg-ivory text-gray-700 border-line"
+                          : "bg-ivory text-[#5B5566] border-line"
                       }`}
                     >
                       <Wrench className="w-4 h-4 mx-auto mb-1 text-gold-light" />
@@ -520,7 +520,7 @@ function ReturnsCounterContent() {
 
                   {(nextAction === "DRY_CLEAN" || nextAction === "REPAIR") && (
                     <div className="pt-2">
-                      <label className="block text-[10px] font-bold text-gray-600 uppercase mb-1">
+                      <label className="block text-[10px] font-bold text-[#5B5566] uppercase mb-1">
                         Assigned Vendor Name ({nextAction === "DRY_CLEAN" ? "Dry Cleaner" : "Master Tailor"}) *
                       </label>
                       <input
@@ -537,7 +537,7 @@ function ReturnsCounterContent() {
 
                 {/* Action Buttons */}
                 <div className="pt-4 border-t border-line-soft flex items-center justify-between">
-                  <div className="text-[11px] text-gray-500">
+                  <div className="text-[11px] text-[#5B5566]">
                     Inspected By: <strong>{user?.name || "Counter Manager"}</strong>
                   </div>
 
@@ -589,7 +589,7 @@ function ReturnsCounterContent() {
 
 export default function ReturnsCounterPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-xs text-gray-400">Loading returns counter...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-xs text-[#8C8499]">Loading returns counter...</div>}>
       <ReturnsCounterContent />
     </Suspense>
   );

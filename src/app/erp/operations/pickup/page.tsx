@@ -104,13 +104,13 @@ function PickupOperationsContent() {
           <span>Dispatch &amp; Client Handover Desk</span>
         </div>
         <h1 className="text-2xl page-title">Pickup / Issue Management</h1>
-        <p className="text-xs text-gray-500 mt-0.5">
+        <p className="text-xs text-[#5B5566] mt-0.5">
           Execute physical garment handovers, verify accompanying accessories, and log balance settlements.
         </p>
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-gray-500">
+        <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-[#5B5566]">
           <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
           Loading confirmed bookings queue for pickup...
         </div>
@@ -118,9 +118,9 @@ function PickupOperationsContent() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left: Queue of Bookings Awaiting Handover */}
           <div className="bg-white rounded-2xl border border-line-soft p-4 shadow-xs space-y-3">
-            <div className="font-bold text-gray-900 text-xs uppercase tracking-wider flex items-center justify-between pb-2 border-b border-line-soft">
+            <div className="font-bold text-[#18141E] text-xs uppercase tracking-wider flex items-center justify-between pb-2 border-b border-line-soft">
               <span>Pending Pickups ({bookings.length})</span>
-              <span className="text-[10px] text-gray-400">Confirmed</span>
+              <span className="text-[10px] text-[#8C8499]">Confirmed</span>
             </div>
 
             {bookings.length === 0 ? (
@@ -140,11 +140,11 @@ function PickupOperationsContent() {
                         : "bg-ivory border-line hover:border-gold"
                     }`}
                   >
-                    <div className="flex items-center justify-between font-bold text-gray-900">
+                    <div className="flex items-center justify-between font-bold text-[#18141E]">
                       <span>{b.customer?.name}</span>
                       <span className="font-mono text-plum text-[11px]">{b.id}</span>
                     </div>
-                    <div className="text-gray-500 text-[11px] mt-0.5 truncate">
+                    <div className="text-[#5B5566] text-[11px] mt-0.5 truncate">
                       {b.items.map((i) => i.name).join(", ")}
                     </div>
                     <div className="mt-2 flex items-center justify-between text-[11px]">
@@ -168,10 +168,10 @@ function PickupOperationsContent() {
                     <div className="text-[10px] text-gold-dark font-bold uppercase">
                       Handover Checklist for Booking
                     </div>
-                    <h2 className="text-lg font-bold text-gray-900 mt-0.5">
+                    <h2 className="text-lg font-bold text-[#18141E] mt-0.5">
                       {selectedBooking.customer?.name} ({selectedBooking.customer?.phone})
                     </h2>
-                    <div className="text-gray-500 text-[11px]">
+                    <div className="text-[#5B5566] text-[11px]">
                       Event: <strong>{selectedBooking.eventName || "Event"}</strong> • Return Due:{" "}
                       <strong>{formatDate(selectedBooking.returnDueDate)}</strong>
                     </div>
@@ -186,7 +186,7 @@ function PickupOperationsContent() {
 
                 {/* Items in this booking */}
                 <div>
-                  <div className="font-bold text-gray-800 uppercase text-[11px] mb-2">
+                  <div className="font-bold text-[#18141E] uppercase text-[11px] mb-2">
                     Garment Physical Units to Inspect &amp; Handover
                   </div>
                   <div className="space-y-2">
@@ -200,13 +200,13 @@ function PickupOperationsContent() {
                             {item.garmentId}
                           </span>
                           <div>
-                            <div className="font-bold text-gray-900">{item.name}</div>
-                            <div className="text-gray-500 text-[11px]">
+                            <div className="font-bold text-[#18141E]">{item.name}</div>
+                            <div className="text-[#5B5566] text-[11px]">
                               Size: {item.size} {item.rack ? `• Rack: ${item.rack}` : ""}
                             </div>
                           </div>
                         </div>
-                        <div className="text-right font-mono font-bold text-gray-700">
+                        <div className="text-right font-mono font-bold text-[#5B5566]">
                           {formatINR(item.rentalPrice)}
                         </div>
                       </div>
@@ -219,13 +219,13 @@ function PickupOperationsContent() {
                   <div className="font-bold text-plum text-xs">Payment &amp; Deposit Verification</div>
                   <div className="grid grid-cols-3 gap-2 text-center pt-1">
                     <div className="p-2 bg-white rounded-lg border border-line">
-                      <div className="text-[10px] text-gray-400">Total Rental</div>
-                      <div className="font-bold text-gray-900 mt-0.5 font-mono">
+                      <div className="text-[10px] text-[#8C8499]">Total Rental</div>
+                      <div className="font-bold text-[#18141E] mt-0.5 font-mono">
                         {formatINR(selectedBooking.rentalTotal)}
                       </div>
                     </div>
                     <div className="p-2 bg-white rounded-lg border border-line">
-                      <div className="text-[10px] text-gray-400">Amount Paid</div>
+                      <div className="text-[10px] text-[#8C8499]">Amount Paid</div>
                       <div className="font-bold text-emerald-700 mt-0.5 font-mono">
                         {formatINR(selectedBooking.amountPaid)}
                       </div>
@@ -244,7 +244,7 @@ function PickupOperationsContent() {
                         Collect Remaining Balance: {formatINR(selectedBooking.balanceDue)}
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-semibold text-gray-600">Payment Mode:</span>
+                        <span className="text-[10px] font-semibold text-[#5B5566]">Payment Mode:</span>
                         <select
                           value={balancePayMode}
                           onChange={(e) => setBalancePayMode(e.target.value as PayMode)}
@@ -262,7 +262,7 @@ function PickupOperationsContent() {
                 {/* Handover Condition Remarks & Evidence Photos */}
                 <div className="space-y-3 border-t border-line-soft pt-3">
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-800 uppercase mb-1">
+                    <label className="block text-[11px] font-bold text-[#18141E] uppercase mb-1">
                       Handover Condition Remarks *
                     </label>
                     <input
@@ -270,9 +270,9 @@ function PickupOperationsContent() {
                       value={handoverCondition}
                       onChange={(e) => setHandoverCondition(e.target.value)}
                       placeholder="e.g. Small stain on left sleeve, zari intact, hanger & bag given"
-                      className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium text-xs text-gray-900 focus:outline-hidden focus:border-plum"
+                      className="w-full p-2.5 bg-ivory border border-line rounded-xl font-medium text-xs text-[#18141E] focus:outline-hidden focus:border-plum"
                     />
-                    <p className="text-[10px] text-gray-500 mt-1">
+                    <p className="text-[10px] text-[#5B5566] mt-1">
                       Inspect garment with customer and note any pre-existing marks, loose threads, or accessories handed over.
                     </p>
                   </div>
@@ -299,7 +299,7 @@ function PickupOperationsContent() {
                       onChange={(e) => setAccessoriesChecked(e.target.checked)}
                       className="w-4 h-4 rounded text-plum"
                     />
-                    <span className="text-gray-800 font-semibold">
+                    <span className="text-[#18141E] font-semibold">
                       All accessories verified (Dupatta, latkans, safa brooch, wooden hanger &amp; garment dust cover bag)
                     </span>
                   </label>
@@ -310,7 +310,7 @@ function PickupOperationsContent() {
                       onChange={(e) => setConditionChecked(e.target.checked)}
                       className="w-4 h-4 rounded text-plum"
                     />
-                    <span className="text-gray-800 font-semibold">
+                    <span className="text-[#18141E] font-semibold">
                       Client inspected garment condition &amp; confirmed pristine state before leaving store
                     </span>
                   </label>
@@ -319,14 +319,14 @@ function PickupOperationsContent() {
                 {/* Dispatch Action */}
                 <div className="pt-3 border-t border-line-soft flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] text-gray-400 font-mono">Logged By:</span>
-                    <div className="font-semibold text-gray-800">{user?.name || "Counter Staff"}</div>
+                    <span className="text-[10px] text-[#8C8499] font-mono">Logged By:</span>
+                    <div className="font-semibold text-[#18141E]">{user?.name || "Counter Staff"}</div>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/erp/billing/invoices?bookingId=${selectedBooking.id}`}
-                      className="p-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer"
+                      className="p-2.5 bg-[#F5F2F8] hover:bg-[#F5F2F8] text-[#5B5566] rounded-xl font-bold flex items-center gap-1.5 cursor-pointer"
                     >
                       <Printer className="w-4 h-4" />
                       <span>Print Issue Slip</span>
@@ -358,7 +358,7 @@ function PickupOperationsContent() {
 
 export default function PickupOperationsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-xs text-gray-400">Loading pickups...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-xs text-[#8C8499]">Loading pickups...</div>}>
       <PickupOperationsContent />
     </Suspense>
   );

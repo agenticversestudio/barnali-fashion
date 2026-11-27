@@ -71,7 +71,7 @@ export default function DepositsLedgerPage() {
           <span>Refundable Deposit Escrow &amp; Reconciliation</span>
         </div>
         <h1 className="text-2xl page-title">Security Deposit Ledger</h1>
-        <p className="text-xs text-gray-500 mt-0.5">
+        <p className="text-xs text-[#5B5566] mt-0.5">
           Strict separation of client security deposits from rental income, tracking active liabilities, damage deductions, and refunds.
         </p>
       </div>
@@ -79,37 +79,37 @@ export default function DepositsLedgerPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
         <div className="bg-white p-4 rounded-xl border border-line-soft shadow-xs">
-          <div className="text-gray-400 font-semibold uppercase text-[10px]">
+          <div className="text-[#8C8499] font-semibold uppercase text-[10px]">
             Active Deposit Liability (In Vault)
           </div>
           <div className="text-2xl font-bold text-gold mt-1 font-mono">
             {formatINR(totalDepositsHeld)}
           </div>
-          <div className="text-gray-500 text-[11px] mt-0.5">
+          <div className="text-[#5B5566] text-[11px] mt-0.5">
             Held against {bookings.filter((b) => b.depositStatus === "HELD").length} active bookings
           </div>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-line-soft shadow-xs">
-          <div className="text-gray-400 font-semibold uppercase text-[10px]">
+          <div className="text-[#8C8499] font-semibold uppercase text-[10px]">
             Total Deposits Refunded
           </div>
           <div className="text-2xl font-bold text-emerald-700 mt-1 font-mono">
             {formatINR(totalRefunded > 0 ? totalRefunded : 0)}
           </div>
-          <div className="text-gray-500 text-[11px] mt-0.5">
+          <div className="text-[#5B5566] text-[11px] mt-0.5">
             Returned upon verified undamaged check-in
           </div>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-line-soft shadow-xs">
-          <div className="text-gray-400 font-semibold uppercase text-[10px]">
+          <div className="text-[#8C8499] font-semibold uppercase text-[10px]">
             Damage Deductions Retained
           </div>
           <div className="text-2xl font-bold text-rose-700 mt-1 font-mono">
             {formatINR(totalDamageCleaningRetained)}
           </div>
-          <div className="text-gray-500 text-[11px] mt-0.5">
+          <div className="text-[#5B5566] text-[11px] mt-0.5">
             Transferred to maintenance repair fund
           </div>
         </div>
@@ -118,7 +118,7 @@ export default function DepositsLedgerPage() {
       {/* Filter and Search Bar */}
       <div className="bg-white rounded-2xl border border-line-soft p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 text-xs">
         <div className="flex-1 relative">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#8C8499] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search booking ref, customer name or phone..."
@@ -129,11 +129,11 @@ export default function DepositsLedgerPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-gray-500 font-semibold">Deposit Status:</span>
+          <span className="text-[#5B5566] font-semibold">Deposit Status:</span>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="p-2 bg-ivory border border-line rounded-xl text-xs font-semibold text-gray-700"
+            className="p-2 bg-ivory border border-line rounded-xl text-xs font-semibold text-[#5B5566]"
           >
             <option value="ALL">All Statuses</option>
             <option value="HELD">HELD (Active)</option>
@@ -148,7 +148,7 @@ export default function DepositsLedgerPage() {
       {/* Deposit Records Table */}
       <div className="bg-white rounded-2xl border border-line-soft shadow-xs overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-xs text-gray-500">
+          <div className="p-12 text-center text-xs text-[#5B5566]">
             <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
             Loading deposit escrow entries...
           </div>
@@ -173,10 +173,10 @@ export default function DepositsLedgerPage() {
                   <tr key={b.id} className="hover:bg-ivory transition-colors">
                     <td className="py-3 px-4 font-mono font-bold text-plum">{b.id}</td>
                     <td className="py-3 px-3">
-                      <div className="font-bold text-gray-900">{b.customer.name}</div>
-                      <div className="text-gray-400 text-[10px]">{b.customer.phone}</div>
+                      <div className="font-bold text-[#18141E]">{b.customer.name}</div>
+                      <div className="text-[#8C8499] text-[10px]">{b.customer.phone}</div>
                     </td>
-                    <td className="py-3 px-3 font-mono text-gray-600">
+                    <td className="py-3 px-3 font-mono text-[#5B5566]">
                       {formatDate(b.eventDate)}
                     </td>
                     <td className="py-3 px-3 font-mono font-bold text-gold">
@@ -191,7 +191,7 @@ export default function DepositsLedgerPage() {
                             ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                             : b.depositStatus === "PARTIALLY_REFUNDED"
                             ? "bg-blue-50 text-blue-800 border-blue-200"
-                            : "bg-gray-100 text-gray-700 border-gray-200"
+                            : "bg-[#F5F2F8] text-[#5B5566] border-[#E8E2F0]"
                         }`}
                       >
                         {b.depositStatus}

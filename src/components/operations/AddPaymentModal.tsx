@@ -237,7 +237,7 @@ export function AddPaymentModal({
               )}
             </div>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5B5566] font-bold">
                 ₹
               </span>
               <input
@@ -248,7 +248,7 @@ export function AddPaymentModal({
                 onChange={(e) => setAmount(Number(e.target.value) || 0)}
                 readOnly={isRefund}
                 placeholder="0"
-                className={`w-full pl-7 pr-3 py-2.5 border rounded-xl font-mono font-bold text-sm text-gray-900 focus:outline-hidden ${
+                className={`w-full pl-7 pr-3 py-2.5 border rounded-xl font-mono font-bold text-sm text-[#18141E] focus:outline-hidden ${
                   isRefund
                     ? "bg-amber-50/50 border-amber-300 cursor-not-allowed text-amber-900"
                     : "bg-white border-line focus:border-plum"

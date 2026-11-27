@@ -67,7 +67,7 @@ function InvoiceContent() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-gray-500">
+      <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-[#5B5566]">
         <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
         Loading booking invoice &amp; voucher...
       </div>
@@ -76,7 +76,7 @@ function InvoiceContent() {
 
   if (!selectedBooking) {
     return (
-      <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-gray-500">
+      <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-[#5B5566]">
         No bookings found. Create a booking first to generate an invoice.
       </div>
     );
@@ -110,7 +110,7 @@ function InvoiceContent() {
             <button
               onClick={() => setPrintLayout("A4")}
               className={`px-3 py-1.5 rounded-lg font-bold transition-colors cursor-pointer ${
-                printLayout === "A4" ? "bg-plum text-white" : "text-gray-600 hover:text-gray-900"
+                printLayout === "A4" ? "bg-plum text-white" : "text-[#5B5566] hover:text-[#18141E]"
               }`}
             >
               A4 Agreement
@@ -118,7 +118,7 @@ function InvoiceContent() {
             <button
               onClick={() => setPrintLayout("thermal")}
               className={`px-3 py-1.5 rounded-lg font-bold transition-colors cursor-pointer ${
-                printLayout === "thermal" ? "bg-plum text-white" : "text-gray-600 hover:text-gray-900"
+                printLayout === "thermal" ? "bg-plum text-white" : "text-[#5B5566] hover:text-[#18141E]"
               }`}
             >
               80mm Thermal Receipt
@@ -137,7 +137,7 @@ function InvoiceContent() {
 
       {/* Select booking dropdown (Hidden during print) */}
       <div className="no-print bg-white p-3 rounded-2xl border border-line-soft flex items-center gap-3 text-xs">
-        <span className="font-bold text-gray-700">Select Booking:</span>
+        <span className="font-bold text-[#5B5566]">Select Booking:</span>
         <select
           value={selectedBooking.id}
           onChange={(e) => {
@@ -167,20 +167,20 @@ function InvoiceContent() {
               <div className="text-[10px] text-gold-dark font-bold uppercase tracking-widest mt-0.5">
                 Bridal &amp; Occasion Wear Rental Studio
               </div>
-              <div className="text-gray-600 mt-2 space-y-0.5 text-[11px] max-w-md">
+              <div className="text-[#5B5566] mt-2 space-y-0.5 text-[11px] max-w-md">
                 <div>{shopAddress}</div>
                 <div>Phone / WhatsApp: {shopPhone}</div>
               </div>
             </div>
 
             <div className="text-right">
-              <div className="font-bold text-gray-400 uppercase text-[10px] tracking-wider">
+              <div className="font-bold text-[#8C8499] uppercase text-[10px] tracking-wider">
                 Tax Invoice / Rental Voucher
               </div>
               <div className="text-lg font-mono font-bold text-plum mt-0.5">
                 {selectedBooking.id}
               </div>
-              <div className="text-gray-500 text-[11px] mt-1">
+              <div className="text-[#5B5566] text-[11px] mt-1">
                 Date: {formatDate(selectedBooking.createdAt)}
               </div>
               <div className="mt-1">
@@ -194,25 +194,25 @@ function InvoiceContent() {
           {/* Customer & Event Details */}
           <div className="grid grid-cols-2 gap-6 my-6 p-4 bg-ivory rounded-xl border border-line">
             <div>
-              <div className="font-bold text-gray-500 uppercase text-[10px] mb-1">
+              <div className="font-bold text-[#5B5566] uppercase text-[10px] mb-1">
                 Customer Information
               </div>
-              <div className="font-bold text-sm text-gray-900">{selectedBooking.customer.name}</div>
-              <div className="text-gray-600 mt-0.5 font-mono">Mobile: {selectedBooking.customer.phone}</div>
+              <div className="font-bold text-sm text-[#18141E]">{selectedBooking.customer.name}</div>
+              <div className="text-[#5B5566] mt-0.5 font-mono">Mobile: {selectedBooking.customer.phone}</div>
               {selectedBooking.customer.city && (
-                <div className="text-gray-600 text-[11px]">Location: {selectedBooking.customer.city}</div>
+                <div className="text-[#5B5566] text-[11px]">Location: {selectedBooking.customer.city}</div>
               )}
             </div>
 
             <div>
-              <div className="font-bold text-gray-500 uppercase text-[10px] mb-1">
+              <div className="font-bold text-[#5B5566] uppercase text-[10px] mb-1">
                 Rental Period &amp; Event
               </div>
-              <div className="font-bold text-gray-900">{selectedBooking.eventName || "Wedding Celebration"}</div>
-              <div className="text-gray-700 mt-0.5">
+              <div className="font-bold text-[#18141E]">{selectedBooking.eventName || "Wedding Celebration"}</div>
+              <div className="text-[#5B5566] mt-0.5">
                 Pickup Date: <strong>{formatDate(selectedBooking.pickupDate)}</strong>
               </div>
-              <div className="text-gray-700">
+              <div className="text-[#5B5566]">
                 Return Due Date: <strong>{formatDate(selectedBooking.returnDueDate)}</strong> (Before 7:00 PM)
               </div>
             </div>
@@ -234,15 +234,15 @@ function InvoiceContent() {
               <tbody className="divide-y divide-line-soft">
                 {selectedBooking.items.map((item, idx) => (
                   <tr key={item.garmentId}>
-                    <td className="py-3 px-4 text-gray-400 font-mono">{idx + 1}</td>
+                    <td className="py-3 px-4 text-[#8C8499] font-mono">{idx + 1}</td>
                     <td className="py-3 px-3 font-mono font-bold text-plum">
                       {item.garmentId}
                     </td>
-                    <td className="py-3 px-3 font-semibold text-gray-900">{item.name}</td>
+                    <td className="py-3 px-3 font-semibold text-[#18141E]">{item.name}</td>
                     <td className="py-3 px-3">
-                      <span className="bg-gray-100 px-2 py-0.5 rounded font-bold text-[10px]">{item.size}</span>
+                      <span className="bg-[#F5F2F8] px-2 py-0.5 rounded font-bold text-[10px]">{item.size}</span>
                     </td>
-                    <td className="py-3 px-3 text-right font-semibold text-gray-900 font-mono">
+                    <td className="py-3 px-3 text-right font-semibold text-[#18141E] font-mono">
                       {formatINR(item.rentalPrice)}
                     </td>
                     <td className="py-3 px-4 text-right font-semibold text-gold font-mono">
@@ -257,8 +257,8 @@ function InvoiceContent() {
           {/* Financial Calculation Breakdown */}
           <div className="grid grid-cols-2 gap-6 my-6">
             {/* Rental Terms & Conditions */}
-            <div className="p-4 bg-gold-soft/60 rounded-xl border border-line text-[10px] text-gray-600 space-y-1">
-              <div className="font-bold text-gray-800 uppercase text-[11px] mb-1">
+            <div className="p-4 bg-gold-soft/60 rounded-xl border border-line text-[10px] text-[#5B5566] space-y-1">
+              <div className="font-bold text-[#18141E] uppercase text-[11px] mb-1">
                 Standard Rental Terms
               </div>
               <div>• Garment security deposit is 100% refundable upon undamaged return.</div>
@@ -269,9 +269,9 @@ function InvoiceContent() {
 
             {/* Billing Totals */}
             <div className="p-4 bg-ivory rounded-xl border border-line space-y-2">
-              <div className="flex justify-between font-bold text-gray-700">
+              <div className="flex justify-between font-bold text-[#5B5566]">
                 <span>Rental Service Fee:</span>
-                <span className="font-mono text-gray-900">
+                <span className="font-mono text-[#18141E]">
                   {formatINR(selectedBooking.rentalTotal)}
                 </span>
               </div>
@@ -291,7 +291,7 @@ function InvoiceContent() {
                 <span>Advance / Paid:</span>
                 <span className="font-mono">− {formatINR(advancePayment)}</span>
               </div>
-              <div className="border-t-2 border-plum pt-2 flex justify-between font-black text-sm text-gray-900">
+              <div className="border-t-2 border-plum pt-2 flex justify-between font-black text-sm text-[#18141E]">
                 <span>Remaining Balance Due:</span>
                 <span className="font-mono">
                   {formatINR(selectedBooking.balanceDue)}
@@ -304,19 +304,19 @@ function InvoiceContent() {
           <div className="pt-8 border-t border-line-soft grid grid-cols-2 gap-10 text-center text-xs">
             <div>
               <div className="h-10 border-b border-gray-400"></div>
-              <div className="font-bold text-gray-800 mt-1">Customer Signature</div>
-              <div className="text-[10px] text-gray-500">I agree to the rental terms &amp; deposit policy</div>
+              <div className="font-bold text-[#18141E] mt-1">Customer Signature</div>
+              <div className="text-[10px] text-[#5B5566]">I agree to the rental terms &amp; deposit policy</div>
             </div>
             <div>
               <div className="h-10 border-b border-gray-400"></div>
               <div className="font-bold text-plum mt-1">Authorized Signatory — {shopName}</div>
-              <div className="text-[10px] text-gray-500">Bargarh, Odisha Flagship Store</div>
+              <div className="text-[10px] text-[#5B5566]">Bargarh, Odisha Flagship Store</div>
             </div>
           </div>
         </div>
       ) : (
         /* 80mm Thermal Receipt Layout */
-        <div className="thermal-receipt bg-white p-4 rounded-xl border border-gray-300 shadow-sm max-w-[80mm] mx-auto text-black font-mono text-[11px] leading-tight space-y-2">
+        <div className="thermal-receipt bg-white p-4 rounded-xl border border-[#E8E2F0] shadow-sm max-w-[80mm] mx-auto text-black font-mono text-[11px] leading-tight space-y-2">
           <div className="text-center pb-2 border-b border-dashed border-gray-400">
             <div className="font-bold text-sm uppercase">{shopName}</div>
             <div className="text-[9px]">CLOTHING &amp; BRIDAL RENTAL</div>
@@ -354,13 +354,13 @@ function InvoiceContent() {
               <span>Advance Paid:</span>
               <span>− {formatINR(advancePayment)}</span>
             </div>
-            <div className="flex justify-between font-bold text-xs pt-1 border-t border-gray-300">
+            <div className="flex justify-between font-bold text-xs pt-1 border-t border-[#E8E2F0]">
               <span>Balance Due:</span>
               <span>{formatINR(selectedBooking.balanceDue)}</span>
             </div>
           </div>
 
-          <div className="text-center pt-2 text-[9px] text-gray-600">
+          <div className="text-center pt-2 text-[9px] text-[#5B5566]">
             <div>Keep this receipt safe for deposit refund at return check-in.</div>
             <div className="mt-1 font-bold">Dhanyabad! Visit Again.</div>
           </div>
@@ -372,7 +372,7 @@ function InvoiceContent() {
 
 export default function InvoicesPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-xs text-gray-400">Loading invoice data...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-xs text-[#8C8499]">Loading invoice data...</div>}>
       <InvoiceContent />
     </Suspense>
   );

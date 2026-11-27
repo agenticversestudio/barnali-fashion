@@ -121,7 +121,7 @@ function MaintenanceContent() {
             <span>Tailoring &amp; Embellishment Repairs</span>
           </div>
           <h1 className="text-2xl page-title">Maintenance &amp; Alterations</h1>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-xs text-[#5B5566] mt-0.5">
             Manage master tailor alterations, zari re-stitching, zipper replacements, and stone bead setting.
           </p>
         </div>
@@ -136,13 +136,13 @@ function MaintenanceContent() {
       </div>
 
       <div className="bg-white rounded-2xl border border-line-soft p-5 shadow-xs space-y-4">
-        <div className="font-bold text-gray-900 text-sm pb-2 border-b border-line-soft flex justify-between">
+        <div className="font-bold text-[#18141E] text-sm pb-2 border-b border-line-soft flex justify-between">
           <span>Active &amp; Completed Tailor Jobs ({jobs.length})</span>
-          <span className="text-xs text-gray-400 font-normal">Master Salim Tailor Desk</span>
+          <span className="text-xs text-[#8C8499] font-normal">Master Salim Tailor Desk</span>
         </div>
 
         {loading ? (
-          <div className="py-12 text-center text-xs text-gray-500">
+          <div className="py-12 text-center text-xs text-[#5B5566]">
             <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
             Loading tailoring &amp; alteration jobs...
           </div>
@@ -158,13 +158,13 @@ function MaintenanceContent() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-mono font-bold text-plum">{job.id}</span>
-                    <span className="font-bold text-gray-900">{job.garmentName}</span>
-                    <span className="font-mono text-gray-400 text-[11px]">({job.garmentId})</span>
+                    <span className="font-bold text-[#18141E]">{job.garmentName}</span>
+                    <span className="font-mono text-[#8C8499] text-[11px]">({job.garmentId})</span>
                   </div>
-                  <div className="text-gray-600 mt-0.5">
+                  <div className="text-[#5B5566] mt-0.5">
                     Service: <strong>{job.subType || "Alteration"}</strong> • Assigned: {job.vendorName}
                   </div>
-                  <div className="text-gray-400 text-[11px] mt-0.5">
+                  <div className="text-[#8C8499] text-[11px] mt-0.5">
                     Dispatched: {formatDate(job.outDate)}{" "}
                     {job.expectedDate ? `• Expected: ${formatDate(job.expectedDate)}` : ""}
                   </div>
@@ -172,7 +172,7 @@ function MaintenanceContent() {
 
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <span className="font-mono font-bold text-gray-800">{formatINR(job.cost)}</span>
+                    <span className="font-mono font-bold text-[#18141E]">{formatINR(job.cost)}</span>
                     <div className="text-[10px]">
                       <span
                         className={`px-1.5 py-0.5 rounded font-bold ${
@@ -212,7 +212,7 @@ function MaintenanceContent() {
               </div>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                className="text-[#8C8499] hover:text-[#5B5566] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -220,7 +220,7 @@ function MaintenanceContent() {
 
             <form onSubmit={handleCreateJob} className="mt-4 space-y-3">
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                   Select Garment Unit *
                 </label>
                 <select
@@ -237,7 +237,7 @@ function MaintenanceContent() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                   Alteration / Repair Type *
                 </label>
                 <select
@@ -255,7 +255,7 @@ function MaintenanceContent() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                     Cost (₹) *
                   </label>
                   <input
@@ -266,7 +266,7 @@ function MaintenanceContent() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                     Expected Ready Date
                   </label>
                   <input
@@ -279,7 +279,7 @@ function MaintenanceContent() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-[#5B5566] uppercase mb-1">
                   Specific Tailoring Instructions
                 </label>
                 <textarea
@@ -295,7 +295,7 @@ function MaintenanceContent() {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-xl font-semibold text-gray-700 cursor-pointer"
+                  className="px-4 py-2 border border-[#E8E2F0] rounded-xl font-semibold text-[#5B5566] cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -318,7 +318,7 @@ function MaintenanceContent() {
 
 export default function MaintenancePage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-xs text-gray-400">Loading maintenance desk...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-xs text-[#8C8499]">Loading maintenance desk...</div>}>
       <MaintenanceContent />
     </Suspense>
   );
