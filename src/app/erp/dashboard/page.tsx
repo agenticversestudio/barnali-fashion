@@ -1,39 +1,46 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
-  CalendarDays,
   Plus,
   Phone,
   MessageCircle,
   Clock,
-  CheckCircle2,
   AlertTriangle,
-  ArrowRight,
-  X,
   ChevronRight,
   Sparkles,
   Shirt,
-  DollarSign,
   PackageCheck,
   RotateCcw,
   Bell,
-  MapPin,
-  Loader2,
   RefreshCw,
   FileSpreadsheet,
-  Check,
+  Wallet,
+  Scissors,
+  PartyPopper,
 } from "lucide-react";
 import { alertsApi, bookingsApi, garmentsApi, syncApi } from "@/lib/api";
-import { formatINR, formatDate } from "@/lib/utils";
-import { StatusBadge } from "@/components/ui/StatusBadge";
+import { formatDate, cn } from "@/lib/utils";
+import { addDaysISO, daysBetween, localISO, relativeDays, waLink } from "@/lib/dates";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { StatCard } from "@/components/ui/StatCard";
 import type { AlertDto, BookingDto, GarmentDto, SyncStatus } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 
+/** The 6 costume states: bar segment colour + label (same palette as <StatusBadge> and the sidebar legend). */
+const STATE_META = [
+  { key: "AVAILABLE", label: "Available", bar: "bg-emerald-500", dot: "bg-emerald-500" },
+  { key: "OUT_ON_RENT", label: "Out on rent", bar: "bg-sky-500", dot: "bg-sky-500" },
+  { key: "RETURNED_CLEANING", label: "Cleaning", bar: "bg-violet-500", dot: "bg-violet-500" },
+  { key: "IN_CARE", label: "In care", bar: "bg-amber-500", dot: "bg-amber-500" },
+  { key: "DAMAGED_REPAIR", label: "Repair", bar: "bg-rose-500", dot: "bg-rose-500" },
+  { key: "UNAVAILABLE", label: "Unavailable", bar: "bg-stone-400", dot: "bg-stone-400" },
+] as const;
+
+type Milestone = { booking: BookingDto; days: number };
+
 export default function DashboardPage() {
-  const router = useRouter();
   const { user, isAdmin } = useAuth();
 
   const [garments, setGarments] = useState<GarmentDto[]>([]);
@@ -42,6 +49,7 @@ export default function DashboardPage() {
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [todayStr, setTodayStr] = useState("");
 
   const loadDashboardData = useCallback(async () => {
     setLoading(true);
@@ -69,6 +77,10 @@ export default function DashboardPage() {
     loadDashboardData();
   }, [loadDashboardData]);
 
+  useEffect(() => {
+    setTodayStr(localISO());
+  }, []);
+
   const handleSyncNow = async () => {
     setSyncing(true);
     try {
@@ -83,240 +95,378 @@ export default function DashboardPage() {
     }
   };
 
-  const [todayStr, setTodayStr] = useState("");
+  // ---- stock counts (6 states) ----
+  const counts = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const m of STATE_META) c[m.key] = garments.filter((g) => g.status === m.key).length;
+    return c;
+  }, [garments]);
+  const totalStock = garments.length;
 
-  useEffect(() => {
-    setTodayStr(new Date().toISOString().split("T")[0]);
-  }, []);
+  // ---- pending actions ----
+  const upcomingPickups = todayStr ? bookings.filter((b) => b.status === "CONFIRMED" && b.pickupDate <= todayStr) : [];
+  const dueReturns = todayStr ? bookings.filter((b) => b.status === "OUT_ON_RENT" && b.returnDueDate <= todayStr) : [];
+  const refundsPending = alerts.filter((a) => a.type === "REFUND_PENDING").length;
+  const careOverdue = alerts.filter((a) => a.type === "CARE_OVERDUE").length;
+  const pendingTotal = upcomingPickups.length + dueReturns.length + refundsPending + careOverdue;
 
-  // Stock status counts
-  const countAvailable = garments.filter((g) => g.status === "AVAILABLE").length;
-  const countOutOnRent = garments.filter((g) => g.status === "OUT_ON_RENT").length;
-  const countCleaning = garments.filter((g) => g.status === "RETURNED_CLEANING").length;
-  const countCare = garments.filter((g) => g.status === "IN_CARE").length;
-  const countDamaged = garments.filter((g) => g.status === "DAMAGED_REPAIR").length;
-  const countUnavailable = garments.filter((g) => g.status === "UNAVAILABLE").length;
+  // ---- 4D trial-due / 3D packing-ready (client side, from pickupDate) ----
+  const milestones = useMemo(() => {
+    const out: Milestone[] = [];
+    if (!todayStr) return out;
+    for (const b of bookings) {
+      if (b.status !== "CONFIRMED") continue;
+      const d = daysBetween(todayStr, b.pickupDate);
+      if (d === 4 || d === 3) out.push({ booking: b, days: d });
+    }
+    return out.sort((a, b) => a.days - b.days);
+  }, [bookings, todayStr]);
 
-  const upcomingPickups = todayStr
-    ? bookings.filter((b) => b.status === "CONFIRMED" && b.pickupDate <= todayStr)
-    : [];
-  const dueReturns = todayStr
-    ? bookings.filter((b) => b.status === "OUT_ON_RENT" && b.returnDueDate <= todayStr)
-    : [];
+  // ---- 7-day costume calendar strip ----
+  const week = useMemo(() => {
+    if (!todayStr) return [];
+    return Array.from({ length: 7 }, (_, i) => {
+      const date = addDaysISO(todayStr, i);
+      const chips: { code: string; kind: "pickup" | "return"; bookingId: string }[] = [];
+      for (const b of bookings) {
+        if (b.status === "CONFIRMED" && b.pickupDate === date)
+          b.items.forEach((it) => chips.push({ code: it.garmentId, kind: "pickup", bookingId: b.id }));
+        if (b.status === "OUT_ON_RENT" && b.returnDueDate === date)
+          b.items.forEach((it) => chips.push({ code: it.garmentId, kind: "return", bookingId: b.id }));
+      }
+      return { date, chips };
+    });
+  }, [bookings, todayStr]);
+
+  const weekHasAny = week.some((d) => d.chips.length > 0);
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      {/* Google Sheets Sync Banner (Admin) */}
+    <div className="space-y-5 md:space-y-6 animate-in fade-in">
+      {/* Google Sheets sync (admin) */}
       {isAdmin && syncStatus && (
-        <div className="p-3 bg-white rounded-2xl border border-[#E8DFD1] shadow-2xs flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-emerald-50 text-emerald-800 rounded-xl">
+        <div className="surface p-3 flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-2 bg-emerald-50 text-emerald-800 rounded-lg shrink-0">
               <FileSpreadsheet className="w-4 h-4" />
             </div>
-            <div>
-              <span className="font-semibold text-stone-800">
-                Automated Google Sheet Mirror
-              </span>
-              <span className="text-stone-400 text-[11px] block">
+            <div className="min-w-0">
+              <span className="font-semibold text-ink block">Google Sheet mirror</span>
+              <span className="text-mute text-[11px] block truncate">
                 {syncStatus.configured
                   ? syncStatus.lastSyncAt
-                    ? `Last synced: ${formatDate(syncStatus.lastSyncAt)} (${syncStatus.lastStatus})`
-                    : "Configured (awaiting first sync)"
-                  : "Google Sheets service account not configured yet (Docs: SHEETS_SETUP.md)"}
+                    ? `Last synced ${formatDate(syncStatus.lastSyncAt)} (${syncStatus.lastStatus})`
+                    : "Configured, awaiting first sync"
+                  : "Not configured yet (see SHEETS_SETUP.md)"}
               </span>
             </div>
           </div>
-
           {syncStatus.configured && (
             <button
               onClick={handleSyncNow}
               disabled={syncing}
-              className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-lg text-xs flex items-center gap-1.5 min-h-10"
+              className="px-3 bg-ivory hover:bg-ivory-deep border border-line text-ink-soft font-semibold rounded-lg text-xs flex items-center gap-1.5 min-h-10 shrink-0 disabled:opacity-60"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin text-[#4B1835]" : ""}`} />
-              <span>{syncing ? "Syncing..." : "Sync Now"}</span>
+              <RefreshCw className={cn("w-3.5 h-3.5", syncing && "animate-spin text-plum")} />
+              <span>{syncing ? "Syncing..." : "Sync now"}</span>
             </button>
           )}
         </div>
       )}
 
-      {/* Top Welcome & Quick Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+      {/* Welcome */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="text-xs font-mono text-[#4B1835] font-bold">
-            Barnali Fashion Studio · Bargarh
-          </span>
-          <h1 className="font-serif font-bold text-xl md:text-2xl text-stone-900 tracking-tight mt-0.5">
-            Today&apos;s Store Operations
-          </h1>
-          <p className="text-xs text-stone-500 mt-1">
-            Welcome back, {user?.name || "Operator"} ({user?.role?.toUpperCase()}). Real-time live status.
+          <span className="eyebrow">Barnali Fashion Studio · Bargarh</span>
+          <h1 className="page-title text-2xl md:text-3xl mt-1">Today&apos;s Studio</h1>
+          <p className="text-xs text-mute mt-1.5">
+            Welcome back, {user?.name || "Operator"}. {todayStr && <span className="num">{formatDate(todayStr)}</span>}
           </p>
         </div>
+        <Link
+          href="/erp/bookings/new"
+          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white rounded-xl text-sm font-semibold shadow-[0_1px_2px_rgba(75,24,53,0.3)] transition-colors shrink-0"
+        >
+          <Plus className="w-4 h-4 text-gold" />
+          <span>New Booking</span>
+        </Link>
+      </div>
 
-        <div className="flex items-center gap-2">
-          <Link
-            href="/erp/bookings/new"
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors shrink-0"
+      {/* Today's pending actions */}
+      <section
+        className={cn(
+          "rounded-2xl border p-4 md:p-5",
+          pendingTotal > 0 ? "bg-gold-soft border-gold/40" : "bg-white border-line"
+        )}
+        aria-label="Today's pending actions"
+      >
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2.5">
+            <Bell className="w-4 h-4 text-gold-dark" />
+            <h2 className="section-title text-base">Today&apos;s Pending Actions</h2>
+          </div>
+          <span
+            className={cn(
+              "num text-[11px] font-semibold px-2.5 py-0.5 rounded-full border",
+              pendingTotal > 0 ? "bg-white text-rose-700 border-rose-200" : "bg-emerald-50 text-emerald-800 border-emerald-200"
+            )}
           >
-            <Plus className="w-4 h-4" />
-            <span>New Booking</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* 4 Counter Operations KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Link
-          href="/erp/bookings?filter=today"
-          className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs hover:shadow-md transition-shadow group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-stone-500">Pickups Due</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
-              <Clock className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="font-mono font-bold text-2xl text-stone-900 mt-2">
-            {upcomingPickups.length}
-          </div>
-          <span className="text-[10px] text-stone-400 mt-0.5 block">ready for handover</span>
-        </Link>
-
-        <Link
-          href="/erp/bookings?filter=overdue"
-          className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs hover:shadow-md transition-shadow group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-stone-500">Returns Due</span>
-            <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center">
-              <AlertTriangle className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="font-mono font-bold text-2xl text-rose-800 mt-2">
-            {dueReturns.length}
-          </div>
-          <span className="text-[10px] text-rose-600 font-medium mt-0.5 block">settlement pending</span>
-        </Link>
-
-        <Link
-          href="/erp/operations/laundry"
-          className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs hover:shadow-md transition-shadow group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-stone-500">At Care / Laundry</span>
-            <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
-              <Sparkles className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="font-mono font-bold text-2xl text-purple-900 mt-2">
-            {countCare + countCleaning}
-          </div>
-          <span className="text-[10px] text-stone-400 mt-0.5 block">dry clean &amp; tailoring</span>
-        </Link>
-
-        <Link
-          href="/erp/inventory"
-          className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs hover:shadow-md transition-shadow group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-stone-500">Available Stock</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-              <Shirt className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="font-mono font-bold text-2xl text-emerald-800 mt-2">
-            {countAvailable}
-          </div>
-          <span className="text-[10px] text-stone-400 mt-0.5 block">ready on godown racks</span>
-        </Link>
-      </div>
-
-      {/* Stock Breakdown Strip (6 Exact States) */}
-      <div className="bg-white p-4 md:p-5 rounded-2xl border border-[#E8DFD1] shadow-2xs space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-            Total Inventory Stock Breakdown ({garments.length} Pieces)
+            {loading ? "Loading..." : pendingTotal > 0 ? `${pendingTotal} to do` : "All clear"}
           </span>
-          <Link href="/erp/inventory" className="text-xs font-semibold text-[#4B1835] hover:underline flex items-center gap-1">
-            <span>View All Assets</span>
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+          {[
+            { label: "Pickups due", n: upcomingPickups.length, icon: PackageCheck, href: "/erp/bookings?filter=today", hot: false },
+            { label: "Overdue returns", n: dueReturns.length, icon: RotateCcw, href: "/erp/bookings?filter=overdue", hot: true },
+            { label: "Deposit refunds", n: refundsPending, icon: Wallet, href: "/erp/bookings", hot: false },
+            { label: "Care overdue", n: careOverdue, icon: Scissors, href: "/erp/operations/laundry", hot: true },
+          ].map((x) => (
+            <Link
+              key={x.label}
+              href={x.href}
+              className="bg-white/90 hover:bg-white border border-line rounded-xl px-3.5 min-h-14 py-2.5 flex items-center justify-between gap-2 transition-shadow hover:shadow-sm"
+            >
+              <span className="flex items-center gap-2 min-w-0">
+                <x.icon className="w-4 h-4 text-mute shrink-0" />
+                <span className="text-xs font-medium text-ink-soft truncate">{x.label}</span>
+              </span>
+              <span className={cn("num font-display font-semibold text-xl", x.n > 0 && x.hot ? "text-rose-700" : "text-ink")}>
+                {x.n}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Delivery date alerts: 4D trial due, 3D packing ready */}
+      <section className="surface p-4 md:p-5" aria-label="Delivery date alerts">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <span className="eyebrow">Countdown to pickup</span>
+            <h2 className="section-title text-lg mt-0.5">Delivery Date Alerts</h2>
+          </div>
+          <span className="num text-[11px] text-mute">{milestones.length} booking{milestones.length === 1 ? "" : "s"}</span>
+        </div>
+
+        {milestones.length === 0 ? (
+          <EmptyState
+            icon={PartyPopper}
+            title="No trials or packing due"
+            hint="When a confirmed booking is 4 days from pickup you will see Trial Due here, and 3 days out, Packing Ready."
+            className="py-8"
+          />
+        ) : (
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+            {milestones.map(({ booking: b, days }) => {
+              const trial = days === 4;
+              const wa = b.customer.whatsapp || b.customer.phone;
+              const msg = trial
+                ? `Namaste ${b.customer.name}, this is Barnali Fashion. Your trial for ${b.items.map((i) => i.name).join(", ")} is due. Please visit the studio before your pickup on ${formatDate(b.pickupDate)}.`
+                : `Namaste ${b.customer.name}, this is Barnali Fashion. Your costume is being packed and will be ready for pickup on ${formatDate(b.pickupDate)}.`;
+              return (
+                <article key={b.id} className="bg-ivory border border-line rounded-xl p-4 flex flex-col gap-3 surface-interactive">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <span
+                        className={cn(
+                          "num inline-flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full border",
+                          trial ? "bg-gold-soft text-gold-dark border-gold/40" : "bg-plum/10 text-plum border-plum/20"
+                        )}
+                      >
+                        {days}D · {trial ? "Trial due" : "Packing ready"}
+                      </span>
+                      <h3 className="font-display font-semibold text-ink text-base mt-2 truncate">{b.customer.name}</h3>
+                      <p className="text-[11px] text-mute truncate">
+                        {b.eventName} · <span className="num">{b.id}</span>
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="num text-xs font-semibold text-ink">{formatDate(b.pickupDate)}</div>
+                      <div className="text-[10px] text-mute">{relativeDays(todayStr, b.pickupDate)}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    {b.items.map((it) => (
+                      <span key={it.garmentId} className="num text-[10px] font-medium bg-white border border-line text-ink-soft px-2 py-0.5 rounded-md">
+                        {it.garmentId}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 pt-1">
+                    <a
+                      href={waLink(wa, msg)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="min-h-10 flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </a>
+                    <a
+                      href={`tel:${b.customer.phone}`}
+                      className="min-h-10 flex items-center justify-center gap-1.5 rounded-lg bg-white hover:bg-ivory-deep border border-line text-ink-soft text-[11px] font-semibold"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>Call</span>
+                    </a>
+                    <Link
+                      href={`/erp/bookings?orderId=${b.id}`}
+                      className="min-h-10 flex items-center justify-center gap-1 rounded-lg bg-plum hover:bg-plum-dark text-white text-[11px] font-semibold"
+                    >
+                      <span>Details</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-gold" />
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* KPI tiles */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatCard label="Pickups due" value={upcomingPickups.length} hint="ready for handover" icon={Clock} tone="amber" href="/erp/bookings?filter=today" />
+        <StatCard label="Returns due" value={dueReturns.length} hint="settlement pending" icon={AlertTriangle} tone="rose" href="/erp/bookings?filter=overdue" />
+        <StatCard label="At care" value={counts.IN_CARE + counts.RETURNED_CLEANING} hint="dry clean & tailoring" icon={Sparkles} tone="violet" href="/erp/operations/laundry" />
+        <StatCard label="Available" value={counts.AVAILABLE} hint="ready on racks" icon={Shirt} tone="emerald" href="/erp/inventory" />
+      </div>
+
+      {/* Costume calendar strip */}
+      <section className="surface p-4 md:p-5" aria-label="Costume calendar, next 7 days">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <span className="eyebrow">Next 7 days</span>
+            <h2 className="section-title text-lg mt-0.5">Costume Calendar</h2>
+          </div>
+          <div className="hidden sm:flex items-center gap-3 text-[11px] text-mute">
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500" />Pickup</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-sky-500" />Return due</span>
+          </div>
+        </div>
+
+        <div className="mt-4 -mx-1 overflow-x-auto pb-1">
+          <div className="grid grid-flow-col auto-cols-[minmax(7.5rem,1fr)] gap-2 px-1 min-w-max md:min-w-0 md:grid-flow-row md:grid-cols-7 md:auto-cols-auto">
+            {week.map((d, i) => {
+              const dt = new Date(+d.date.slice(0, 4), +d.date.slice(5, 7) - 1, +d.date.slice(8, 10));
+              return (
+                <div
+                  key={d.date}
+                  className={cn(
+                    "rounded-xl border p-2.5 min-h-24 flex flex-col gap-1.5",
+                    i === 0 ? "bg-gold-soft border-gold/40" : "bg-ivory border-line"
+                  )}
+                >
+                  <div className="flex items-baseline justify-between">
+                    <span className="eyebrow-mute">{i === 0 ? "Today" : dt.toLocaleDateString("en-IN", { weekday: "short" })}</span>
+                    <span className="num text-xs font-semibold text-ink">{dt.getDate()}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {d.chips.slice(0, 6).map((c, k) => (
+                      <Link
+                        key={`${c.bookingId}-${c.code}-${k}`}
+                        href={`/erp/bookings?orderId=${c.bookingId}`}
+                        title={c.kind === "pickup" ? "Pickup" : "Return due"}
+                        className={cn(
+                          "num text-[10px] font-semibold px-1.5 py-0.5 rounded-md border",
+                          c.kind === "pickup"
+                            ? "bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100"
+                            : "bg-sky-50 text-sky-900 border-sky-200 hover:bg-sky-100"
+                        )}
+                      >
+                        {c.code}
+                      </Link>
+                    ))}
+                    {d.chips.length > 6 && <span className="num text-[10px] text-mute self-center">+{d.chips.length - 6}</span>}
+                    {d.chips.length === 0 && <span className="text-[10px] text-stone-300">free</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        {!weekHasAny && !loading && (
+          <p className="text-[11px] text-mute mt-3">No pickups or returns scheduled this week.</p>
+        )}
+      </section>
+
+      {/* 6-state stock bar */}
+      <section className="surface p-4 md:p-5" aria-label="Inventory by state">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <span className="eyebrow">Wardrobe</span>
+            <h2 className="section-title text-lg mt-0.5">
+              Stock by State <span className="num text-sm text-mute font-sans font-normal">({totalStock} pieces)</span>
+            </h2>
+          </div>
+          <Link href="/erp/inventory" className="text-xs font-semibold text-plum hover:underline flex items-center gap-1 min-h-10">
+            <span>View all</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 text-center text-xs">
-          <div className="p-3 bg-emerald-50/70 border border-emerald-200/60 rounded-xl">
-            <span className="text-[10px] font-bold text-emerald-800 uppercase block">Available</span>
-            <span className="font-mono font-bold text-lg text-emerald-950 mt-0.5 block">{countAvailable}</span>
+        {totalStock > 0 ? (
+          <div className="mt-3 flex h-3 w-full overflow-hidden rounded-full bg-ivory-deep border border-line" role="img" aria-label="Proportion of costumes in each state">
+            {STATE_META.map((m) =>
+              counts[m.key] > 0 ? (
+                <div
+                  key={m.key}
+                  className={cn("h-full first:rounded-l-full last:rounded-r-full", m.bar)}
+                  style={{ width: `${(counts[m.key] / totalStock) * 100}%` }}
+                  title={`${m.label}: ${counts[m.key]}`}
+                />
+              ) : null
+            )}
           </div>
-          <div className="p-3 bg-blue-50/70 border border-blue-200/60 rounded-xl">
-            <span className="text-[10px] font-bold text-blue-800 uppercase block">Out on Rent</span>
-            <span className="font-mono font-bold text-lg text-blue-950 mt-0.5 block">{countOutOnRent}</span>
-          </div>
-          <div className="p-3 bg-purple-50/70 border border-purple-200/60 rounded-xl">
-            <span className="text-[10px] font-bold text-purple-800 uppercase block">Cleaning</span>
-            <span className="font-mono font-bold text-lg text-purple-950 mt-0.5 block">{countCleaning}</span>
-          </div>
-          <div className="p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl">
-            <span className="text-[10px] font-bold text-amber-800 uppercase block">In Care</span>
-            <span className="font-mono font-bold text-lg text-amber-950 mt-0.5 block">{countCare}</span>
-          </div>
-          <div className="p-3 bg-rose-50/70 border border-rose-200/60 rounded-xl">
-            <span className="text-[10px] font-bold text-rose-800 uppercase block">Repair</span>
-            <span className="font-mono font-bold text-lg text-rose-950 mt-0.5 block">{countDamaged}</span>
-          </div>
-          <div className="p-3 bg-stone-100/70 border border-stone-200/60 rounded-xl">
-            <span className="text-[10px] font-bold text-stone-600 uppercase block">Unavailable</span>
-            <span className="font-mono font-bold text-lg text-stone-800 mt-0.5 block">{countUnavailable}</span>
-          </div>
-        </div>
-      </div>
+        ) : (
+          !loading && <EmptyState icon={Shirt} title="No costumes yet" hint="Add your first piece in Inventory to see the wardrobe split here." className="py-6" />
+        )}
 
-      {/* Live Operational Alerts Section */}
-      <div className="bg-white p-4 md:p-6 rounded-2xl border border-[#E8DFD1] shadow-2xs space-y-4">
-        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-          <div className="flex items-center gap-2">
-            <Bell className="w-4 h-4 text-[#4B1835]" />
-            <h2 className="font-serif font-bold text-base text-stone-900">
-              Live Operational Alerts &amp; Schedule Alarms
-            </h2>
-          </div>
-          <span className="text-xs font-mono font-bold bg-rose-50 text-rose-700 px-2.5 py-0.5 rounded-full border border-rose-200">
-            {alerts.length} Pending Actions
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          {STATE_META.map((m) => (
+            <div key={m.key} className="rounded-xl border border-line-soft bg-ivory px-3 py-2.5">
+              <span className="flex items-center gap-1.5 text-[11px] text-ink-soft">
+                <span className={cn("w-1.5 h-1.5 rounded-full", m.dot)} />
+                {m.label}
+              </span>
+              <span className="num font-display font-semibold text-xl text-ink block mt-1 leading-none">{counts[m.key]}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Live alerts */}
+      <section className="surface p-4 md:p-5" aria-label="Operational alerts">
+        <div className="flex items-center justify-between gap-3 border-b border-line-soft pb-3">
+          <h2 className="section-title text-lg">Operational Alerts</h2>
+          <span className="num text-[11px] font-semibold bg-rose-50 text-rose-700 px-2.5 py-0.5 rounded-full border border-rose-200">
+            {alerts.length} pending
           </span>
         </div>
 
         {alerts.length === 0 ? (
-          <div className="text-center py-8 text-xs text-stone-400">
-            All customer handovers, returns and care jobs are up to date!
-          </div>
+          <EmptyState icon={Bell} title="All caught up" hint="Every handover, return and care job is up to date." className="py-8" />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
             {alerts.map((a, idx) => (
-              <div
-                key={idx}
-                className="p-3.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl flex items-start justify-between gap-3 text-xs"
-              >
-                <div className="flex items-start gap-2.5">
+              <div key={idx} className="p-3.5 bg-ivory border border-line rounded-xl flex items-start justify-between gap-3 text-xs">
+                <div className="flex items-start gap-2.5 min-w-0">
                   {a.type.includes("OVERDUE") ? (
                     <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                   ) : (
                     <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                   )}
-                  <div>
-                    <span className="font-semibold text-stone-900 block">{a.title}</span>
-                    <p className="text-stone-600 text-[11px] mt-0.5 leading-snug">{a.message}</p>
-                    {a.date && <span className="font-mono text-[10px] text-stone-400 mt-1 block">Due: {a.date}</span>}
+                  <div className="min-w-0">
+                    <span className="font-semibold text-ink block">{a.title}</span>
+                    <p className="text-ink-soft text-[11px] mt-0.5 leading-snug">{a.message}</p>
+                    {a.date && <span className="num text-[10px] text-mute mt-1 block">Due: {a.date}</span>}
                   </div>
                 </div>
-
                 <Link
-                  href={
-                    a.type.includes("CARE")
-                      ? "/erp/operations/laundry"
-                      : `/erp/bookings?orderId=${a.refId}`
-                  }
-                  className="px-2.5 py-1 bg-white hover:bg-stone-50 text-stone-700 font-semibold rounded-lg border border-stone-200 text-[11px] shrink-0 min-h-10"
+                  href={a.type.includes("CARE") ? "/erp/operations/laundry" : `/erp/bookings?orderId=${a.refId}`}
+                  className="px-3 min-h-10 inline-flex items-center bg-white hover:bg-ivory-deep text-ink-soft font-semibold rounded-lg border border-line text-[11px] shrink-0"
                 >
                   Inspect
                 </Link>
@@ -324,7 +474,7 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

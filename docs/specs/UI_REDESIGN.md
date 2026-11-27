@@ -22,7 +22,7 @@ Minimum touch target 40 px (`min-h-10`), 44 px for bottom-nav items.
 
 ## Phases (one commit each; `tsc`, `npm test`, `next build` after every phase)
 - [x] **Phase 1** tokens, fonts, sidebar, top bar, drawer, search modal, mobile bottom nav, palette sweep (maroon to plum, slate to warm stone) across ERP pages
-- [ ] **Phase 2** shared pieces (StatusPill, EmptyState, StatCard, OrderCard) + Dashboard: Delivery Date Alerts (4D / 3D), Today's Pending Actions, costume-code calendar strip, 6-state bar
+- [x] **Phase 2** shared pieces (StatusPill, EmptyState, StatCard, OrderCard) + Dashboard: Delivery Date Alerts (4D / 3D), Today's Pending Actions, costume-code calendar strip, 6-state bar
 - [ ] **Phase 3** Orders cards (`/erp/bookings`)
 - [ ] **Phase 4** Inventory grid with thumbnails and rack tags
 - [ ] **Phase 5** Return & Care vendor tracker (`/erp/operations/laundry`)
