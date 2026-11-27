@@ -27,6 +27,7 @@ import {
 import { bookingsApi } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { EmptyState } from "@/components/ui/EmptyState";
 import type { BookingDto, BookingStatus, PayMode, Settlement, NextAction } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 import { PhotoCapture } from "@/components/operations/PhotoCapture";
@@ -230,57 +231,144 @@ function BookingsContent() {
     }
   };
 
+  /** Same action buttons (and handlers) for the desktop table row and the mobile card. */
+  const renderActions = (b: BookingDto, align: "end" | "stretch") => {
+    const isConfirmed = b.status === "CONFIRMED";
+    const isOut = b.status === "OUT_ON_RENT";
+    const base = "px-3 min-h-10 rounded-lg text-[11px] font-semibold text-white shadow-[0_1px_1px_rgba(0,0,0,0.12)] transition-colors";
+    return (
+      <div className={align === "end" ? "flex flex-wrap items-center justify-end gap-1.5" : "grid grid-cols-2 gap-2"}>
+        {isConfirmed && (
+          <button
+            onClick={() => {
+              setHandoverBooking(b);
+              setHandoverPhotoIds([]);
+            }}
+            className={`${base} bg-emerald-600 hover:bg-emerald-700`}
+          >
+            Handover
+          </button>
+        )}
+
+        {isOut && (
+          <button
+            onClick={() => {
+              setReturnBooking(b);
+              setReturnPhotoIds([]);
+              setActualReturnDate(new Date().toISOString().split("T")[0]);
+            }}
+            className={`${base} bg-plum hover:bg-plum-dark`}
+          >
+            Return &amp; Settle
+          </button>
+        )}
+
+        {b.status === "COMPLETED" && b.additionalDue > 0 && (
+          <button
+            onClick={() => {
+              setPaymentModalBooking(b);
+              setPaymentModalKind("EXTRA");
+            }}
+            className={`${base} bg-rose-700 hover:bg-rose-800`}
+          >
+            Add payment → Extra
+          </button>
+        )}
+
+        {b.status === "COMPLETED" && b.depositStatus === "HELD" && b.refundAmount > 0 && (
+          <button
+            onClick={() => {
+              setPaymentModalBooking(b);
+              setPaymentModalKind("REFUND");
+            }}
+            className={`${base} bg-amber-700 hover:bg-amber-800`}
+          >
+            Pay deposit refund
+          </button>
+        )}
+
+        {(isConfirmed || isOut) && b.balanceDue > 0 && (
+          <button
+            onClick={() => {
+              setPaymentModalBooking(b);
+              setPaymentModalKind("BALANCE");
+            }}
+            className={`${base} bg-amber-600 hover:bg-amber-700`}
+          >
+            Add Payment
+          </button>
+        )}
+
+        <button
+          onClick={() => setSelectedOrder(b)}
+          className="px-3 min-h-10 bg-white hover:bg-ivory-deep border border-line text-ink-soft font-semibold rounded-lg text-[11px] transition-colors"
+        >
+          Details
+        </button>
+      </div>
+    );
+  };
+
+  /** Payment state pill shown under the status pill. */
+  const payPill = (b: BookingDto) =>
+    b.status === "CANCELLED" ? null : b.balanceDue > 0 ? (
+      <span className="num inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200">
+        Due {formatINR(b.balanceDue)}
+      </span>
+    ) : (
+      <span className="inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+        Paid in full
+      </span>
+    );
+
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-5 md:space-y-6 animate-in fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="font-serif font-bold text-xl md:text-2xl text-stone-900 tracking-tight">
-              Rental Orders &amp; Counter Ledger
-            </h1>
-            <span className="text-xs font-mono font-semibold bg-[#4B1835]/10 text-[#4B1835] px-2.5 py-0.5 rounded-full">
-              {bookings.length} Bookings
+          <span className="eyebrow">Counter ledger</span>
+          <div className="flex items-center gap-3 mt-1 flex-wrap">
+            <h1 className="page-title text-2xl md:text-3xl">Rental Orders</h1>
+            <span className="num text-[11px] font-semibold bg-plum/10 text-plum px-2.5 py-0.5 rounded-full">
+              {bookings.length} booking{bookings.length === 1 ? "" : "s"}
             </span>
           </div>
-          <p className="text-xs text-stone-500 mt-1">
-            5-Step counter workflow: Selection, Client, Pricing Quote, Handover &amp; Return Settlement.
-          </p>
+          <p className="text-xs text-mute mt-1.5">Selection, client, quote, handover and return settlement in one place.</p>
         </div>
 
-        {/* New Order Button routes to 5-Step Wizard */}
         <Link
           href="/erp/bookings/new"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white text-sm font-semibold rounded-xl shadow-[0_1px_2px_rgba(75,24,53,0.3)] transition-colors shrink-0"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 text-gold" />
           <span>New Counter Booking</span>
         </Link>
       </div>
 
-      {/* Filter & Search Strip */}
-      <div className="bg-white p-3.5 md:p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs space-y-3">
-        <div className="flex flex-col sm:flex-row gap-3">
+      {/* Filter & search strip */}
+      <div className="surface p-3.5 md:p-4">
+        <div className="flex flex-col lg:flex-row gap-3">
           <div className="relative flex-1">
             <input
               type="text"
               placeholder="Search by customer name, phone, SKU (e.g. LF-001) or Order ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-xs pl-9 pr-4 py-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl text-stone-800 placeholder-stone-400 focus:outline-none focus:border-[#4B1835]"
+              className="w-full text-xs pl-9 pr-10 min-h-11 bg-ivory border border-line rounded-xl text-ink placeholder-stone-400 focus:outline-none focus:border-plum"
             />
-            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-mute absolute left-3 top-3.5" />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
-                className="absolute right-3 top-3 text-stone-400 hover:text-stone-600"
+                aria-label="Clear search"
+                className="absolute right-1 top-1 w-9 h-9 flex items-center justify-center text-mute hover:text-ink"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
           </div>
 
-          {/* Status Tabs */}
+          {/* Status tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto text-xs no-scrollbar">
             {[
               { id: "ALL", label: "All Orders" },
@@ -292,9 +380,10 @@ function BookingsContent() {
               <button
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${statusFilter === tab.id
-                  ? "bg-[#4B1835] text-white font-semibold"
-                  : "bg-stone-50 text-stone-600 hover:bg-stone-100 border border-stone-200/80"
+                aria-pressed={statusFilter === tab.id}
+                className={`px-4 min-h-10 rounded-full text-xs whitespace-nowrap transition-colors shrink-0 border ${statusFilter === tab.id
+                  ? "bg-plum text-white font-semibold border-plum"
+                  : "bg-white text-ink-soft font-medium hover:bg-ivory-deep border-line"
                   }`}
               >
                 {tab.label}
@@ -304,187 +393,156 @@ function BookingsContent() {
         </div>
       </div>
 
-      {/* Bookings Display */}
+      {/* Bookings display */}
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center">
-          <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
-          <div className="text-xs text-stone-500">Loading booking records from database...</div>
+        <div className="surface p-12 text-center">
+          <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
+          <div className="text-xs text-mute">Loading booking records...</div>
         </div>
       ) : bookings.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center space-y-3">
-          <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
-            <ClipboardList className="w-6 h-6" />
-          </div>
-          <div className="text-sm font-bold text-stone-800">No orders found</div>
-          <p className="text-xs text-stone-500 max-w-sm mx-auto">
-            Try clearing search filters or create a new counter booking.
-          </p>
+        <div className="surface">
+          <EmptyState
+            icon={ClipboardList}
+            title="No orders found"
+            hint="Try clearing the search or filter, or start a new counter booking."
+            action={
+              <Link href="/erp/bookings/new" className="inline-flex items-center gap-1.5 px-4 min-h-10 bg-plum text-white rounded-lg text-xs font-semibold">
+                <Plus className="w-3.5 h-3.5 text-gold" />
+                New Counter Booking
+              </Link>
+            }
+          />
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#E8DFD1] shadow-2xs overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="bg-[#FBF8F2] border-b border-[#E8DFD1] text-[11px] font-bold uppercase text-stone-500">
-                  <th className="py-3 px-4">Order ID &amp; Customer</th>
-                  <th className="py-3 px-4">Costumes Booked</th>
-                  <th className="py-3 px-4">Pickup → Return Due</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Tariff / Balance</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EFE8DB]">
-                {bookings.map((b) => {
-                  const cleanPhone = b.customer.phone.replace(/\D/g, "").slice(-10);
-                  const isConfirmed = b.status === "CONFIRMED";
-                  const isOut = b.status === "OUT_ON_RENT";
+        <>
+          {/* Mobile / tablet: order cards */}
+          <div className="lg:hidden space-y-3">
+            {bookings.map((b) => {
+              const cleanPhone = b.customer.phone.replace(/\D/g, "").slice(-10);
+              return (
+                <article key={b.id} className="surface p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <span className="num text-[11px] font-bold text-plum">{b.id}</span>
+                      <h3 className="font-display font-semibold text-ink text-base leading-tight mt-0.5 truncate">{b.customer.name}</h3>
+                      <a href={`tel:${cleanPhone}`} className="num text-[11px] text-mute inline-block min-h-6">
+                        +91 {cleanPhone}
+                      </a>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      <StatusBadge status={b.status} />
+                      {payPill(b)}
+                    </div>
+                  </div>
 
-                  return (
-                    <tr key={b.id} className="hover:bg-stone-50/70 transition-colors">
-                      <td className="py-3.5 px-4">
-                        <div className="font-mono font-bold text-xs text-[#4B1835]">
-                          {b.id}
-                        </div>
-                        <div className="font-serif font-semibold text-stone-900 mt-0.5">
-                          {b.customer.name}
-                        </div>
-                        <div className="text-[11px] text-stone-500 font-mono">
-                          +91 {cleanPhone}
-                        </div>
-                      </td>
+                  <div className="flex flex-wrap gap-1.5">
+                    {b.items.map((item, idx) => (
+                      <span key={idx} className="inline-flex items-center gap-1.5 bg-ivory border border-line rounded-md px-2 py-1 max-w-full">
+                        <span className="num font-bold text-[10px] text-plum">{item.garmentId}</span>
+                        <span className="text-[11px] text-ink-soft truncate">{item.name}</span>
+                      </span>
+                    ))}
+                  </div>
 
-                      <td className="py-3.5 px-4">
-                        <div className="space-y-1">
-                          {b.items.map((item, idx) => (
-                            <div key={idx} className="flex items-center gap-1.5">
-                              <span className="font-mono font-bold text-[10px] bg-rose-50 text-rose-800 px-1.5 py-0.5 rounded border border-rose-200">
-                                {item.garmentId}
-                              </span>
-                              <span className="font-medium text-stone-800 line-clamp-1">
-                                {item.name}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </td>
+                  <div className="flex items-center justify-between gap-3 pt-2 border-t border-line-soft">
+                    <div>
+                      <div className="eyebrow-mute">Pickup → Return</div>
+                      <div className="num text-xs font-semibold text-ink mt-0.5">
+                        {b.pickupDate} → {b.returnDueDate}
+                      </div>
+                      {b.isOverdue && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.5 rounded mt-1">
+                          <AlertTriangle className="w-3 h-3" /> Overdue return
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <div className="eyebrow-mute">Total</div>
+                      <div className="num font-display font-semibold text-lg text-ink leading-tight">{formatINR(b.grandTotal)}</div>
+                      {b.depositStatus === "HELD" && (
+                        <div className="num text-[10px] text-amber-800 font-medium">Deposit held {formatINR(b.depositTotal)}</div>
+                      )}
+                    </div>
+                  </div>
 
-                      <td className="py-3.5 px-4">
-                        <div className="font-mono text-stone-800 font-semibold">
-                          {b.pickupDate} → {b.returnDueDate}
-                        </div>
-                        {b.isOverdue && (
-                          <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.5 rounded inline-block mt-1">
-                            ⚠️ Overdue Return
-                          </span>
-                        )}
-                        {b.eventName && (
-                          <div className="text-[11px] text-stone-500 mt-0.5">{b.eventName}</div>
-                        )}
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <StatusBadge status={b.status} />
-                        {b.depositStatus === "HELD" && (
-                          <div className="text-[10px] text-amber-800 font-medium mt-1">
-                            Dep Held: {formatINR(b.depositTotal)}
-                          </div>
-                        )}
-                      </td>
-
-                      <td className="py-3.5 px-4 text-right font-mono">
-                        <div className="font-bold text-stone-900 text-xs">
-                          {formatINR(b.grandTotal)}
-                        </div>
-                        {b.balanceDue > 0 ? (
-                          <div className="text-[11px] font-bold text-amber-800">
-                            Due: {formatINR(b.balanceDue)}
-                          </div>
-                        ) : (
-                          <div className="text-[10px] text-emerald-700 font-semibold">
-                            Full Paid
-                          </div>
-                        )}
-                      </td>
-
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {isConfirmed && (
-                            <button
-                              onClick={() => {
-                                setHandoverBooking(b);
-                                setHandoverPhotoIds([]);
-                              }}
-                              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-[11px] shadow-xs"
-                            >
-                              Handover
-                            </button>
-                          )}
-
-                          {isOut && (
-                            <button
-                              onClick={() => {
-                                setReturnBooking(b);
-                                setReturnPhotoIds([]);
-                                setActualReturnDate(new Date().toISOString().split("T")[0]);
-                              }}
-                              className="px-2.5 py-1.5 bg-[#4B1835] hover:bg-[#521624] text-white font-semibold rounded-lg text-[11px] shadow-xs"
-                            >
-                              Return &amp; Settle
-                            </button>
-                          )}
-
-                          {b.status === "COMPLETED" && b.additionalDue > 0 && (
-                            <button
-                              onClick={() => {
-                                setPaymentModalBooking(b);
-                                setPaymentModalKind("EXTRA");
-                              }}
-                              className="px-2.5 py-1.5 bg-rose-700 hover:bg-rose-800 text-white font-semibold rounded-lg text-[11px] shadow-xs"
-                            >
-                              Add payment → Extra
-                            </button>
-                          )}
-
-                          {b.status === "COMPLETED" && b.depositStatus === "HELD" && b.refundAmount > 0 && (
-                            <button
-                              onClick={() => {
-                                setPaymentModalBooking(b);
-                                setPaymentModalKind("REFUND");
-                              }}
-                              className="px-2.5 py-1.5 bg-amber-700 hover:bg-amber-800 text-white font-semibold rounded-lg text-[11px] shadow-xs"
-                            >
-                              Pay deposit refund
-                            </button>
-                          )}
-
-                          {(isConfirmed || isOut) && b.balanceDue > 0 && (
-                            <button
-                              onClick={() => {
-                                setPaymentModalBooking(b);
-                                setPaymentModalKind("BALANCE");
-                              }}
-                              className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg text-[11px] shadow-xs"
-                            >
-                              Add Payment
-                            </button>
-                          )}
-
-                          <button
-                            onClick={() => setSelectedOrder(b)}
-                            className="px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-lg text-[11px]"
-                          >
-                            Details
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  {renderActions(b, "stretch")}
+                </article>
+              );
+            })}
           </div>
-        </div>
+
+          {/* Desktop: ledger table */}
+          <div className="hidden lg:block surface overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-ivory border-b border-line">
+                    {["Order & Customer", "Costumes", "Pickup → Return Due", "Status", "Tariff / Balance", "Actions"].map((h, i) => (
+                      <th key={h} className={`py-3.5 px-4 eyebrow-mute ${i >= 4 ? "text-right" : ""}`}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line-soft">
+                  {bookings.map((b) => {
+                    const cleanPhone = b.customer.phone.replace(/\D/g, "").slice(-10);
+                    return (
+                      <tr key={b.id} className="hover:bg-ivory transition-colors align-top">
+                        <td className="py-4 px-4">
+                          <div className="num font-bold text-xs text-plum">{b.id}</div>
+                          <div className="font-display font-semibold text-ink text-sm mt-0.5">{b.customer.name}</div>
+                          <div className="num text-[11px] text-mute">+91 {cleanPhone}</div>
+                        </td>
+
+                        <td className="py-4 px-4">
+                          <div className="space-y-1">
+                            {b.items.map((item, idx) => (
+                              <div key={idx} className="flex items-center gap-1.5">
+                                <span className="num font-bold text-[10px] bg-gold-soft text-gold-dark px-1.5 py-0.5 rounded border border-gold/30">
+                                  {item.garmentId}
+                                </span>
+                                <span className="font-medium text-ink-soft line-clamp-1">{item.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+
+                        <td className="py-4 px-4">
+                          <div className="num text-ink font-semibold">
+                            {b.pickupDate} → {b.returnDueDate}
+                          </div>
+                          {b.isOverdue && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.5 rounded mt-1">
+                              <AlertTriangle className="w-3 h-3" /> Overdue return
+                            </span>
+                          )}
+                          {b.eventName && <div className="text-[11px] text-mute mt-0.5">{b.eventName}</div>}
+                        </td>
+
+                        <td className="py-4 px-4">
+                          <div className="flex flex-col items-start gap-1.5">
+                            <StatusBadge status={b.status} />
+                            {b.depositStatus === "HELD" && (
+                              <div className="num text-[10px] text-amber-800 font-medium">Dep held: {formatINR(b.depositTotal)}</div>
+                            )}
+                          </div>
+                        </td>
+
+                        <td className="py-4 px-4 text-right">
+                          <div className="num font-display font-semibold text-ink text-base leading-tight">{formatINR(b.grandTotal)}</div>
+                          <div className="mt-1">{payPill(b)}</div>
+                        </td>
+
+                        <td className="py-4 px-4 text-right max-w-xs">{renderActions(b, "end")}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
 
       {/* HANDOVER / PICKUP MODAL */}
