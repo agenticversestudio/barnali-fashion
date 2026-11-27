@@ -19,7 +19,9 @@ import {
 } from "lucide-react";
 import { careApi, garmentsApi } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
-import { StatusBadge } from "@/components/ui/StatusBadge";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { StatCard } from "@/components/ui/StatCard";
+import { daysBetween, localISO } from "@/lib/dates";
 import type { CareJobDto, CareKind, GarmentDto } from "@/types/api";
 
 export default function StitchingAndDryCleanPage() {
@@ -138,37 +140,74 @@ export default function StitchingAndDryCleanPage() {
     return j.kind === activeTab;
   });
 
+  const todayStr = localISO();
+  const outJobs = careJobs.filter((j) => j.status === "OUT");
+  const overdueCount = outJobs.filter((j) => j.isOverdue).length;
+  const outCost = outJobs.reduce((sum, j) => sum + (j.cost || 0), 0);
+
+  const KIND_META: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; chip: string }> = {
+    DRY_CLEAN: { label: "Dry clean", icon: Sparkles, chip: "bg-violet-50 text-violet-900 border-violet-200" },
+    STITCHING: { label: "Stitching", icon: Scissors, chip: "bg-gold-soft text-gold-dark border-gold/40" },
+    REPAIR: { label: "Repair", icon: Shirt, chip: "bg-rose-50 text-rose-900 border-rose-200" },
+  };
+
+  /** Countdown pill: days left to the expected return, or days overdue. */
+  const countdown = (j: CareJobDto) => {
+    if (!j.expectedDate) return <span className="text-[11px] text-mute">No expected date</span>;
+    const n = daysBetween(todayStr, j.expectedDate);
+    const late = j.isOverdue || n < 0;
+    return (
+      <span
+        className={`num inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+          late
+            ? "bg-rose-50 text-rose-800 border-rose-200"
+            : n <= 1
+              ? "bg-amber-50 text-amber-900 border-amber-200"
+              : "bg-emerald-50 text-emerald-800 border-emerald-200"
+        }`}
+      >
+        <Clock className="w-3 h-3" />
+        {late ? `${Math.abs(n)}d overdue` : n === 0 ? "due today" : `${n}d left`}
+      </span>
+    );
+  };
+
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-5 md:space-y-6 animate-in fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="font-serif font-bold text-xl md:text-2xl text-stone-900 tracking-tight">
-              Care &amp; Vendor Registers
-            </h1>
-            <span className="text-xs font-mono font-semibold bg-[#4B1835]/10 text-[#4B1835] px-2.5 py-0.5 rounded-full">
-              {filteredJobs.length} Jobs
+          <span className="eyebrow">Vendor dispatch</span>
+          <div className="flex items-center gap-3 mt-1 flex-wrap">
+            <h1 className="page-title text-2xl md:text-3xl">Care &amp; Laundry</h1>
+            <span className="num text-[11px] font-semibold bg-plum/10 text-plum px-2.5 py-0.5 rounded-full">
+              {filteredJobs.length} job{filteredJobs.length === 1 ? "" : "s"}
             </span>
           </div>
-          <p className="text-xs text-stone-500 mt-1">
-            Track external commercial dry-cleaning, tailoring alterations &amp; repair turnaround.
-          </p>
+          <p className="text-xs text-mute mt-1.5">Dry cleaning, tailoring alterations and repair turnaround at outside vendors.</p>
         </div>
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white text-sm font-semibold rounded-xl shadow-[0_1px_2px_rgba(75,24,53,0.3)] transition-colors shrink-0"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 text-gold" />
           <span>Dispatch New Job</span>
         </button>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="bg-white p-3.5 md:p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
-        {/* Kind Filter */}
-        <div className="flex items-center gap-1.5 overflow-x-auto text-xs no-scrollbar w-full sm:w-auto">
+      {/* Summary tiles (currently-out jobs) */}
+      {statusFilter === "OUT" && !loading && (
+        <div className="grid grid-cols-3 gap-3">
+          <StatCard label="At vendors" value={outJobs.length} hint="pieces out" icon={Sparkles} tone="violet" />
+          <StatCard label="Overdue" value={overdueCount} hint="past expected date" icon={AlertTriangle} tone="rose" />
+          <StatCard label="Pending cost" value={formatINR(outCost)} hint="estimated" icon={Scissors} tone="amber" className="[&_.font-display]:text-2xl" />
+        </div>
+      )}
+
+      {/* Filter tabs */}
+      <div className="surface p-3.5 md:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 overflow-x-auto text-xs no-scrollbar">
           {[
             { id: "ALL", label: "All Care" },
             { id: "DRY_CLEAN", label: "Dry Cleaning" },
@@ -178,10 +217,11 @@ export default function StitchingAndDryCleanPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 ${
+              aria-pressed={activeTab === tab.id}
+              className={`px-4 min-h-10 rounded-full text-xs whitespace-nowrap transition-colors shrink-0 border ${
                 activeTab === tab.id
-                  ? "bg-[#4B1835] text-white font-semibold"
-                  : "bg-stone-50 text-stone-600 hover:bg-stone-100 border border-stone-200/80"
+                  ? "bg-plum text-white font-semibold border-plum"
+                  : "bg-white text-ink-soft font-medium hover:bg-ivory-deep border-line"
               }`}
             >
               {tab.label}
@@ -189,20 +229,21 @@ export default function StitchingAndDryCleanPage() {
           ))}
         </div>
 
-        {/* Status Filter: OUT vs RECEIVED */}
-        <div className="flex items-center bg-stone-100 p-0.5 rounded-xl border border-stone-200 text-xs">
+        <div className="flex items-center bg-ivory-deep p-1 rounded-xl border border-line text-xs shrink-0" role="group" aria-label="Job status">
           <button
             onClick={() => setStatusFilter("OUT")}
-            className={`px-3 py-1 rounded-lg font-semibold transition-colors ${
-              statusFilter === "OUT" ? "bg-white text-stone-900 shadow-2xs" : "text-stone-500"
+            aria-pressed={statusFilter === "OUT"}
+            className={`px-4 min-h-9 rounded-lg font-semibold transition-colors ${
+              statusFilter === "OUT" ? "bg-white text-plum shadow-xs" : "text-mute hover:text-ink"
             }`}
           >
             Currently Out ({careJobs.filter((j) => j.status === "OUT").length})
           </button>
           <button
             onClick={() => setStatusFilter("RECEIVED")}
-            className={`px-3 py-1 rounded-lg font-semibold transition-colors ${
-              statusFilter === "RECEIVED" ? "bg-white text-stone-900 shadow-2xs" : "text-stone-500"
+            aria-pressed={statusFilter === "RECEIVED"}
+            className={`px-4 min-h-9 rounded-lg font-semibold transition-colors ${
+              statusFilter === "RECEIVED" ? "bg-white text-plum shadow-xs" : "text-mute hover:text-ink"
             }`}
           >
             Past Received
@@ -210,100 +251,112 @@ export default function StitchingAndDryCleanPage() {
         </div>
       </div>
 
-      {/* Main Jobs List */}
+      {/* Vendor dispatch cards */}
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center">
-          <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
-          <div className="text-xs text-stone-500">Loading vendor care jobs...</div>
+        <div className="surface p-12 text-center">
+          <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
+          <div className="text-xs text-mute">Loading vendor care jobs...</div>
         </div>
       ) : filteredJobs.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center space-y-3">
-          <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <div className="text-sm font-bold text-stone-800">No care jobs found</div>
-          <p className="text-xs text-stone-500 max-w-sm mx-auto">
-            {statusFilter === "OUT" ? "No garments currently at vendors." : "No completed care jobs recorded."}
-          </p>
+        <div className="surface">
+          <EmptyState
+            icon={Sparkles}
+            title={statusFilter === "OUT" ? "Nothing at the vendors" : "No completed care jobs yet"}
+            hint={
+              statusFilter === "OUT"
+                ? "Every costume is back in the studio. Dispatch a piece when it needs cleaning, fitting or repair."
+                : "Jobs you mark received will be recorded here."
+            }
+            action={
+              statusFilter === "OUT" ? (
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="inline-flex items-center gap-1.5 px-4 min-h-10 bg-plum text-white rounded-lg text-xs font-semibold"
+                >
+                  <Plus className="w-3.5 h-3.5 text-gold" />
+                  Dispatch New Job
+                </button>
+              ) : undefined
+            }
+          />
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#E8DFD1] shadow-2xs overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="bg-[#FBF8F2] border-b border-[#E8DFD1] text-[11px] font-bold uppercase text-stone-500">
-                  <th className="py-3 px-4">Job ID &amp; Piece</th>
-                  <th className="py-3 px-4">Kind &amp; Vendor</th>
-                  <th className="py-3 px-4">Dispatched → Expected</th>
-                  <th className="py-3 px-4">Cost</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EFE8DB]">
-                {filteredJobs.map((j) => (
-                  <tr key={j.id} className="hover:bg-stone-50/70 transition-colors">
-                    <td className="py-3.5 px-4">
-                      <span className="font-mono font-bold text-xs text-[#4B1835]">{j.id}</span>
-                      <div className="font-semibold text-stone-900 mt-0.5">{j.garmentName}</div>
-                      <span className="font-mono text-[10px] text-stone-400">SKU: {j.garmentId}</span>
-                    </td>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filteredJobs.map((j) => {
+            const meta = KIND_META[j.kind] || KIND_META.DRY_CLEAN;
+            const KindIcon = meta.icon;
+            return (
+              <article key={j.id} className={`surface p-4 flex flex-col gap-3 ${j.status === "OUT" && j.isOverdue ? "border-rose-300" : ""}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${meta.chip}`}>
+                      <KindIcon className="w-3 h-3" />
+                      {meta.label}
+                    </span>
+                    <h3 className="font-display font-semibold text-ink text-base mt-2 leading-tight truncate">{j.garmentName}</h3>
+                    <div className="num text-[11px] text-mute mt-0.5">
+                      {j.garmentId} · <span className="text-plum font-semibold">{j.id}</span>
+                    </div>
+                  </div>
+                  {j.status === "OUT" ? (
+                    countdown(j)
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Received
+                    </span>
+                  )}
+                </div>
 
-                    <td className="py-3.5 px-4">
-                      <span className="text-[10px] uppercase font-bold bg-stone-100 px-2 py-0.5 rounded text-stone-700">
-                        {j.kind.replace("_", " ")}
-                      </span>
-                      <div className="font-medium text-stone-800 mt-1">{j.vendorName}</div>
-                      {j.subType && <div className="text-[11px] text-stone-500">{j.subType}</div>}
-                    </td>
+                <div className="bg-ivory border border-line-soft rounded-xl p-3 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="eyebrow-mute">Vendor</span>
+                    <span className="text-xs font-semibold text-ink text-right truncate">{j.vendorName}</span>
+                  </div>
+                  {j.subType && <div className="text-[11px] text-ink-soft">{j.subType}</div>}
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-line-soft">
+                    <div>
+                      <div className="eyebrow-mute">Dispatched</div>
+                      <div className="num text-xs font-semibold text-ink mt-0.5">{formatDate(j.outDate)}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="eyebrow-mute">{j.status === "OUT" ? "Expected" : "Received"}</div>
+                      <div className={`num text-xs font-semibold mt-0.5 ${j.status === "OUT" && j.isOverdue ? "text-rose-700" : "text-ink"}`}>
+                        {j.status === "OUT" ? (j.expectedDate ? formatDate(j.expectedDate) : "—") : j.rcvDate ? formatDate(j.rcvDate) : "—"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-                    <td className="py-3.5 px-4 font-mono text-stone-700">
-                      <div>Out: {j.outDate}</div>
-                      {j.status === "OUT" ? (
-                        <div className={j.isOverdue ? "text-rose-700 font-bold" : "text-stone-500"}>
-                          Exp: {j.expectedDate || "—"} {j.isOverdue && "(Overdue)"}
-                        </div>
-                      ) : (
-                        <div className="text-emerald-700 font-semibold">Rcv: {j.rcvDate}</div>
-                      )}
-                    </td>
-
-                    <td className="py-3.5 px-4 font-mono font-semibold text-stone-800">
-                      {formatINR(j.cost)}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right">
-                      {j.status === "OUT" ? (
-                        <button
-                          onClick={() => {
-                            setReceiveJob(j);
-                            setRcvCost(String(j.cost || ""));
-                          }}
-                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs shadow-xs"
-                        >
-                          Mark Received
-                        </button>
-                      ) : (
-                        <span className="text-emerald-700 font-semibold text-xs flex items-center justify-end gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>Received</span>
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                <div className="flex items-center justify-between gap-3 mt-auto">
+                  <span className="num inline-flex items-center text-xs font-semibold bg-gold-soft text-gold-dark border border-gold/30 px-2.5 py-1 rounded-full">
+                    {formatINR(j.cost)}
+                  </span>
+                  {j.status === "OUT" && (
+                    <button
+                      onClick={() => {
+                        setReceiveJob(j);
+                        setRcvCost(String(j.cost || ""));
+                      }}
+                      className="px-4 min-h-10 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs shadow-[0_1px_1px_rgba(0,0,0,0.12)] transition-colors"
+                    >
+                      Mark Received
+                    </button>
+                  )}
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
 
       {/* DISPATCH NEW JOB MODAL */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-line shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-line-soft">
               <div>
-                <h3 className="font-serif font-bold text-stone-900 text-base">Dispatch to Vendor</h3>
+                <h3 className="font-display font-semibold text-stone-900 text-base">Dispatch to Vendor</h3>
                 <p className="text-[11px] text-stone-500">Record garment dispatch for care/alteration</p>
               </div>
               <button
@@ -316,13 +369,13 @@ export default function StitchingAndDryCleanPage() {
 
             <form onSubmit={handleCreateJob} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
+                <label className="block eyebrow-mute mb-1">
                   Select Garment *
                 </label>
                 <select
                   value={createGarmentId}
                   onChange={(e) => setCreateGarmentId(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                  className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-medium"
                   required
                 >
                   {garments.map((g) => (
@@ -335,13 +388,13 @@ export default function StitchingAndDryCleanPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
+                  <label className="block eyebrow-mute mb-1">
                     Care Kind *
                   </label>
                   <select
                     value={createKind}
                     onChange={(e) => setCreateKind(e.target.value as CareKind)}
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-semibold"
+                    className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-semibold"
                   >
                     <option value="DRY_CLEAN">Commercial Dry Clean</option>
                     <option value="STITCHING">Tailor Alteration</option>
@@ -350,7 +403,7 @@ export default function StitchingAndDryCleanPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
+                  <label className="block eyebrow-mute mb-1">
                     Vendor / Tailor *
                   </label>
                   <input
@@ -358,7 +411,7 @@ export default function StitchingAndDryCleanPage() {
                     value={vendorName}
                     onChange={(e) => setVendorName(e.target.value)}
                     placeholder="e.g. Salim Tailor"
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                    className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-medium"
                     required
                   />
                 </div>
@@ -366,34 +419,34 @@ export default function StitchingAndDryCleanPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
+                  <label className="block eyebrow-mute mb-1">
                     Dispatch Date
                   </label>
                   <input
                     type="date"
                     value={outDate}
                     onChange={(e) => setOutDate(e.target.value)}
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono"
+                    className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-mono"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
+                  <label className="block eyebrow-mute mb-1">
                     Expected Return Date
                   </label>
                   <input
                     type="date"
                     value={expectedDate}
                     onChange={(e) => setExpectedDate(e.target.value)}
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono"
+                    className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-mono"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
+                  <label className="block eyebrow-mute mb-1">
                     Care Instructions / Sub-type
                   </label>
                   <input
@@ -401,25 +454,25 @@ export default function StitchingAndDryCleanPage() {
                     value={subType}
                     onChange={(e) => setSubType(e.target.value)}
                     placeholder="e.g. Hemline stitch, steam iron"
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
+                    className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
+                  <label className="block eyebrow-mute mb-1">
                     Estimated Cost (₹)
                   </label>
                   <input
                     type="number"
                     value={cost}
                     onChange={(e) => setCost(e.target.value)}
-                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono"
+                    className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
+                <label className="block eyebrow-mute mb-1">
                   Vendor Notes (Optional)
                 </label>
                 <input
@@ -427,22 +480,22 @@ export default function StitchingAndDryCleanPage() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="e.g. Handover invoice #341"
-                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl"
+                  className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum"
                 />
               </div>
 
-              <div className="flex items-center gap-3 pt-3 border-t border-stone-100">
+              <div className="flex items-center gap-3 pt-3 border-t border-line-soft">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-stone-200 text-stone-700 font-semibold"
+                  className="flex-1 min-h-11 rounded-xl border border-line text-stone-700 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creating}
-                  className="flex-1 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white font-bold rounded-xl shadow-xs flex items-center justify-center gap-1.5"
+                  className="flex-1 min-h-11 bg-plum hover:bg-plum-dark text-white font-bold rounded-xl shadow-xs flex items-center justify-center gap-1.5"
                 >
                   {creating ? <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" /> : <CheckCircle2 className="w-4 h-4" />}
                   <span>Confirm Dispatch</span>
@@ -456,11 +509,11 @@ export default function StitchingAndDryCleanPage() {
       {/* RECEIVE CARE MODAL */}
       {receiveJob && (
         <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 border border-line shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-line-soft">
               <div>
-                <span className="font-mono text-xs text-[#4B1835] font-bold">{receiveJob.id}</span>
-                <h3 className="font-serif font-bold text-base text-stone-900">
+                <span className="font-mono text-xs text-plum font-bold">{receiveJob.id}</span>
+                <h3 className="font-display font-semibold text-base text-stone-900">
                   Receive Piece from Vendor
                 </h3>
               </div>
@@ -479,25 +532,25 @@ export default function StitchingAndDryCleanPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
+                <label className="block eyebrow-mute mb-1">
                   Received Date *
                 </label>
                 <input
                   type="date"
                   value={rcvDate}
                   onChange={(e) => setRcvDate(e.target.value)}
-                  className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-medium"
+                  className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-mono font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
+                <label className="block eyebrow-mute mb-1">
                   New Garment Stock Status *
                 </label>
                 <select
                   value={nextStatus}
                   onChange={(e) => setNextStatus(e.target.value as any)}
-                  className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-semibold"
+                  className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-semibold"
                 >
                   <option value="AVAILABLE">Available for Rent</option>
                   <option value="RETURNED_CLEANING">Still Needs Cleaning</option>
@@ -506,7 +559,7 @@ export default function StitchingAndDryCleanPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
+                <label className="block eyebrow-mute mb-1">
                   Actual Service Cost Paid (₹)
                 </label>
                 <input
@@ -514,22 +567,22 @@ export default function StitchingAndDryCleanPage() {
                   value={rcvCost}
                   onChange={(e) => setRcvCost(e.target.value)}
                   placeholder="e.g. 350"
-                  className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-bold"
+                  className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-mono font-bold"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
+            <div className="flex items-center gap-2 pt-2 border-t border-line-soft">
               <button
                 onClick={() => setReceiveJob(null)}
-                className="flex-1 py-2 rounded-xl border border-stone-200 text-stone-700 font-semibold"
+                className="flex-1 min-h-11 rounded-xl border border-line text-stone-700 font-semibold"
               >
                 Cancel
               </button>
               <button
                 onClick={handleReceiveJob}
                 disabled={receiving}
-                className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs flex items-center justify-center gap-1.5"
+                className="flex-1 min-h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs flex items-center justify-center gap-1.5"
               >
                 {receiving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                 <span>Save to Stock</span>
