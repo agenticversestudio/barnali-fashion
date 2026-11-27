@@ -105,24 +105,24 @@ export default function CustomersPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E8DFD1] shadow-2xs">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-serif font-bold text-xl md:text-2xl text-slate-900 tracking-tight">
+            <h1 className="font-serif font-bold text-xl md:text-2xl text-stone-900 tracking-tight">
               Customer Directory
             </h1>
-            <span className="text-xs font-mono font-semibold bg-[#6B1D2F]/10 text-[#6B1D2F] px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-mono font-semibold bg-[#4B1835]/10 text-[#4B1835] px-2.5 py-0.5 rounded-full">
               {customers.length} Clients
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-stone-500 mt-1">
             Verified rental profiles, contact information, and security deposit ledgers.
           </p>
         </div>
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Customer</span>
@@ -130,20 +130,20 @@ export default function CustomersPage() {
       </div>
 
       {/* Search Input Bar */}
-      <div className="bg-white p-3 md:p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+      <div className="bg-white p-3 md:p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
         <div className="relative">
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search by customer name, 10-digit mobile number, or address..."
-            className="w-full pl-9 pr-4 py-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#6B1D2F]"
+            className="w-full pl-9 pr-4 py-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl text-xs font-medium text-stone-800 placeholder-stone-400 focus:outline-none focus:border-[#4B1835]"
           />
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+          <Search className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+              className="absolute right-3 top-3 text-stone-400 hover:text-stone-600"
             >
               <X className="w-4 h-4" />
             </button>
@@ -153,17 +153,17 @@ export default function CustomersPage() {
 
       {/* Customer Grid */}
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center">
-          <Loader2 className="w-6 h-6 animate-spin text-[#6B1D2F] mx-auto mb-2" />
-          <div className="text-xs text-slate-500">Loading customer records from Turso database...</div>
+        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center">
+          <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+          <div className="text-xs text-stone-500">Loading customer records from Turso database...</div>
         </div>
       ) : customers.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center space-y-3">
-          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
             <Users className="w-6 h-6" />
           </div>
-          <div className="text-sm font-bold text-slate-800">No customers found</div>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+          <div className="text-sm font-bold text-stone-800">No customers found</div>
+          <p className="text-xs text-stone-500 max-w-sm mx-auto">
             Try searching a different mobile number or add a new customer directly.
           </p>
         </div>
@@ -174,15 +174,15 @@ export default function CustomersPage() {
             return (
               <div
                 key={c.id}
-                className="bg-white rounded-2xl border border-[#E6E4DF] p-4 shadow-2xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-3"
+                className="bg-white rounded-2xl border border-[#E8DFD1] p-4 shadow-2xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-3"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <span className="font-mono text-[10px] text-slate-400 font-semibold">
+                      <span className="font-mono text-[10px] text-stone-400 font-semibold">
                         {c.id}
                       </span>
-                      <h3 className="font-serif font-bold text-base text-slate-900 leading-tight">
+                      <h3 className="font-serif font-bold text-base text-stone-900 leading-tight">
                         {c.name}
                       </h3>
                     </div>
@@ -194,17 +194,17 @@ export default function CustomersPage() {
                     )}
                   </div>
 
-                  <div className="space-y-1.5 mt-3 text-xs text-slate-600">
+                  <div className="space-y-1.5 mt-3 text-xs text-stone-600">
                     <div className="flex items-center gap-2">
-                      <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <a href={`tel:${cleanPhone}`} className="font-mono font-semibold hover:text-[#6B1D2F]">
+                      <Phone className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                      <a href={`tel:${cleanPhone}`} className="font-mono font-semibold hover:text-[#4B1835]">
                         +91 {cleanPhone}
                       </a>
                     </div>
 
                     {c.address && (
                       <div className="flex items-start gap-2">
-                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                        <MapPin className="w-3.5 h-3.5 text-stone-400 shrink-0 mt-0.5" />
                         <span className="line-clamp-1">
                           {c.address}, {c.city}
                         </span>
@@ -214,23 +214,23 @@ export default function CustomersPage() {
                 </div>
 
                 {/* Metrics Footer */}
-                <div className="pt-3 border-t border-slate-100 space-y-2.5">
-                  <div className="grid grid-cols-3 gap-2 text-center text-xs bg-slate-50 p-2 rounded-xl">
+                <div className="pt-3 border-t border-stone-100 space-y-2.5">
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs bg-stone-50 p-2 rounded-xl">
                     <div>
-                      <span className="text-[10px] text-slate-400 block">Orders</span>
-                      <span className="font-bold text-slate-800 font-mono">{c.totalBookings}</span>
+                      <span className="text-[10px] text-stone-400 block">Orders</span>
+                      <span className="font-bold text-stone-800 font-mono">{c.totalBookings}</span>
                     </div>
 
                     <div>
-                      <span className="text-[10px] text-slate-400 block">Deposit</span>
+                      <span className="text-[10px] text-stone-400 block">Deposit</span>
                       <span className="font-bold text-amber-900 font-mono">
                         {formatINR(c.depositsHeld)}
                       </span>
                     </div>
 
                     <div>
-                      <span className="text-[10px] text-slate-400 block">Spent</span>
-                      <span className="font-bold text-slate-800 font-mono">
+                      <span className="text-[10px] text-stone-400 block">Spent</span>
+                      <span className="font-bold text-stone-800 font-mono">
                         {isAdmin && c.totalSpent !== undefined ? formatINR(c.totalSpent) : "—"}
                       </span>
                     </div>
@@ -251,7 +251,7 @@ export default function CustomersPage() {
 
                     <button
                       onClick={() => setSelectedCustomer(c)}
-                      className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-center font-semibold rounded-xl text-xs transition-colors"
+                      className="flex-1 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-800 text-center font-semibold rounded-xl text-xs transition-colors"
                     >
                       View Profile
                     </button>
@@ -260,7 +260,7 @@ export default function CustomersPage() {
                       href={`/erp/bookings/new?customerId=${c.id}&name=${encodeURIComponent(
                         c.name
                       )}&phone=${cleanPhone}`}
-                      className="flex-1 py-1.5 bg-[#6B1D2F] hover:bg-[#521624] text-white text-center font-semibold rounded-xl text-xs transition-colors min-h-10"
+                      className="flex-1 py-1.5 bg-[#4B1835] hover:bg-[#521624] text-white text-center font-semibold rounded-xl text-xs transition-colors min-h-10"
                     >
                       New Booking
                     </Link>
@@ -274,47 +274,47 @@ export default function CustomersPage() {
 
       {/* Customer Detail Bottom Sheet / Modal */}
       {selectedCustomer && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="font-mono text-xs text-[#6B1D2F] font-bold">
+                <span className="font-mono text-xs text-[#4B1835] font-bold">
                   {selectedCustomer.id}
                 </span>
-                <h3 className="font-serif font-bold text-lg text-slate-900">
+                <h3 className="font-serif font-bold text-lg text-stone-900">
                   {selectedCustomer.name}
                 </h3>
               </div>
               <button
                 onClick={() => setSelectedCustomer(null)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-stone-400 hover:text-stone-600"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="p-3 bg-slate-50 rounded-xl space-y-1.5">
+              <div className="p-3 bg-stone-50 rounded-xl space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Phone:</span>
+                  <span className="text-stone-500">Phone:</span>
                   <a
                     href={`tel:${selectedCustomer.phone}`}
-                    className="font-mono font-bold text-[#6B1D2F]"
+                    className="font-mono font-bold text-[#4B1835]"
                   >
                     +91 {getCleanPhone(selectedCustomer.phone)}
                   </a>
                 </div>
                 {selectedCustomer.address && (
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Address:</span>
-                    <span className="font-medium text-slate-800">
+                    <span className="text-stone-500">Address:</span>
+                    <span className="font-medium text-stone-800">
                       {selectedCustomer.address}, {selectedCustomer.city} {selectedCustomer.pincode}
                     </span>
                   </div>
                 )}
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Member Since:</span>
-                  <span className="font-mono text-slate-700">
+                  <span className="text-stone-500">Member Since:</span>
+                  <span className="font-mono text-stone-700">
                     {formatDate(selectedCustomer.createdAt)}
                   </span>
                 </div>
@@ -330,11 +330,11 @@ export default function CustomersPage() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                  <span className="text-[10px] text-slate-500 font-bold uppercase">
+                <div className="p-3 bg-stone-50 border border-stone-200 rounded-xl">
+                  <span className="text-[10px] text-stone-500 font-bold uppercase">
                     Total Bookings
                   </span>
-                  <div className="font-mono font-bold text-base text-slate-800 mt-0.5">
+                  <div className="font-mono font-bold text-base text-stone-800 mt-0.5">
                     {selectedCustomer.totalBookings}
                   </div>
                 </div>
@@ -342,19 +342,19 @@ export default function CustomersPage() {
 
               {selectedCustomer.notes && (
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Customer Notes</span>
-                  <p className="text-slate-700 mt-0.5 bg-[#FAF9F6] p-2.5 rounded-xl border border-slate-200/60">
+                  <span className="text-[10px] font-bold text-stone-400 uppercase">Customer Notes</span>
+                  <p className="text-stone-700 mt-0.5 bg-[#FBF8F2] p-2.5 rounded-xl border border-stone-200/60">
                     {selectedCustomer.notes}
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
               <Link
                 href={`/erp/bookings?q=${selectedCustomer.phone}`}
                 onClick={() => setSelectedCustomer(null)}
-                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded-xl text-center text-xs"
+                className="flex-1 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold rounded-xl text-center text-xs"
               >
                 Booking History
               </Link>
@@ -363,7 +363,7 @@ export default function CustomersPage() {
                   selectedCustomer.name
                 )}&phone=${getCleanPhone(selectedCustomer.phone)}`}
                 onClick={() => setSelectedCustomer(null)}
-                className="flex-1 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-semibold rounded-xl text-center text-xs"
+                className="flex-1 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white font-semibold rounded-xl text-center text-xs"
               >
                 Create Booking
               </Link>
@@ -374,16 +374,16 @@ export default function CustomersPage() {
 
       {/* Add New Customer Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <h3 className="font-serif font-bold text-slate-900 text-base">Register New Customer</h3>
-                <p className="text-[11px] text-slate-500">Saves customer profile into live database</p>
+                <h3 className="font-serif font-bold text-stone-900 text-base">Register New Customer</h3>
+                <p className="text-[11px] text-stone-500">Saves customer profile into live database</p>
               </div>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-stone-400 hover:text-stone-600"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -398,7 +398,7 @@ export default function CustomersPage() {
 
             <form onSubmit={handleAddCustomer} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                   Customer Full Name *
                 </label>
                 <input
@@ -406,14 +406,14 @@ export default function CustomersPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Smt. Priyadarshini Meher"
-                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium text-slate-800"
+                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium text-stone-800"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     Phone Number (10-Digit) *
                   </label>
                   <input
@@ -422,13 +422,13 @@ export default function CustomersPage() {
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="9876543210"
                     maxLength={10}
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-semibold text-slate-800"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-semibold text-stone-800"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     WhatsApp Number
                   </label>
                   <input
@@ -437,13 +437,13 @@ export default function CustomersPage() {
                     onChange={(e) => setWhatsapp(e.target.value)}
                     placeholder="Same as phone"
                     maxLength={10}
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono text-slate-800"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono text-stone-800"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                   Local Address / Landmark
                 </label>
                 <input
@@ -451,37 +451,37 @@ export default function CustomersPage() {
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="e.g. Near Bhatli Chowk, Ward 4"
-                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     City / Town
                   </label>
                   <input
                     type="text"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     PIN Code
                   </label>
                   <input
                     type="text" inputMode="numeric" pattern="[0-9]*"
                     value={pincode}
                     onChange={(e) => setPincode(e.target.value)}
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium font-mono"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                   Customer Notes (Optional)
                 </label>
                 <input
@@ -489,22 +489,22 @@ export default function CustomersPage() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="e.g. VIP client, preferred size L"
-                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
                 />
               </div>
 
-              <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center gap-3 pt-3 border-t border-stone-100">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold"
+                  className="flex-1 py-2.5 rounded-xl border border-stone-200 text-stone-700 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white rounded-xl font-semibold shadow-xs flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white rounded-xl font-semibold shadow-xs flex items-center justify-center gap-1.5"
                 >
                   {saving ? (
                     <>

@@ -113,15 +113,15 @@ export function AddPaymentModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-      <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4">
+    <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+      <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center justify-between pb-3 border-b border-stone-100">
           <div>
-            <span className="font-mono text-xs text-[#6B1D2F] font-bold">
+            <span className="font-mono text-xs text-[#4B1835] font-bold">
               {booking.id}
             </span>
-            <h3 className="font-serif font-bold text-lg text-slate-900">
+            <h3 className="font-serif font-bold text-lg text-stone-900">
               {isRefund
                 ? "Pay Deposit Refund"
                 : isExtra
@@ -132,7 +132,7 @@ export function AddPaymentModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 cursor-pointer"
+            className="text-stone-400 hover:text-stone-600 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -147,14 +147,14 @@ export function AddPaymentModal({
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           {/* Booking Summary Box */}
-          <div className="p-3 bg-slate-50 rounded-xl space-y-1 text-slate-700">
+          <div className="p-3 bg-stone-50 rounded-xl space-y-1 text-stone-700">
             <div>
-              Customer: <strong className="text-slate-900">{booking.customer.name}</strong> ({booking.customer.phone})
+              Customer: <strong className="text-stone-900">{booking.customer.name}</strong> ({booking.customer.phone})
             </div>
             <div>
-              Status: <strong className="font-mono text-[#6B1D2F]">{booking.status}</strong>
+              Status: <strong className="font-mono text-[#4B1835]">{booking.status}</strong>
             </div>
-            <div className="pt-1 flex items-center justify-between border-t border-slate-200 text-slate-900 font-semibold">
+            <div className="pt-1 flex items-center justify-between border-t border-stone-200 text-stone-900 font-semibold">
               <span>
                 {isRefund
                   ? "Pending Deposit Refund to Customer:"
@@ -174,7 +174,7 @@ export function AddPaymentModal({
 
           {/* Payment Kind */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+            <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
               Transaction Kind *
             </label>
             {isRefund ? (
@@ -195,7 +195,7 @@ export function AddPaymentModal({
               <select
                 value={kind}
                 onChange={(e) => setKind(e.target.value as any)}
-                className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-semibold"
+                className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-semibold"
               >
                 <option value="BALANCE">BALANCE (Rental balance collected)</option>
                 <option value="DEPOSIT">DEPOSIT (Security deposit collected)</option>
@@ -205,13 +205,13 @@ export function AddPaymentModal({
 
           {/* Payment Mode */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+            <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
               {isRefund ? "Refund Payment Mode Given *" : "Payment Mode Received *"}
             </label>
             <select
               value={mode}
               onChange={(e) => setMode(e.target.value as PayMode)}
-              className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-semibold"
+              className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-semibold"
             >
               <option value="CASH">Cash (From Till / Counter Drawer)</option>
               <option value="UPI">UPI (GPay / PhonePe / Paytm)</option>
@@ -223,7 +223,7 @@ export function AddPaymentModal({
           {/* Amount Input */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-[11px] font-bold text-slate-700 uppercase">
+              <label className="block text-[11px] font-bold text-stone-700 uppercase">
                 {isRefund ? "Refund Amount (₹) *" : "Amount Received (₹) *"}
               </label>
               {!isRefund && (
@@ -251,7 +251,7 @@ export function AddPaymentModal({
                 className={`w-full pl-7 pr-3 py-2.5 border rounded-xl font-mono font-bold text-sm text-gray-900 focus:outline-hidden ${
                   isRefund
                     ? "bg-amber-50/50 border-amber-300 cursor-not-allowed text-amber-900"
-                    : "bg-white border-[#E6E4DF] focus:border-[#6B1D2F]"
+                    : "bg-white border-[#E8DFD1] focus:border-[#4B1835]"
                 }`}
                 required
               />
@@ -265,7 +265,7 @@ export function AddPaymentModal({
 
           {/* Note Input */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+            <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
               Internal Note / Remarks (Optional)
             </label>
             <input
@@ -277,17 +277,17 @@ export function AddPaymentModal({
                   ? "e.g. Deposit refunded to customer via UPI"
                   : "e.g. Received by counter manager, settled in full"
               }
-              className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+              className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
+          <div className="flex items-center gap-3 pt-3 border-t border-stone-100">
             <button
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 cursor-pointer"
+              className="flex-1 py-2.5 rounded-xl border border-stone-200 text-stone-700 font-semibold text-xs hover:bg-stone-50 cursor-pointer"
             >
               Cancel
             </button>

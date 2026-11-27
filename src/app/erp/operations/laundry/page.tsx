@@ -141,24 +141,24 @@ export default function StitchingAndDryCleanPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E8DFD1] shadow-2xs">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-serif font-bold text-xl md:text-2xl text-slate-900 tracking-tight">
+            <h1 className="font-serif font-bold text-xl md:text-2xl text-stone-900 tracking-tight">
               Care &amp; Vendor Registers
             </h1>
-            <span className="text-xs font-mono font-semibold bg-[#6B1D2F]/10 text-[#6B1D2F] px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-mono font-semibold bg-[#4B1835]/10 text-[#4B1835] px-2.5 py-0.5 rounded-full">
               {filteredJobs.length} Jobs
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-stone-500 mt-1">
             Track external commercial dry-cleaning, tailoring alterations &amp; repair turnaround.
           </p>
         </div>
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Dispatch New Job</span>
@@ -166,7 +166,7 @@ export default function StitchingAndDryCleanPage() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="bg-white p-3.5 md:p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-white p-3.5 md:p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Kind Filter */}
         <div className="flex items-center gap-1.5 overflow-x-auto text-xs no-scrollbar w-full sm:w-auto">
           {[
@@ -180,8 +180,8 @@ export default function StitchingAndDryCleanPage() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 ${
                 activeTab === tab.id
-                  ? "bg-[#6B1D2F] text-white font-semibold"
-                  : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80"
+                  ? "bg-[#4B1835] text-white font-semibold"
+                  : "bg-stone-50 text-stone-600 hover:bg-stone-100 border border-stone-200/80"
               }`}
             >
               {tab.label}
@@ -190,11 +190,11 @@ export default function StitchingAndDryCleanPage() {
         </div>
 
         {/* Status Filter: OUT vs RECEIVED */}
-        <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs">
+        <div className="flex items-center bg-stone-100 p-0.5 rounded-xl border border-stone-200 text-xs">
           <button
             onClick={() => setStatusFilter("OUT")}
             className={`px-3 py-1 rounded-lg font-semibold transition-colors ${
-              statusFilter === "OUT" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-500"
+              statusFilter === "OUT" ? "bg-white text-stone-900 shadow-2xs" : "text-stone-500"
             }`}
           >
             Currently Out ({careJobs.filter((j) => j.status === "OUT").length})
@@ -202,7 +202,7 @@ export default function StitchingAndDryCleanPage() {
           <button
             onClick={() => setStatusFilter("RECEIVED")}
             className={`px-3 py-1 rounded-lg font-semibold transition-colors ${
-              statusFilter === "RECEIVED" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-500"
+              statusFilter === "RECEIVED" ? "bg-white text-stone-900 shadow-2xs" : "text-stone-500"
             }`}
           >
             Past Received
@@ -212,26 +212,26 @@ export default function StitchingAndDryCleanPage() {
 
       {/* Main Jobs List */}
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center">
-          <Loader2 className="w-6 h-6 animate-spin text-[#6B1D2F] mx-auto mb-2" />
-          <div className="text-xs text-slate-500">Loading vendor care jobs...</div>
+        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center">
+          <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+          <div className="text-xs text-stone-500">Loading vendor care jobs...</div>
         </div>
       ) : filteredJobs.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center space-y-3">
-          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
             <Sparkles className="w-6 h-6" />
           </div>
-          <div className="text-sm font-bold text-slate-800">No care jobs found</div>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+          <div className="text-sm font-bold text-stone-800">No care jobs found</div>
+          <p className="text-xs text-stone-500 max-w-sm mx-auto">
             {statusFilter === "OUT" ? "No garments currently at vendors." : "No completed care jobs recorded."}
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#E6E4DF] shadow-2xs overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#E8DFD1] shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-[#FAF9F6] border-b border-[#E6E4DF] text-[11px] font-bold uppercase text-slate-500">
+                <tr className="bg-[#FBF8F2] border-b border-[#E8DFD1] text-[11px] font-bold uppercase text-stone-500">
                   <th className="py-3 px-4">Job ID &amp; Piece</th>
                   <th className="py-3 px-4">Kind &amp; Vendor</th>
                   <th className="py-3 px-4">Dispatched → Expected</th>
@@ -239,27 +239,27 @@ export default function StitchingAndDryCleanPage() {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#EFECE6]">
+              <tbody className="divide-y divide-[#EFE8DB]">
                 {filteredJobs.map((j) => (
-                  <tr key={j.id} className="hover:bg-slate-50/70 transition-colors">
+                  <tr key={j.id} className="hover:bg-stone-50/70 transition-colors">
                     <td className="py-3.5 px-4">
-                      <span className="font-mono font-bold text-xs text-[#6B1D2F]">{j.id}</span>
-                      <div className="font-semibold text-slate-900 mt-0.5">{j.garmentName}</div>
-                      <span className="font-mono text-[10px] text-slate-400">SKU: {j.garmentId}</span>
+                      <span className="font-mono font-bold text-xs text-[#4B1835]">{j.id}</span>
+                      <div className="font-semibold text-stone-900 mt-0.5">{j.garmentName}</div>
+                      <span className="font-mono text-[10px] text-stone-400">SKU: {j.garmentId}</span>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="text-[10px] uppercase font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-700">
+                      <span className="text-[10px] uppercase font-bold bg-stone-100 px-2 py-0.5 rounded text-stone-700">
                         {j.kind.replace("_", " ")}
                       </span>
-                      <div className="font-medium text-slate-800 mt-1">{j.vendorName}</div>
-                      {j.subType && <div className="text-[11px] text-slate-500">{j.subType}</div>}
+                      <div className="font-medium text-stone-800 mt-1">{j.vendorName}</div>
+                      {j.subType && <div className="text-[11px] text-stone-500">{j.subType}</div>}
                     </td>
 
-                    <td className="py-3.5 px-4 font-mono text-slate-700">
+                    <td className="py-3.5 px-4 font-mono text-stone-700">
                       <div>Out: {j.outDate}</div>
                       {j.status === "OUT" ? (
-                        <div className={j.isOverdue ? "text-rose-700 font-bold" : "text-slate-500"}>
+                        <div className={j.isOverdue ? "text-rose-700 font-bold" : "text-stone-500"}>
                           Exp: {j.expectedDate || "—"} {j.isOverdue && "(Overdue)"}
                         </div>
                       ) : (
@@ -267,7 +267,7 @@ export default function StitchingAndDryCleanPage() {
                       )}
                     </td>
 
-                    <td className="py-3.5 px-4 font-mono font-semibold text-slate-800">
+                    <td className="py-3.5 px-4 font-mono font-semibold text-stone-800">
                       {formatINR(j.cost)}
                     </td>
 
@@ -299,16 +299,16 @@ export default function StitchingAndDryCleanPage() {
 
       {/* DISPATCH NEW JOB MODAL */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <h3 className="font-serif font-bold text-slate-900 text-base">Dispatch to Vendor</h3>
-                <p className="text-[11px] text-slate-500">Record garment dispatch for care/alteration</p>
+                <h3 className="font-serif font-bold text-stone-900 text-base">Dispatch to Vendor</h3>
+                <p className="text-[11px] text-stone-500">Record garment dispatch for care/alteration</p>
               </div>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-stone-400 hover:text-stone-600"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -316,13 +316,13 @@ export default function StitchingAndDryCleanPage() {
 
             <form onSubmit={handleCreateJob} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                   Select Garment *
                 </label>
                 <select
                   value={createGarmentId}
                   onChange={(e) => setCreateGarmentId(e.target.value)}
-                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
                   required
                 >
                   {garments.map((g) => (
@@ -335,13 +335,13 @@ export default function StitchingAndDryCleanPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     Care Kind *
                   </label>
                   <select
                     value={createKind}
                     onChange={(e) => setCreateKind(e.target.value as CareKind)}
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-semibold"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-semibold"
                   >
                     <option value="DRY_CLEAN">Commercial Dry Clean</option>
                     <option value="STITCHING">Tailor Alteration</option>
@@ -350,7 +350,7 @@ export default function StitchingAndDryCleanPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     Vendor / Tailor *
                   </label>
                   <input
@@ -358,7 +358,7 @@ export default function StitchingAndDryCleanPage() {
                     value={vendorName}
                     onChange={(e) => setVendorName(e.target.value)}
                     placeholder="e.g. Salim Tailor"
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
                     required
                   />
                 </div>
@@ -366,34 +366,34 @@ export default function StitchingAndDryCleanPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     Dispatch Date
                   </label>
                   <input
                     type="date"
                     value={outDate}
                     onChange={(e) => setOutDate(e.target.value)}
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     Expected Return Date
                   </label>
                   <input
                     type="date"
                     value={expectedDate}
                     onChange={(e) => setExpectedDate(e.target.value)}
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     Care Instructions / Sub-type
                   </label>
                   <input
@@ -401,25 +401,25 @@ export default function StitchingAndDryCleanPage() {
                     value={subType}
                     onChange={(e) => setSubType(e.target.value)}
                     placeholder="e.g. Hemline stitch, steam iron"
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     Estimated Cost (₹)
                   </label>
                   <input
                     type="number"
                     value={cost}
                     onChange={(e) => setCost(e.target.value)}
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                   Vendor Notes (Optional)
                 </label>
                 <input
@@ -427,22 +427,22 @@ export default function StitchingAndDryCleanPage() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="e.g. Handover invoice #341"
-                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl"
+                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl"
                 />
               </div>
 
-              <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center gap-3 pt-3 border-t border-stone-100">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold"
+                  className="flex-1 py-2.5 rounded-xl border border-stone-200 text-stone-700 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creating}
-                  className="flex-1 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-bold rounded-xl shadow-xs flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white font-bold rounded-xl shadow-xs flex items-center justify-center gap-1.5"
                 >
                   {creating ? <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" /> : <CheckCircle2 className="w-4 h-4" />}
                   <span>Confirm Dispatch</span>
@@ -455,49 +455,49 @@ export default function StitchingAndDryCleanPage() {
 
       {/* RECEIVE CARE MODAL */}
       {receiveJob && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="font-mono text-xs text-[#6B1D2F] font-bold">{receiveJob.id}</span>
-                <h3 className="font-serif font-bold text-base text-slate-900">
+                <span className="font-mono text-xs text-[#4B1835] font-bold">{receiveJob.id}</span>
+                <h3 className="font-serif font-bold text-base text-stone-900">
                   Receive Piece from Vendor
                 </h3>
               </div>
               <button
                 onClick={() => setReceiveJob(null)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-stone-400 hover:text-stone-600"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="p-2.5 bg-slate-50 rounded-xl space-y-1">
+              <div className="p-2.5 bg-stone-50 rounded-xl space-y-1">
                 <div>Piece: <strong>{receiveJob.garmentName}</strong></div>
                 <div>Vendor: <strong>{receiveJob.vendorName}</strong></div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                   Received Date *
                 </label>
                 <input
                   type="date"
                   value={rcvDate}
                   onChange={(e) => setRcvDate(e.target.value)}
-                  className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-medium"
+                  className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                   New Garment Stock Status *
                 </label>
                 <select
                   value={nextStatus}
                   onChange={(e) => setNextStatus(e.target.value as any)}
-                  className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-semibold"
+                  className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-semibold"
                 >
                   <option value="AVAILABLE">Available for Rent</option>
                   <option value="RETURNED_CLEANING">Still Needs Cleaning</option>
@@ -506,7 +506,7 @@ export default function StitchingAndDryCleanPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                   Actual Service Cost Paid (₹)
                 </label>
                 <input
@@ -514,15 +514,15 @@ export default function StitchingAndDryCleanPage() {
                   value={rcvCost}
                   onChange={(e) => setRcvCost(e.target.value)}
                   placeholder="e.g. 350"
-                  className="w-full p-2 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-bold"
+                  className="w-full p-2 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-bold"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
               <button
                 onClick={() => setReceiveJob(null)}
-                className="flex-1 py-2 rounded-xl border border-slate-200 text-slate-700 font-semibold"
+                className="flex-1 py-2 rounded-xl border border-stone-200 text-stone-700 font-semibold"
               >
                 Cancel
               </button>

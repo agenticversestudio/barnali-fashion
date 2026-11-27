@@ -132,7 +132,7 @@ function LoginContent() {
                   : "bg-white/70 hover:bg-white border-[#E8DFD1] text-gray-700"
               }`}
             >
-              <User className="w-4 h-4 text-slate-600 shrink-0" />
+              <User className="w-4 h-4 text-stone-600 shrink-0" />
               <div>
                 <div className="font-bold text-xs">Counter Staff</div>
                 <div className="text-[10px] text-gray-500 font-mono">staff / staff123</div>
@@ -162,7 +162,7 @@ function LoginContent() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="e.g. admin or staff"
-                className="w-full p-2.5 pl-9 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold text-slate-800 focus:outline-none focus:border-[#4B1835]"
+                className="w-full p-2.5 pl-9 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold text-stone-800 focus:outline-none focus:border-[#4B1835]"
               />
               <User className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
             </div>
@@ -179,7 +179,7 @@ function LoginContent() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
-                className="w-full p-2.5 pl-9 pr-10 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold text-slate-800 focus:outline-none focus:border-[#4B1835]"
+                className="w-full p-2.5 pl-9 pr-10 bg-[#FBF9F5] border border-[#E8DFD1] rounded-xl font-semibold text-stone-800 focus:outline-none focus:border-[#4B1835]"
               />
               <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
               <button

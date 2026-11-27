@@ -108,16 +108,16 @@ export default function DashboardPage() {
     <div className="space-y-4 md:space-y-6">
       {/* Google Sheets Sync Banner (Admin) */}
       {isAdmin && syncStatus && (
-        <div className="p-3 bg-white rounded-2xl border border-[#E6E4DF] shadow-2xs flex items-center justify-between text-xs">
+        <div className="p-3 bg-white rounded-2xl border border-[#E8DFD1] shadow-2xs flex items-center justify-between text-xs">
           <div className="flex items-center gap-2.5">
             <div className="p-2 bg-emerald-50 text-emerald-800 rounded-xl">
               <FileSpreadsheet className="w-4 h-4" />
             </div>
             <div>
-              <span className="font-semibold text-slate-800">
+              <span className="font-semibold text-stone-800">
                 Automated Google Sheet Mirror
               </span>
-              <span className="text-slate-400 text-[11px] block">
+              <span className="text-stone-400 text-[11px] block">
                 {syncStatus.configured
                   ? syncStatus.lastSyncAt
                     ? `Last synced: ${formatDate(syncStatus.lastSyncAt)} (${syncStatus.lastStatus})`
@@ -131,9 +131,9 @@ export default function DashboardPage() {
             <button
               onClick={handleSyncNow}
               disabled={syncing}
-              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs flex items-center gap-1.5 min-h-10"
+              className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-lg text-xs flex items-center gap-1.5 min-h-10"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin text-[#6B1D2F]" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin text-[#4B1835]" : ""}`} />
               <span>{syncing ? "Syncing..." : "Sync Now"}</span>
             </button>
           )}
@@ -141,15 +141,15 @@ export default function DashboardPage() {
       )}
 
       {/* Top Welcome & Quick Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E8DFD1] shadow-2xs">
         <div>
-          <span className="text-xs font-mono text-[#6B1D2F] font-bold">
+          <span className="text-xs font-mono text-[#4B1835] font-bold">
             Barnali Fashion Studio · Bargarh
           </span>
-          <h1 className="font-serif font-bold text-xl md:text-2xl text-slate-900 tracking-tight mt-0.5">
+          <h1 className="font-serif font-bold text-xl md:text-2xl text-stone-900 tracking-tight mt-0.5">
             Today&apos;s Store Operations
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-stone-500 mt-1">
             Welcome back, {user?.name || "Operator"} ({user?.role?.toUpperCase()}). Real-time live status.
           </p>
         </div>
@@ -157,7 +157,7 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/erp/bookings/new"
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors shrink-0"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>New Booking</span>
@@ -169,26 +169,26 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Link
           href="/erp/bookings?filter=today"
-          className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs hover:shadow-md transition-shadow group"
+          className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs hover:shadow-md transition-shadow group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500">Pickups Due</span>
+            <span className="text-xs font-medium text-stone-500">Pickups Due</span>
             <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
               <Clock className="w-4 h-4" />
             </div>
           </div>
-          <div className="font-mono font-bold text-2xl text-slate-900 mt-2">
+          <div className="font-mono font-bold text-2xl text-stone-900 mt-2">
             {upcomingPickups.length}
           </div>
-          <span className="text-[10px] text-slate-400 mt-0.5 block">ready for handover</span>
+          <span className="text-[10px] text-stone-400 mt-0.5 block">ready for handover</span>
         </Link>
 
         <Link
           href="/erp/bookings?filter=overdue"
-          className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs hover:shadow-md transition-shadow group"
+          className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs hover:shadow-md transition-shadow group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500">Returns Due</span>
+            <span className="text-xs font-medium text-stone-500">Returns Due</span>
             <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center">
               <AlertTriangle className="w-4 h-4" />
             </div>
@@ -201,10 +201,10 @@ export default function DashboardPage() {
 
         <Link
           href="/erp/operations/laundry"
-          className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs hover:shadow-md transition-shadow group"
+          className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs hover:shadow-md transition-shadow group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500">At Care / Laundry</span>
+            <span className="text-xs font-medium text-stone-500">At Care / Laundry</span>
             <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
               <Sparkles className="w-4 h-4" />
             </div>
@@ -212,15 +212,15 @@ export default function DashboardPage() {
           <div className="font-mono font-bold text-2xl text-purple-900 mt-2">
             {countCare + countCleaning}
           </div>
-          <span className="text-[10px] text-slate-400 mt-0.5 block">dry clean &amp; tailoring</span>
+          <span className="text-[10px] text-stone-400 mt-0.5 block">dry clean &amp; tailoring</span>
         </Link>
 
         <Link
           href="/erp/inventory"
-          className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs hover:shadow-md transition-shadow group"
+          className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs hover:shadow-md transition-shadow group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500">Available Stock</span>
+            <span className="text-xs font-medium text-stone-500">Available Stock</span>
             <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
               <Shirt className="w-4 h-4" />
             </div>
@@ -228,17 +228,17 @@ export default function DashboardPage() {
           <div className="font-mono font-bold text-2xl text-emerald-800 mt-2">
             {countAvailable}
           </div>
-          <span className="text-[10px] text-slate-400 mt-0.5 block">ready on godown racks</span>
+          <span className="text-[10px] text-stone-400 mt-0.5 block">ready on godown racks</span>
         </Link>
       </div>
 
       {/* Stock Breakdown Strip (6 Exact States) */}
-      <div className="bg-white p-4 md:p-5 rounded-2xl border border-[#E6E4DF] shadow-2xs space-y-3">
+      <div className="bg-white p-4 md:p-5 rounded-2xl border border-[#E8DFD1] shadow-2xs space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+          <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">
             Total Inventory Stock Breakdown ({garments.length} Pieces)
           </span>
-          <Link href="/erp/inventory" className="text-xs font-semibold text-[#6B1D2F] hover:underline flex items-center gap-1">
+          <Link href="/erp/inventory" className="text-xs font-semibold text-[#4B1835] hover:underline flex items-center gap-1">
             <span>View All Assets</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </Link>
@@ -265,19 +265,19 @@ export default function DashboardPage() {
             <span className="text-[10px] font-bold text-rose-800 uppercase block">Repair</span>
             <span className="font-mono font-bold text-lg text-rose-950 mt-0.5 block">{countDamaged}</span>
           </div>
-          <div className="p-3 bg-slate-100/70 border border-slate-200/60 rounded-xl">
-            <span className="text-[10px] font-bold text-slate-600 uppercase block">Unavailable</span>
-            <span className="font-mono font-bold text-lg text-slate-800 mt-0.5 block">{countUnavailable}</span>
+          <div className="p-3 bg-stone-100/70 border border-stone-200/60 rounded-xl">
+            <span className="text-[10px] font-bold text-stone-600 uppercase block">Unavailable</span>
+            <span className="font-mono font-bold text-lg text-stone-800 mt-0.5 block">{countUnavailable}</span>
           </div>
         </div>
       </div>
 
       {/* Live Operational Alerts Section */}
-      <div className="bg-white p-4 md:p-6 rounded-2xl border border-[#E6E4DF] shadow-2xs space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div className="bg-white p-4 md:p-6 rounded-2xl border border-[#E8DFD1] shadow-2xs space-y-4">
+        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
           <div className="flex items-center gap-2">
-            <Bell className="w-4 h-4 text-[#6B1D2F]" />
-            <h2 className="font-serif font-bold text-base text-slate-900">
+            <Bell className="w-4 h-4 text-[#4B1835]" />
+            <h2 className="font-serif font-bold text-base text-stone-900">
               Live Operational Alerts &amp; Schedule Alarms
             </h2>
           </div>
@@ -287,7 +287,7 @@ export default function DashboardPage() {
         </div>
 
         {alerts.length === 0 ? (
-          <div className="text-center py-8 text-xs text-slate-400">
+          <div className="text-center py-8 text-xs text-stone-400">
             All customer handovers, returns and care jobs are up to date!
           </div>
         ) : (
@@ -295,7 +295,7 @@ export default function DashboardPage() {
             {alerts.map((a, idx) => (
               <div
                 key={idx}
-                className="p-3.5 bg-[#FAF9F6] border border-[#E6E4DF] rounded-xl flex items-start justify-between gap-3 text-xs"
+                className="p-3.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl flex items-start justify-between gap-3 text-xs"
               >
                 <div className="flex items-start gap-2.5">
                   {a.type.includes("OVERDUE") ? (
@@ -304,9 +304,9 @@ export default function DashboardPage() {
                     <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                   )}
                   <div>
-                    <span className="font-semibold text-slate-900 block">{a.title}</span>
-                    <p className="text-slate-600 text-[11px] mt-0.5 leading-snug">{a.message}</p>
-                    {a.date && <span className="font-mono text-[10px] text-slate-400 mt-1 block">Due: {a.date}</span>}
+                    <span className="font-semibold text-stone-900 block">{a.title}</span>
+                    <p className="text-stone-600 text-[11px] mt-0.5 leading-snug">{a.message}</p>
+                    {a.date && <span className="font-mono text-[10px] text-stone-400 mt-1 block">Due: {a.date}</span>}
                   </div>
                 </div>
 
@@ -316,7 +316,7 @@ export default function DashboardPage() {
                       ? "/erp/operations/laundry"
                       : `/erp/bookings?orderId=${a.refId}`
                   }
-                  className="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-lg border border-slate-200 text-[11px] shrink-0 min-h-10"
+                  className="px-2.5 py-1 bg-white hover:bg-stone-50 text-stone-700 font-semibold rounded-lg border border-stone-200 text-[11px] shrink-0 min-h-10"
                 >
                   Inspect
                 </Link>

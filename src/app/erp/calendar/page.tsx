@@ -105,36 +105,36 @@ export default function AvailabilityCalendarPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E8DFD1] shadow-2xs">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-serif font-bold text-xl md:text-2xl text-slate-900 tracking-tight">
+            <h1 className="font-serif font-bold text-xl md:text-2xl text-stone-900 tracking-tight">
               Calendar Availability Matrix
             </h1>
-            <span className="text-xs font-mono font-semibold bg-[#6B1D2F]/10 text-[#6B1D2F] px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-mono font-semibold bg-[#4B1835]/10 text-[#4B1835] px-2.5 py-0.5 rounded-full">
               {rows.length} Pieces
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-stone-500 mt-1">
             Visual 30-day timeline to inspect garment availability and prevent double bookings.
           </p>
         </div>
 
         {/* Month Selector Controls */}
-        <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
+        <div className="flex items-center gap-2 bg-stone-50 p-1 rounded-xl border border-stone-200">
           <button
             onClick={handlePrevMonth}
-            className="p-1.5 hover:bg-white rounded-lg text-slate-600 transition-colors shadow-2xs min-h-10"
+            className="p-1.5 hover:bg-white rounded-lg text-stone-600 transition-colors shadow-2xs min-h-10"
             title="Previous Month"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="font-serif font-bold text-xs text-slate-800 px-3 min-w-[130px] text-center">
+          <span className="font-serif font-bold text-xs text-stone-800 px-3 min-w-[130px] text-center">
             {monthNames[month - 1]} {year}
           </span>
           <button
             onClick={handleNextMonth}
-            className="p-1.5 hover:bg-white rounded-lg text-slate-600 transition-colors shadow-2xs min-h-10"
+            className="p-1.5 hover:bg-white rounded-lg text-stone-600 transition-colors shadow-2xs min-h-10"
             title="Next Month"
           >
             <ChevronRight className="w-4 h-4" />
@@ -143,15 +143,15 @@ export default function AvailabilityCalendarPage() {
       </div>
 
       {/* Categories Filter Strip */}
-      <div className="bg-white p-3 md:p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+      <div className="bg-white p-3 md:p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs flex items-center gap-1.5 overflow-x-auto no-scrollbar">
         {categories.map((c) => (
           <button
             key={c}
             onClick={() => setSelectedCategory(c)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${
               selectedCategory === c
-                ? "bg-[#6B1D2F] text-white font-semibold"
-                : "bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/80"
+                ? "bg-[#4B1835] text-white font-semibold"
+                : "bg-stone-50 hover:bg-stone-100 text-stone-600 border border-stone-200/80"
             }`}
           >
             {c === "ALL" ? "All Categories" : c}
@@ -161,21 +161,21 @@ export default function AvailabilityCalendarPage() {
 
       {/* Main Sticky Calendar Matrix */}
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center">
-          <Loader2 className="w-6 h-6 animate-spin text-[#6B1D2F] mx-auto mb-2" />
-          <div className="text-xs text-slate-500">Computing 30-day availability matrix from database...</div>
+        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center">
+          <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+          <div className="text-xs text-stone-500">Computing 30-day availability matrix from database...</div>
         </div>
       ) : rows.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center space-y-2">
-          <div className="text-slate-800 font-bold text-sm">No costumes found for this category</div>
+        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center space-y-2">
+          <div className="text-stone-800 font-bold text-sm">No costumes found for this category</div>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#E6E4DF] shadow-2xs overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#E8DFD1] shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-[#FAF9F6] border-b border-[#E6E4DF]">
-                  <th className="sticky left-0 bg-[#FAF9F6] z-20 w-52 py-3 px-3.5 border-r border-[#E6E4DF] shadow-[2px_0_4px_rgba(0,0,0,0.03)] font-bold text-slate-700 uppercase text-[10px]">
+                <tr className="bg-[#FBF8F2] border-b border-[#E8DFD1]">
+                  <th className="sticky left-0 bg-[#FBF8F2] z-20 w-52 py-3 px-3.5 border-r border-[#E8DFD1] shadow-[2px_0_4px_rgba(0,0,0,0.03)] font-bold text-stone-700 uppercase text-[10px]">
                     Costume SKU / Piece
                   </th>
                   {dayNumbers.map((d) => {
@@ -184,8 +184,8 @@ export default function AvailabilityCalendarPage() {
                     return (
                       <th
                         key={d}
-                        className={`min-w-[36px] max-w-[40px] py-2 text-center font-mono border-r border-slate-100 text-[10px] ${
-                          isToday ? "bg-amber-100 text-amber-950 font-bold" : "text-slate-500"
+                        className={`min-w-[36px] max-w-[40px] py-2 text-center font-mono border-r border-stone-100 text-[10px] ${
+                          isToday ? "bg-amber-100 text-amber-950 font-bold" : "text-stone-500"
                         }`}
                       >
                         {d}
@@ -194,21 +194,21 @@ export default function AvailabilityCalendarPage() {
                   })}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-stone-100">
                 {rows.map((row) => (
-                  <tr key={row.garmentId} className="hover:bg-slate-50/70 transition-colors">
+                  <tr key={row.garmentId} className="hover:bg-stone-50/70 transition-colors">
                     {/* Sticky SKU & Name column */}
-                    <td className="sticky left-0 bg-white z-10 py-2.5 px-3.5 border-r border-[#E6E4DF] shadow-[2px_0_4px_rgba(0,0,0,0.02)]">
+                    <td className="sticky left-0 bg-white z-10 py-2.5 px-3.5 border-r border-[#E8DFD1] shadow-[2px_0_4px_rgba(0,0,0,0.02)]">
                       <div className="flex items-center justify-between">
                         <Link
                           href={`/erp/inventory/${row.garmentId}`}
-                          className="font-mono font-bold text-xs text-[#6B1D2F] hover:underline"
+                          className="font-mono font-bold text-xs text-[#4B1835] hover:underline"
                         >
                           {row.garmentId}
                         </Link>
-                        <span className="text-[10px] text-slate-400 font-mono">{row.rack}</span>
+                        <span className="text-[10px] text-stone-400 font-mono">{row.rack}</span>
                       </div>
-                      <div className="font-semibold text-slate-800 text-[11px] truncate w-44">
+                      <div className="font-semibold text-stone-800 text-[11px] truncate w-44">
                         {row.name}
                       </div>
                     </td>
@@ -232,13 +232,13 @@ export default function AvailabilityCalendarPage() {
                               booking: busyBooking,
                             });
                           }}
-                          className={`min-w-[36px] max-w-[40px] h-10 border-r border-slate-100 text-center cursor-pointer p-0.5 transition-colors ${
+                          className={`min-w-[36px] max-w-[40px] h-10 border-r border-stone-100 text-center cursor-pointer p-0.5 transition-colors ${
                             busyBooking
                               ? busyBooking.status === "OUT_ON_RENT"
                                 ? "bg-blue-500/80 hover:bg-blue-600 text-white"
                                 : "bg-amber-500/80 hover:bg-amber-600 text-white"
                               : isUnavailable
-                              ? "bg-slate-200/60"
+                              ? "bg-stone-200/60"
                               : "hover:bg-emerald-50/60"
                           }`}
                           title={
@@ -265,27 +265,27 @@ export default function AvailabilityCalendarPage() {
 
       {/* Cell Detail / Booking Popover Modal */}
       {selectedCell && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="font-mono text-xs font-bold text-[#6B1D2F]">
+                <span className="font-mono text-xs font-bold text-[#4B1835]">
                   {selectedCell.garmentId}
                 </span>
-                <h3 className="font-serif font-bold text-base text-slate-900 line-clamp-1">
+                <h3 className="font-serif font-bold text-base text-stone-900 line-clamp-1">
                   {selectedCell.garmentName}
                 </h3>
               </div>
               <button
                 onClick={() => setSelectedCell(null)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-stone-400 hover:text-stone-600"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="p-3 bg-slate-50 rounded-xl space-y-1">
+              <div className="p-3 bg-stone-50 rounded-xl space-y-1">
                 <div>Selected Date: <strong className="font-mono">{selectedCell.date}</strong></div>
                 {selectedCell.booking ? (
                   <>
@@ -293,10 +293,10 @@ export default function AvailabilityCalendarPage() {
                       <Clock className="w-4 h-4 text-rose-600" />
                       <span>Reserved / Out on Rent</span>
                     </div>
-                    <div className="text-[11px] text-slate-600">
+                    <div className="text-[11px] text-stone-600">
                       Booking: <strong className="font-mono">{selectedCell.booking.bookingId}</strong>
                     </div>
-                    <div className="text-[11px] text-slate-500 font-mono">
+                    <div className="text-[11px] text-stone-500 font-mono">
                       Dates: {selectedCell.booking.from} → {selectedCell.booking.to}
                     </div>
                   </>
@@ -309,12 +309,12 @@ export default function AvailabilityCalendarPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
               {selectedCell.booking ? (
                 <Link
                   href={`/erp/bookings?orderId=${selectedCell.booking.bookingId}`}
                   onClick={() => setSelectedCell(null)}
-                  className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-center font-semibold rounded-xl text-xs"
+                  className="w-full py-2 bg-stone-900 hover:bg-stone-800 text-white text-center font-semibold rounded-xl text-xs"
                 >
                   View Booking
                 </Link>
@@ -322,7 +322,7 @@ export default function AvailabilityCalendarPage() {
                 <Link
                   href={`/erp/bookings/new?sku=${selectedCell.garmentId}`}
                   onClick={() => setSelectedCell(null)}
-                  className="w-full py-2 bg-[#6B1D2F] hover:bg-[#521624] text-white text-center font-semibold rounded-xl text-xs"
+                  className="w-full py-2 bg-[#4B1835] hover:bg-[#521624] text-white text-center font-semibold rounded-xl text-xs"
                 >
                   Book Costume Now
                 </Link>

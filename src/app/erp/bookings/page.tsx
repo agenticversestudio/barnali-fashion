@@ -233,17 +233,17 @@ function BookingsContent() {
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E8DFD1] shadow-2xs">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-serif font-bold text-xl md:text-2xl text-slate-900 tracking-tight">
+            <h1 className="font-serif font-bold text-xl md:text-2xl text-stone-900 tracking-tight">
               Rental Orders &amp; Counter Ledger
             </h1>
-            <span className="text-xs font-mono font-semibold bg-[#6B1D2F]/10 text-[#6B1D2F] px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-mono font-semibold bg-[#4B1835]/10 text-[#4B1835] px-2.5 py-0.5 rounded-full">
               {bookings.length} Bookings
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-stone-500 mt-1">
             5-Step counter workflow: Selection, Client, Pricing Quote, Handover &amp; Return Settlement.
           </p>
         </div>
@@ -251,7 +251,7 @@ function BookingsContent() {
         {/* New Order Button routes to 5-Step Wizard */}
         <Link
           href="/erp/bookings/new"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>New Counter Booking</span>
@@ -259,7 +259,7 @@ function BookingsContent() {
       </div>
 
       {/* Filter & Search Strip */}
-      <div className="bg-white p-3.5 md:p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs space-y-3">
+      <div className="bg-white p-3.5 md:p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs space-y-3">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <input
@@ -267,13 +267,13 @@ function BookingsContent() {
               placeholder="Search by customer name, phone, SKU (e.g. LF-001) or Order ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-xs pl-9 pr-4 py-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#6B1D2F]"
+              className="w-full text-xs pl-9 pr-4 py-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl text-stone-800 placeholder-stone-400 focus:outline-none focus:border-[#4B1835]"
             />
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
-                className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                className="absolute right-3 top-3 text-stone-400 hover:text-stone-600"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -293,8 +293,8 @@ function BookingsContent() {
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${statusFilter === tab.id
-                  ? "bg-[#6B1D2F] text-white font-semibold"
-                  : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80"
+                  ? "bg-[#4B1835] text-white font-semibold"
+                  : "bg-stone-50 text-stone-600 hover:bg-stone-100 border border-stone-200/80"
                   }`}
               >
                 {tab.label}
@@ -306,26 +306,26 @@ function BookingsContent() {
 
       {/* Bookings Display */}
       {loading ? (
-        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center">
-          <Loader2 className="w-6 h-6 animate-spin text-[#6B1D2F] mx-auto mb-2" />
-          <div className="text-xs text-slate-500">Loading booking records from database...</div>
+        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center">
+          <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+          <div className="text-xs text-stone-500">Loading booking records from database...</div>
         </div>
       ) : bookings.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center space-y-3">
-          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
             <ClipboardList className="w-6 h-6" />
           </div>
-          <div className="text-sm font-bold text-slate-800">No orders found</div>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+          <div className="text-sm font-bold text-stone-800">No orders found</div>
+          <p className="text-xs text-stone-500 max-w-sm mx-auto">
             Try clearing search filters or create a new counter booking.
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#E6E4DF] shadow-2xs overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#E8DFD1] shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-[#FAF9F6] border-b border-[#E6E4DF] text-[11px] font-bold uppercase text-slate-500">
+                <tr className="bg-[#FBF8F2] border-b border-[#E8DFD1] text-[11px] font-bold uppercase text-stone-500">
                   <th className="py-3 px-4">Order ID &amp; Customer</th>
                   <th className="py-3 px-4">Costumes Booked</th>
                   <th className="py-3 px-4">Pickup → Return Due</th>
@@ -334,22 +334,22 @@ function BookingsContent() {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#EFECE6]">
+              <tbody className="divide-y divide-[#EFE8DB]">
                 {bookings.map((b) => {
                   const cleanPhone = b.customer.phone.replace(/\D/g, "").slice(-10);
                   const isConfirmed = b.status === "CONFIRMED";
                   const isOut = b.status === "OUT_ON_RENT";
 
                   return (
-                    <tr key={b.id} className="hover:bg-slate-50/70 transition-colors">
+                    <tr key={b.id} className="hover:bg-stone-50/70 transition-colors">
                       <td className="py-3.5 px-4">
-                        <div className="font-mono font-bold text-xs text-[#6B1D2F]">
+                        <div className="font-mono font-bold text-xs text-[#4B1835]">
                           {b.id}
                         </div>
-                        <div className="font-serif font-semibold text-slate-900 mt-0.5">
+                        <div className="font-serif font-semibold text-stone-900 mt-0.5">
                           {b.customer.name}
                         </div>
-                        <div className="text-[11px] text-slate-500 font-mono">
+                        <div className="text-[11px] text-stone-500 font-mono">
                           +91 {cleanPhone}
                         </div>
                       </td>
@@ -361,7 +361,7 @@ function BookingsContent() {
                               <span className="font-mono font-bold text-[10px] bg-rose-50 text-rose-800 px-1.5 py-0.5 rounded border border-rose-200">
                                 {item.garmentId}
                               </span>
-                              <span className="font-medium text-slate-800 line-clamp-1">
+                              <span className="font-medium text-stone-800 line-clamp-1">
                                 {item.name}
                               </span>
                             </div>
@@ -370,7 +370,7 @@ function BookingsContent() {
                       </td>
 
                       <td className="py-3.5 px-4">
-                        <div className="font-mono text-slate-800 font-semibold">
+                        <div className="font-mono text-stone-800 font-semibold">
                           {b.pickupDate} → {b.returnDueDate}
                         </div>
                         {b.isOverdue && (
@@ -379,7 +379,7 @@ function BookingsContent() {
                           </span>
                         )}
                         {b.eventName && (
-                          <div className="text-[11px] text-slate-500 mt-0.5">{b.eventName}</div>
+                          <div className="text-[11px] text-stone-500 mt-0.5">{b.eventName}</div>
                         )}
                       </td>
 
@@ -393,7 +393,7 @@ function BookingsContent() {
                       </td>
 
                       <td className="py-3.5 px-4 text-right font-mono">
-                        <div className="font-bold text-slate-900 text-xs">
+                        <div className="font-bold text-stone-900 text-xs">
                           {formatINR(b.grandTotal)}
                         </div>
                         {b.balanceDue > 0 ? (
@@ -428,7 +428,7 @@ function BookingsContent() {
                                 setReturnPhotoIds([]);
                                 setActualReturnDate(new Date().toISOString().split("T")[0]);
                               }}
-                              className="px-2.5 py-1.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-semibold rounded-lg text-[11px] shadow-xs"
+                              className="px-2.5 py-1.5 bg-[#4B1835] hover:bg-[#521624] text-white font-semibold rounded-lg text-[11px] shadow-xs"
                             >
                               Return &amp; Settle
                             </button>
@@ -472,7 +472,7 @@ function BookingsContent() {
 
                           <button
                             onClick={() => setSelectedOrder(b)}
-                            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-[11px]"
+                            className="px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-lg text-[11px]"
                           >
                             Details
                           </button>
@@ -489,28 +489,28 @@ function BookingsContent() {
 
       {/* HANDOVER / PICKUP MODAL */}
       {handoverBooking && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="font-mono text-xs text-[#6B1D2F] font-bold">
+                <span className="font-mono text-xs text-[#4B1835] font-bold">
                   {handoverBooking.id}
                 </span>
-                <h3 className="font-serif font-bold text-lg text-slate-900">
+                <h3 className="font-serif font-bold text-lg text-stone-900">
                   Store Handover to Customer
                 </h3>
               </div>
               <button
                 onClick={() => setHandoverBooking(null)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-stone-400 hover:text-stone-600"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="p-3 bg-slate-50 rounded-xl space-y-1 text-slate-700">
-                <div>Client: <strong className="text-slate-900">{handoverBooking.customer.name}</strong></div>
+              <div className="p-3 bg-stone-50 rounded-xl space-y-1 text-stone-700">
+                <div>Client: <strong className="text-stone-900">{handoverBooking.customer.name}</strong></div>
                 <div>Pieces: <strong>{handoverBooking.items.map((i) => i.name).join(", ")}</strong></div>
                 <div>Return Due Date: <strong className="font-mono text-rose-800">{handoverBooking.returnDueDate}</strong></div>
               </div>
@@ -523,7 +523,7 @@ function BookingsContent() {
                 </div>
                 {handoverBooking.balanceDue > 0 && (
                   <div>
-                    <label className="block text-[10px] uppercase font-bold text-slate-600 mb-1">
+                    <label className="block text-[10px] uppercase font-bold text-stone-600 mb-1">
                       Payment Mode Received
                     </label>
                     <select
@@ -540,19 +540,19 @@ function BookingsContent() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                   Handover Condition Verification
                 </label>
                 <input
                   type="text"
                   value={handoverCondition}
                   onChange={(e) => setHandoverCondition(e.target.value)}
-                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
                 />
               </div>
 
               {/* Handover Photos */}
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
                 <PhotoCapture
                   kind="HANDOVER"
                   bookingId={handoverBooking.id}
@@ -565,10 +565,10 @@ function BookingsContent() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
+            <div className="flex items-center gap-3 pt-3 border-t border-stone-100">
               <button
                 onClick={() => setHandoverBooking(null)}
-                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs"
+                className="flex-1 py-2.5 rounded-xl border border-stone-200 text-stone-700 font-semibold text-xs"
               >
                 Cancel
               </button>
@@ -587,54 +587,54 @@ function BookingsContent() {
 
       {/* RETURN & SETTLEMENT MODAL */}
       {returnBooking && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="font-mono text-xs text-[#6B1D2F] font-bold">
+                <span className="font-mono text-xs text-[#4B1835] font-bold">
                   {returnBooking.id}
                 </span>
-                <h3 className="font-serif font-bold text-lg text-slate-900">
+                <h3 className="font-serif font-bold text-lg text-stone-900">
                   Return Inspection &amp; Deposit Settlement
                 </h3>
               </div>
               <button
                 onClick={() => setReturnBooking(null)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-stone-400 hover:text-stone-600"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3.5 text-xs">
-              <div className="p-3 bg-slate-50 rounded-xl space-y-1">
-                <div>Client: <strong className="text-slate-900">{returnBooking.customer.name}</strong></div>
+              <div className="p-3 bg-stone-50 rounded-xl space-y-1">
+                <div>Client: <strong className="text-stone-900">{returnBooking.customer.name}</strong></div>
                 <div>Due Date: <span className="font-mono">{returnBooking.returnDueDate}</span></div>
                 <div>Security Deposit Held: <strong className="font-mono text-emerald-800">{formatINR(returnBooking.depositTotal)}</strong></div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     Actual Return Date *
                   </label>
                   <input
                     type="date"
                     value={actualReturnDate}
                     onChange={(e) => setActualReturnDate(e.target.value)}
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-medium"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-medium"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     Next Garment Action
                   </label>
                   <select
                     value={nextAction}
                     onChange={(e) => setNextAction(e.target.value as NextAction)}
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-semibold"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-semibold"
                   >
                     <option value="AVAILABLE">Good Condition (Make Available)</option>
                     <option value="DRY_CLEAN">Send to Dry Clean</option>
@@ -646,7 +646,7 @@ function BookingsContent() {
 
               {(nextAction === "DRY_CLEAN" || nextAction === "REPAIR") && (
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     Assigned Care Vendor Name
                   </label>
                   <input
@@ -654,39 +654,39 @@ function BookingsContent() {
                     value={vendorName}
                     onChange={(e) => setVendorName(e.target.value)}
                     placeholder="e.g. Bargarh Modern Dry Cleaners"
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-medium"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-medium"
                   />
                 </div>
               )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     Damage Deduction (₹)
                   </label>
                   <input
                     type="number"
                     value={damageCharge}
                     onChange={(e) => setDamageCharge(Number(e.target.value) || 0)}
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                     Extra Stain Cleaning (₹)
                   </label>
                   <input
                     type="number"
                     value={cleaningCharge}
                     onChange={(e) => setCleaningCharge(Number(e.target.value) || 0)}
-                    className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono"
+                    className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                   Inspection Remarks
                 </label>
                 <input
@@ -694,18 +694,18 @@ function BookingsContent() {
                   value={returnNotes}
                   onChange={(e) => setReturnNotes(e.target.value)}
                   placeholder="e.g. Returned on time, minor dupatta stain"
-                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl"
+                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                   Deposit Refund Payment Mode
                 </label>
                 <select
                   value={refundPayMode}
                   onChange={(e) => setRefundPayMode(e.target.value as any)}
-                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-semibold"
+                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-semibold"
                 >
                   <option value="CASH">Cash Refund at Counter</option>
                   <option value="UPI">UPI Refund to Customer Phone</option>
@@ -714,7 +714,7 @@ function BookingsContent() {
               </div>
 
               {/* Damage & Defect Photos */}
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
                 <PhotoCapture
                   kind="DAMAGE"
                   bookingId={returnBooking.id}
@@ -733,17 +733,17 @@ function BookingsContent() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
+            <div className="flex items-center gap-3 pt-3 border-t border-stone-100">
               <button
                 onClick={() => setReturnBooking(null)}
-                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs"
+                className="flex-1 py-2.5 rounded-xl border border-stone-200 text-stone-700 font-semibold text-xs"
               >
                 Cancel
               </button>
               <button
                 onClick={handleExecuteReturn}
                 disabled={submittingReturn}
-                className="flex-1 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-bold rounded-xl text-xs shadow-xs flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white font-bold rounded-xl text-xs shadow-xs flex items-center justify-center gap-1.5"
               >
                 {submittingReturn ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 <span>Settle Deposit &amp; Complete Return</span>
@@ -755,22 +755,22 @@ function BookingsContent() {
 
       {/* WHATSAPP RECEIPT MODAL */}
       {whatsappReceipt && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+        <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-stone-100">
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-bold text-slate-900 text-sm">WhatsApp Receipt Generated</h3>
+                <h3 className="font-bold text-stone-900 text-sm">WhatsApp Receipt Generated</h3>
               </div>
               <button
                 onClick={() => setWhatsappReceipt(null)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-stone-400 hover:text-stone-600"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <pre className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-mono text-slate-800 whitespace-pre-wrap max-h-60 overflow-y-auto leading-relaxed">
+            <pre className="p-3.5 bg-stone-50 border border-stone-200 rounded-xl text-[11px] font-mono text-stone-800 whitespace-pre-wrap max-h-60 overflow-y-auto leading-relaxed">
               {whatsappReceipt}
             </pre>
 
@@ -780,13 +780,13 @@ function BookingsContent() {
                   navigator.clipboard.writeText(whatsappReceipt);
                   alert("Receipt copied to clipboard!");
                 }}
-                className="flex-1 py-2 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs"
+                className="flex-1 py-2 rounded-xl border border-stone-200 text-stone-700 font-semibold text-xs"
               >
                 Copy Text
               </button>
               <button
                 onClick={() => setWhatsappReceipt(null)}
-                className="flex-1 py-2 bg-[#6B1D2F] text-white font-semibold rounded-xl text-xs shadow-xs"
+                className="flex-1 py-2 bg-[#4B1835] text-white font-semibold rounded-xl text-xs shadow-xs"
               >
                 Done
               </button>
@@ -797,65 +797,65 @@ function BookingsContent() {
 
       {/* ORDER DETAILS MODAL */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-[#E6E4DF] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-[#E8DFD1] shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="font-mono text-xs text-[#6B1D2F] font-bold">
+                <span className="font-mono text-xs text-[#4B1835] font-bold">
                   {selectedOrder.id}
                 </span>
-                <h3 className="font-serif font-bold text-lg text-slate-900">
+                <h3 className="font-serif font-bold text-lg text-stone-900">
                   Order Details
                 </h3>
               </div>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-stone-400 hover:text-stone-600"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="p-3 bg-slate-50 rounded-xl space-y-1">
-                <div>Client: <strong className="text-slate-900">{selectedOrder.customer.name}</strong></div>
+              <div className="p-3 bg-stone-50 rounded-xl space-y-1">
+                <div>Client: <strong className="text-stone-900">{selectedOrder.customer.name}</strong></div>
                 <div>Phone: <strong className="font-mono">+91 {selectedOrder.customer.phone}</strong></div>
                 <div>Status: <StatusBadge status={selectedOrder.status} className="ml-2" /></div>
               </div>
 
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
+                <span className="text-[10px] font-bold text-stone-400 uppercase block mb-1">
                   Booked Costumes ({selectedOrder.items.length})
                 </span>
-                <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl bg-[#FAF9F6] p-2 space-y-1">
+                <div className="divide-y divide-stone-100 border border-stone-200 rounded-xl bg-[#FBF8F2] p-2 space-y-1">
                   {selectedOrder.items.map((i, idx) => (
                     <div key={idx} className="flex items-center justify-between py-1 text-xs">
                       <div>
-                        <span className="font-mono font-bold text-[#6B1D2F] mr-2">{i.garmentId}</span>
+                        <span className="font-mono font-bold text-[#4B1835] mr-2">{i.garmentId}</span>
                         <span className="font-semibold">{i.name}</span>
-                        {i.rack && <span className="text-slate-400 text-[10px] ml-1">({i.rack})</span>}
+                        {i.rack && <span className="text-stone-400 text-[10px] ml-1">({i.rack})</span>}
                       </div>
-                      <span className="font-mono font-bold text-slate-800">{formatINR(i.rentalPrice)}</span>
+                      <span className="font-mono font-bold text-stone-800">{formatINR(i.rentalPrice)}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl">
+              <div className="grid grid-cols-2 gap-2 p-3 bg-stone-50 rounded-xl">
                 <div>
-                  <span className="text-slate-400 text-[10px] block">Grand Total</span>
-                  <span className="font-mono font-bold text-slate-900 text-sm">{formatINR(selectedOrder.grandTotal)}</span>
+                  <span className="text-stone-400 text-[10px] block">Grand Total</span>
+                  <span className="font-mono font-bold text-stone-900 text-sm">{formatINR(selectedOrder.grandTotal)}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 text-[10px] block">Amount Paid</span>
+                  <span className="text-stone-400 text-[10px] block">Amount Paid</span>
                   <span className="font-mono font-bold text-emerald-800 text-sm">{formatINR(selectedOrder.amountPaid)}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 text-[10px] block">Deposit Held</span>
+                  <span className="text-stone-400 text-[10px] block">Deposit Held</span>
                   <span className="font-mono font-semibold text-amber-900">{formatINR(selectedOrder.depositTotal)}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 text-[10px] block">Balance Due</span>
+                  <span className="text-stone-400 text-[10px] block">Balance Due</span>
                   <div className="flex items-center justify-between">
                     <span className="font-mono font-bold text-rose-800">{formatINR(selectedOrder.balanceDue)}</span>
                     {(selectedOrder.status === "CONFIRMED" || selectedOrder.status === "OUT_ON_RENT") && selectedOrder.balanceDue > 0 && (
@@ -919,10 +919,10 @@ function BookingsContent() {
               {/* Payment Ledger / History */}
               {selectedOrder.payments && selectedOrder.payments.length > 0 && (
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
+                  <span className="text-[10px] font-bold text-stone-400 uppercase block mb-1">
                     Payment Ledger ({selectedOrder.payments.length})
                   </span>
-                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl bg-white p-2 text-[11px]">
+                  <div className="divide-y divide-stone-100 border border-stone-200 rounded-xl bg-white p-2 text-[11px]">
                     {selectedOrder.payments.map((p) => (
                       <div key={p.id} className="flex items-center justify-between py-1 font-mono">
                         <div>
@@ -935,12 +935,12 @@ function BookingsContent() {
                           }`}>
                             {p.kind}
                           </span>
-                          <span className="text-slate-600">{p.mode}</span>
-                          {p.note && <span className="text-slate-400 text-[10px] ml-1">({p.note})</span>}
+                          <span className="text-stone-600">{p.mode}</span>
+                          {p.note && <span className="text-stone-400 text-[10px] ml-1">({p.note})</span>}
                         </div>
                         <div className="text-right">
-                          <span className="font-bold text-slate-900">{formatINR(p.amount)}</span>
-                          <span className="text-slate-400 text-[9px] block">{p.paidOn}</span>
+                          <span className="font-bold text-stone-900">{formatINR(p.amount)}</span>
+                          <span className="text-stone-400 text-[9px] block">{p.paidOn}</span>
                         </div>
                       </div>
                     ))}
@@ -949,7 +949,7 @@ function BookingsContent() {
               )}
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-between pt-3 border-t border-stone-100">
               {isAdmin && selectedOrder.status === "CONFIRMED" && (
                 <button
                   onClick={() => handleCancelBooking(selectedOrder.id)}
@@ -962,7 +962,7 @@ function BookingsContent() {
 
               <Link
                 href={`/erp/billing/invoices?orderId=${selectedOrder.id}`}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs ml-auto"
+                className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white font-semibold rounded-xl text-xs ml-auto"
               >
                 Print Invoice
               </Link>

@@ -83,9 +83,9 @@ export default function CashClosingPage() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-[#E6E4DF] p-12 text-center">
-        <Loader2 className="w-6 h-6 animate-spin text-[#6B1D2F] mx-auto mb-2" />
-        <div className="text-xs text-slate-500">Reconciling today&apos;s cash payments and drawer totals...</div>
+      <div className="bg-white rounded-2xl border border-[#E8DFD1] p-12 text-center">
+        <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+        <div className="text-xs text-stone-500">Reconciling today&apos;s cash payments and drawer totals...</div>
       </div>
     );
   }
@@ -93,15 +93,15 @@ export default function CashClosingPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-6 rounded-2xl border border-[#E8DFD1] shadow-2xs">
         <div>
-          <span className="text-xs font-mono text-[#6B1D2F] font-bold">
+          <span className="text-xs font-mono text-[#4B1835] font-bold">
             Daily Financial Audit
           </span>
-          <h1 className="font-serif font-bold text-xl md:text-2xl text-slate-900 tracking-tight mt-0.5">
+          <h1 className="font-serif font-bold text-xl md:text-2xl text-stone-900 tracking-tight mt-0.5">
             Daily Cash Drawer Closing
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-stone-500 mt-1">
             Automated reconciliation of counter cash in, security deposit refunds &amp; shop cash expenses.
           </p>
         </div>
@@ -117,50 +117,50 @@ export default function CashClosingPage() {
       {/* Drawer Breakdown Grid */}
       {todayData && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
-            <span className="text-[11px] text-slate-500 font-medium block">Opening Cash</span>
-            <div className="font-mono font-bold text-lg text-slate-900 mt-0.5">
+          <div className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+            <span className="text-[11px] text-stone-500 font-medium block">Opening Cash</span>
+            <div className="font-mono font-bold text-lg text-stone-900 mt-0.5">
               {formatINR(todayData.openingCash)}
             </div>
-            <span className="text-[10px] text-slate-400">from yesterday closing</span>
+            <span className="text-[10px] text-stone-400">from yesterday closing</span>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+          <div className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
             <span className="text-[11px] text-emerald-700 font-medium block">Cash Inflows</span>
             <div className="font-mono font-bold text-lg text-emerald-800 mt-0.5">
               +{formatINR(todayData.cashIn)}
             </div>
-            <span className="text-[10px] text-slate-400">rentals &amp; deposits in</span>
+            <span className="text-[10px] text-stone-400">rentals &amp; deposits in</span>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+          <div className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
             <span className="text-[11px] text-rose-700 font-medium block">Cash Outflows</span>
             <div className="font-mono font-bold text-lg text-rose-800 mt-0.5">
               −{formatINR(todayData.cashRefunds + todayData.cashExpenses)}
             </div>
-            <span className="text-[10px] text-slate-400">refunds + expenses</span>
+            <span className="text-[10px] text-stone-400">refunds + expenses</span>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
-            <span className="text-[11px] text-slate-600 font-bold block">Expected in Drawer</span>
-            <div className="font-mono font-bold text-lg text-[#6B1D2F] mt-0.5">
+          <div className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+            <span className="text-[11px] text-stone-600 font-bold block">Expected in Drawer</span>
+            <div className="font-mono font-bold text-lg text-[#4B1835] mt-0.5">
               {formatINR(todayData.expectedCash)}
             </div>
-            <span className="text-[10px] text-slate-400">system computed</span>
+            <span className="text-[10px] text-stone-400">system computed</span>
           </div>
         </div>
       )}
 
       {/* Form: Actual Cash Counted & Verification */}
-      <div className="bg-white rounded-2xl border border-[#E6E4DF] p-6 shadow-2xs space-y-4">
-        <h2 className="font-bold text-slate-900 text-sm border-b border-slate-100 pb-2">
+      <div className="bg-white rounded-2xl border border-[#E8DFD1] p-6 shadow-2xs space-y-4">
+        <h2 className="font-bold text-stone-900 text-sm border-b border-stone-100 pb-2">
           Physical Currency Count &amp; Reconciliation
         </h2>
 
         <form onSubmit={handleSaveClosing} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+              <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                 Actual Physical Cash Counted (₹) *
               </label>
               <input
@@ -169,13 +169,13 @@ export default function CashClosingPage() {
                 disabled={todayData?.closed}
                 onChange={(e) => setActualCash(e.target.value)}
                 placeholder="Count all notes in drawer..."
-                className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-mono font-bold text-base text-slate-900 focus:outline-none focus:border-[#6B1D2F]"
+                className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-mono font-bold text-base text-stone-900 focus:outline-none focus:border-[#4B1835]"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+              <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
                 Variance / Discrepancy
               </label>
               <div
@@ -194,7 +194,7 @@ export default function CashClosingPage() {
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+            <label className="block text-[11px] font-bold text-stone-700 uppercase mb-1">
               Closing &amp; Currency Bundle Remarks
             </label>
             <input
@@ -203,7 +203,7 @@ export default function CashClosingPage() {
               disabled={todayData?.closed}
               onChange={(e) => setClosingNotes(e.target.value)}
               placeholder="e.g. 500 x 10, 200 x 15 notes. Counted and verified by owner."
-              className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl"
+              className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl"
             />
           </div>
 
@@ -212,7 +212,7 @@ export default function CashClosingPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-6 py-2.5 bg-[#6B1D2F] hover:bg-[#521624] text-white font-bold rounded-xl shadow-xs text-xs flex items-center gap-2"
+                className="px-6 py-2.5 bg-[#4B1835] hover:bg-[#521624] text-white font-bold rounded-xl shadow-xs text-xs flex items-center gap-2"
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin text-[#D4B67F]" /> : <CheckCircle2 className="w-4 h-4" />}
                 <span>Freeze &amp; Save Daily Closing</span>
@@ -223,30 +223,30 @@ export default function CashClosingPage() {
       </div>
 
       {/* Past 30 Days Cash Closings History */}
-      <div className="bg-white rounded-2xl border border-[#E6E4DF] p-6 shadow-2xs space-y-4">
-        <h2 className="font-bold text-slate-900 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
-          <History className="w-4 h-4 text-slate-500" />
+      <div className="bg-white rounded-2xl border border-[#E8DFD1] p-6 shadow-2xs space-y-4">
+        <h2 className="font-bold text-stone-900 text-sm flex items-center gap-2 border-b border-stone-100 pb-2">
+          <History className="w-4 h-4 text-stone-500" />
           <span>Past Cash Drawer Closings Ledger ({closings.length})</span>
         </h2>
 
         {closings.length === 0 ? (
-          <div className="text-center py-8 text-xs text-slate-400">
+          <div className="text-center py-8 text-xs text-stone-400">
             No previous cash closings saved yet.
           </div>
         ) : (
-          <div className="divide-y divide-slate-100 text-xs">
+          <div className="divide-y divide-stone-100 text-xs">
             {closings.map((c) => (
               <div key={c.id} className="py-3 flex items-center justify-between">
                 <div>
-                  <span className="font-mono font-bold text-slate-900">{formatDate(c.date)}</span>
-                  <div className="text-[11px] text-slate-500 mt-0.5">
-                    Verified by: <strong className="text-slate-700">{c.verifiedBy}</strong>
+                  <span className="font-mono font-bold text-stone-900">{formatDate(c.date)}</span>
+                  <div className="text-[11px] text-stone-500 mt-0.5">
+                    Verified by: <strong className="text-stone-700">{c.verifiedBy}</strong>
                     {c.notes && <span> · {c.notes}</span>}
                   </div>
                 </div>
 
                 <div className="text-right font-mono">
-                  <div className="font-bold text-slate-900">{formatINR(c.actualCash)}</div>
+                  <div className="font-bold text-stone-900">{formatINR(c.actualCash)}</div>
                   <div
                     className={`text-[10px] font-semibold ${
                       c.variance === 0

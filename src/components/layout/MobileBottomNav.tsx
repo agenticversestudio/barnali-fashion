@@ -3,21 +3,16 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Bell,
-  CalendarCheck,
-  Shirt,
-  Sparkles,
-  X,
-  ExternalLink,
-  RotateCcw,
-  MapPin,
-  Phone,
-  ChevronRight,
-  ClipboardList,
-} from "lucide-react";
+import { Bell, Shirt, Sparkles, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { alertsApi } from "@/lib/api";
+
+const NAV_ITEMS = [
+  { label: "Alerts", href: "/erp/dashboard", icon: Bell },
+  { label: "Orders", href: "/erp/bookings", icon: ClipboardList },
+  { label: "Costumes", href: "/erp/inventory", icon: Shirt },
+  { label: "Return / Care", href: "/erp/operations/laundry", icon: Sparkles },
+];
 
 export function MobileBottomNav() {
   const pathname = usePathname();
@@ -26,77 +21,48 @@ export function MobileBottomNav() {
   useEffect(() => {
     alertsApi
       .list()
-      .then((res) => {
-        setAlertCount(res.alerts?.length || 0);
-      })
+      .then((res) => setAlertCount(res.alerts?.length || 0))
       .catch(() => setAlertCount(0));
   }, [pathname]);
 
-  // Exact 4 Shop Operator Tabs
-  const navItems = [
-    {
-      label: "Alerts",
-      sublabel: "4D / 3D Alarms",
-      href: "/erp/dashboard",
-      icon: Bell,
-      badge: alertCount > 0 ? alertCount : undefined,
-    },
-    {
-      label: "Orders",
-      sublabel: "5-Step Counter",
-      href: "/erp/bookings",
-      icon: ClipboardList,
-    },
-    {
-      label: "Costumes",
-      sublabel: "Stock & Racks",
-      href: "/erp/inventory",
-      icon: Shirt,
-    },
-    {
-      label: "Return / Care",
-      sublabel: "Refund & Care",
-      href: "/erp/operations/laundry",
-      icon: Sparkles,
-    },
-  ];
+  if (pathname === "/erp/login") return null;
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-[#E6E4DF] z-40 flex items-center justify-around px-1 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] select-none">
-      {navItems.map((item) => {
-        const isActive =
-          pathname === item.href ||
-          (item.href !== "/erp/dashboard" && pathname.startsWith(item.href));
-        const Icon = item.icon;
+    <nav
+      aria-label="Main"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-line shadow-[0_-4px_16px_rgba(60,40,20,0.06)] select-none"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <div className="h-16 flex items-stretch justify-around">
+        {NAV_ITEMS.map((item) => {
+          const active = pathname === item.href || (item.href !== "/erp/dashboard" && pathname.startsWith(item.href));
+          const Icon = item.icon;
+          const badge = item.href === "/erp/dashboard" && alertCount > 0 ? alertCount : undefined;
 
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "flex-1 flex flex-col items-center justify-center py-1 transition-all relative",
-              isActive ? "text-[#6B1D2F] font-bold" : "text-slate-500 hover:text-slate-800"
-            )}
-          >
-            <div className="relative">
-              <Icon
-                className={cn(
-                  "w-5 h-5 transition-transform",
-                  isActive ? "scale-110 text-[#6B1D2F] stroke-[2.3]" : "text-slate-400 stroke-[1.8]"
-                )}
-              />
-              {item.badge !== undefined && (
-                <span className="absolute -top-1.5 -right-2.5 bg-rose-600 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full leading-tight animate-pulse">
-                  {item.badge}
-                </span>
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "relative flex-1 min-h-11 flex flex-col items-center justify-center gap-1",
+                active ? "text-plum" : "text-mute active:text-ink"
               )}
-            </div>
-            <span className="text-[11px] mt-1 tracking-tight leading-none font-medium">
-              {item.label}
-            </span>
-          </Link>
-        );
-      })}
+            >
+              {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-8 rounded-b-full bg-gold" />}
+              <span className="relative">
+                <Icon className={cn("w-[22px] h-[22px]", active ? "stroke-[2.2]" : "stroke-[1.7]")} />
+                {badge !== undefined && (
+                  <span className="num absolute -top-1.5 -right-3 min-w-4 text-center bg-rose-600 text-white text-[9px] font-bold px-1 py-px rounded-full leading-tight ring-2 ring-white">
+                    {badge}
+                  </span>
+                )}
+              </span>
+              <span className={cn("text-[11px] leading-none tracking-tight", active ? "font-semibold" : "font-medium")}>{item.label}</span>
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }

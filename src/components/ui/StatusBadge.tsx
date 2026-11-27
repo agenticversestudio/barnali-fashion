@@ -9,8 +9,8 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className, showDot = true }: StatusBadgeProps) {
-  let colorStyle = "bg-slate-50 text-slate-800 border-slate-300 font-semibold";
-  let dotColor = "bg-slate-500";
+  let colorStyle = "bg-stone-50 text-stone-800 border-stone-300 font-semibold";
+  let dotColor = "bg-stone-500";
   let displayLabel = status.replace(/_/g, " ");
 
   switch (status) {
@@ -61,8 +61,8 @@ export function StatusBadge({ status, className, showDot = true }: StatusBadgePr
 
     case "UNAVAILABLE":
     case "RETIRED":
-      colorStyle = "bg-slate-100 text-slate-700 border-slate-300 font-semibold";
-      dotColor = "bg-slate-500";
+      colorStyle = "bg-stone-100 text-stone-700 border-stone-300 font-semibold";
+      dotColor = "bg-stone-500";
       displayLabel = "Unavailable";
       break;
 
@@ -92,8 +92,8 @@ export function StatusBadge({ status, className, showDot = true }: StatusBadgePr
       break;
 
     default:
-      colorStyle = "bg-slate-50 text-slate-800 border-slate-300 font-semibold";
-      dotColor = "bg-slate-500";
+      colorStyle = "bg-stone-50 text-stone-800 border-stone-300 font-semibold";
+      dotColor = "bg-stone-500";
   }
 
   return (

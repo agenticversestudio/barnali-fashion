@@ -1,28 +1,69 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------------------------------------
+   Barnali Fashion design tokens (boutique editorial).
+   Surfaces: warm ivory / cream, white cards, hairline warm borders. Ink: warm near-black.
+   Accents: plum (brand) + antique gold. Fonts: Playfair Display (headings), Inter (body), Geist Mono (numbers/SKUs).
+   ------------------------------------------------------------------------------------------------ */
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-display: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-ivory: #fbf8f2;
+  --color-ivory-deep: #f5efe4;
+  --color-line: #e8dfd1;
+  --color-line-soft: #efe8db;
+  --color-ink: #1c1917;
+  --color-ink-soft: #44403c;
+  --color-mute: #78716c;
+  --color-plum: #4b1835;
+  --color-plum-dark: #320f23;
+  --color-plum-soft: #f9f1f5;
+  --color-gold: #b89558;
+  --color-gold-dark: #8c6f3b;
+  --color-gold-soft: #faf5eb;
+}
+
 @layer base {
   :root {
-    --brand-plum: #4B1835;
-    --brand-plum-dark: #320F23;
-    --brand-plum-light: #6A254D;
-    --brand-plum-soft: #F9F1F5;
-    --brand-gold: #B89558;
-    --brand-gold-dark: #8C6F3B;
-    --brand-gold-light: #D4B67F;
-    --brand-gold-soft: #FAF5EB;
-    --brand-ivory: #F7F3EC;
-    --brand-ivory-warm: #EFE9DD;
-    --brand-charcoal: #27222A;
-    --brand-sage: #66786C;
-    --brand-sage-light: #EBF0ED;
+    /* legacy names kept so existing pages keep working */
+    --brand-plum: #4b1835;
+    --brand-plum-dark: #320f23;
+    --brand-plum-light: #6a254d;
+    --brand-plum-soft: #f9f1f5;
+    --brand-gold: #b89558;
+    --brand-gold-dark: #8c6f3b;
+    --brand-gold-light: #d4b67f;
+    --brand-gold-soft: #faf5eb;
+    --brand-ivory: #f7f3ec;
+    --brand-ivory-warm: #efe9dd;
+    --brand-charcoal: #27222a;
+    --brand-sage: #66786c;
+    --brand-sage-light: #ebf0ed;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* a visible, on-brand focus ring for keyboard users everywhere */
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+    border-radius: 6px;
   }
 }
 
 body {
-  background-color: #FBF9F5;
-  color: #27222A;
+  background-color: #fbf8f2;
+  color: #1c1917;
+  font-family: var(--font-sans);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* Custom Scrollbar */
@@ -39,6 +80,128 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #b89558;
+}
+
+/* ------------------------------------------------------------------------------------------------
+   Reusable building blocks (used from Phase 1 onward by every ERP page)
+   ------------------------------------------------------------------------------------------------ */
+@layer components {
+  /* editorial page / stat headings */
+  .page-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    color: var(--color-ink);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--color-ink);
+  }
+  /* micro label: uppercase, tracked, never crowds neighbours */
+  .eyebrow {
+    font-size: 10px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-gold-dark);
+  }
+  .eyebrow-mute {
+    font-size: 10px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-mute);
+  }
+  /* currency, dates, counts, SKUs, phones: aligned digits */
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    letter-spacing: -0.01em;
+  }
+  /* white card on ivory: hairline warm border, soft elevation */
+  .surface {
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(60, 40, 20, 0.04);
+  }
+  .surface-interactive {
+    transition: box-shadow 150ms ease, border-color 150ms ease, transform 150ms ease;
+  }
+  .surface-interactive:hover {
+    border-color: #d9cbb0;
+    box-shadow: 0 4px 14px rgba(60, 40, 20, 0.08);
+  }
+  .hairline {
+    border-color: var(--color-line);
+  }
+}
+
+/* ------------------------------------------------------------------------------------------------
+   Micro-interactions: a gentle press on buttons, and the open/close animations the markup already
+   names (animate-in, fade-in, slide-in-from-*, zoom-in-95). All disabled for reduced-motion users.
+   ------------------------------------------------------------------------------------------------ */
+button,
+[role="button"],
+a {
+  transition-property: background-color, border-color, color, box-shadow, transform, opacity;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+button:not(:disabled):active,
+[role="button"]:active {
+  transform: scale(0.98);
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
+@keyframes erp-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes erp-rise-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes erp-zoom-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes erp-slide-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+.animate-in {
+  animation: erp-fade-in 150ms ease-out both;
+}
+.animate-in.slide-in-from-top-1 {
+  animation-name: erp-rise-in;
+}
+.animate-in.zoom-in-95 {
+  animation-name: erp-zoom-in;
+}
+.animate-in.slide-in-from-left {
+  animation: erp-slide-left 200ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  button:not(:disabled):active {
+    transform: none;
+  }
 }
 
 /* Print Styles for Invoices, Handover & 80mm Thermal Receipts */

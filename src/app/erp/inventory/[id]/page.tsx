@@ -161,21 +161,21 @@ function GarmentDetailContent() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-[#E6E4DF] p-16 text-center">
-        <Loader2 className="w-6 h-6 animate-spin text-[#6B1D2F] mx-auto mb-2" />
-        <div className="text-xs text-slate-500">Loading garment details...</div>
+      <div className="bg-white rounded-2xl border border-[#E8DFD1] p-16 text-center">
+        <Loader2 className="w-6 h-6 animate-spin text-[#4B1835] mx-auto mb-2" />
+        <div className="text-xs text-stone-500">Loading garment details...</div>
       </div>
     );
   }
 
   if (error || !garment) {
     return (
-      <div className="bg-white rounded-2xl border border-[#E6E4DF] p-16 text-center space-y-3">
+      <div className="bg-white rounded-2xl border border-[#E8DFD1] p-16 text-center space-y-3">
         <div className="text-rose-600 font-bold text-sm">Garment SKU not found</div>
-        <p className="text-xs text-slate-500">{error || "Please verify the costume SKU ID."}</p>
+        <p className="text-xs text-stone-500">{error || "Please verify the costume SKU ID."}</p>
         <Link
           href="/erp/inventory"
-          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg min-h-10"
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold rounded-lg min-h-10"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Inventory</span>
@@ -187,22 +187,22 @@ function GarmentDetailContent() {
   return (
     <div className="space-y-6">
       {/* Top Navigation & SKU Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
         <div className="flex items-center gap-3">
           <Link
             href="/erp/inventory"
-            className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors min-h-10"
+            className="p-2 rounded-xl border border-stone-200 hover:bg-stone-50 text-stone-600 transition-colors min-h-10"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-mono font-bold text-xs bg-[#6B1D2F]/10 text-[#6B1D2F] px-2.5 py-0.5 rounded-full">
+              <span className="font-mono font-bold text-xs bg-[#4B1835]/10 text-[#4B1835] px-2.5 py-0.5 rounded-full">
                 {garment.id}
               </span>
               <StatusBadge status={garment.status} />
             </div>
-            <h1 className="font-serif font-bold text-lg md:text-xl text-slate-900 mt-1">
+            <h1 className="font-serif font-bold text-lg md:text-xl text-stone-900 mt-1">
               {garment.name}
             </h1>
           </div>
@@ -211,7 +211,7 @@ function GarmentDetailContent() {
         <div className="flex items-center gap-2">
           <Link
             href={`/erp/bookings/new?sku=${garment.id}`}
-            className="px-4 py-2 bg-[#6B1D2F] hover:bg-[#521624] text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5"
+            className="px-4 py-2 bg-[#4B1835] hover:bg-[#521624] text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5"
           >
             <CalendarDays className="w-3.5 h-3.5" />
             <span>Create Booking</span>
@@ -222,8 +222,8 @@ function GarmentDetailContent() {
       {/* Main Grid: Details & Photos */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Image & Media Gallery */}
-        <div className="bg-white rounded-2xl border border-[#E6E4DF] p-5 shadow-2xs space-y-4">
-          <div className="h-80 bg-slate-100 rounded-xl overflow-hidden relative border border-slate-200">
+        <div className="bg-white rounded-2xl border border-[#E8DFD1] p-5 shadow-2xs space-y-4">
+          <div className="h-80 bg-stone-100 rounded-xl overflow-hidden relative border border-stone-200">
             <img
               src={
                 garment.mainPhotoUrl ||
@@ -240,9 +240,9 @@ function GarmentDetailContent() {
 
           {/* Photo Gallery Thumbnails */}
           <div>
-            <div className="flex items-center justify-between text-xs font-bold text-slate-700 uppercase mb-2">
+            <div className="flex items-center justify-between text-xs font-bold text-stone-700 uppercase mb-2">
               <span>Costume Photos ({garment.photos?.length || 0}/8)</span>
-              <label className="flex items-center gap-1 text-[11px] text-[#6B1D2F] hover:underline cursor-pointer">
+              <label className="flex items-center gap-1 text-[11px] text-[#4B1835] hover:underline cursor-pointer">
                 <Upload className="w-3 h-3" />
                 <span>Upload</span>
                 <input
@@ -273,7 +273,7 @@ function GarmentDetailContent() {
               {garment.photos?.map((p) => (
                 <div
                   key={p.id}
-                  className="h-16 rounded-lg overflow-hidden border border-slate-200 relative group bg-slate-50"
+                  className="h-16 rounded-lg overflow-hidden border border-stone-200 relative group bg-stone-50"
                 >
                   <img src={p.url} alt={p.kind} className="w-full h-full object-cover" />
                   {isAdmin && (
@@ -291,14 +291,14 @@ function GarmentDetailContent() {
           </div>
 
           {/* Location & Godown Rack info */}
-          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2 text-xs">
+          <div className="p-3.5 bg-stone-50 rounded-xl border border-stone-200/80 space-y-2 text-xs">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-700 uppercase text-[10px] tracking-wider">
+              <span className="font-bold text-stone-700 uppercase text-[10px] tracking-wider">
                 Godown Warehouse Location
               </span>
               <button
                 onClick={() => setIsEditingRack(!isEditingRack)}
-                className="text-[11px] text-[#6B1D2F] font-semibold flex items-center gap-1 hover:underline"
+                className="text-[11px] text-[#4B1835] font-semibold flex items-center gap-1 hover:underline"
               >
                 <Edit2 className="w-3 h-3" />
                 <span>{isEditingRack ? "Cancel" : "Change"}</span>
@@ -312,27 +312,27 @@ function GarmentDetailContent() {
                   value={rack}
                   onChange={(e) => setRack(e.target.value)}
                   placeholder="Rack name (e.g. Rack A-01)"
-                  className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs"
+                  className="w-full p-2 bg-white border border-stone-300 rounded-lg text-xs"
                 />
                 <input
                   type="text"
                   value={shelf}
                   onChange={(e) => setShelf(e.target.value)}
                   placeholder="Shelf (e.g. Shelf 2)"
-                  className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs"
+                  className="w-full p-2 bg-white border border-stone-300 rounded-lg text-xs"
                 />
                 <button
                   onClick={handleSaveRack}
                   disabled={savingRack}
-                  className="w-full py-1.5 bg-[#6B1D2F] text-white rounded-lg font-semibold text-xs flex items-center justify-center gap-1 min-h-10"
+                  className="w-full py-1.5 bg-[#4B1835] text-white rounded-lg font-semibold text-xs flex items-center justify-center gap-1 min-h-10"
                 >
                   {savingRack ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                   <span>Save Location</span>
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-slate-800 font-semibold">
-                <MapPin className="w-4 h-4 text-[#6B1D2F] shrink-0" />
+              <div className="flex items-center gap-2 text-stone-800 font-semibold">
+                <MapPin className="w-4 h-4 text-[#4B1835] shrink-0" />
                 <span>
                   {garment.rack} {garment.shelf ? `· ${garment.shelf}` : ""}
                 </span>
@@ -345,26 +345,26 @@ function GarmentDetailContent() {
         <div className="lg:col-span-2 space-y-6">
           {/* Tariffs & Key Numbers */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
-              <span className="text-[11px] text-slate-500 font-medium">Rental Tariff</span>
-              <div className="font-mono font-bold text-lg text-[#6B1D2F] mt-0.5">
+            <div className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+              <span className="text-[11px] text-stone-500 font-medium">Rental Tariff</span>
+              <div className="font-mono font-bold text-lg text-[#4B1835] mt-0.5">
                 {formatINR(garment.rentalPrice)}
               </div>
-              <span className="text-[10px] text-slate-400">per 3-day booking</span>
+              <span className="text-[10px] text-stone-400">per 3-day booking</span>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
-              <span className="text-[11px] text-slate-500 font-medium">Refundable Deposit</span>
-              <div className="font-mono font-bold text-lg text-slate-900 mt-0.5">
+            <div className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+              <span className="text-[11px] text-stone-500 font-medium">Refundable Deposit</span>
+              <div className="font-mono font-bold text-lg text-stone-900 mt-0.5">
                 {formatINR(garment.securityDeposit)}
               </div>
-              <span className="text-[10px] text-slate-400">returned on inspection</span>
+              <span className="text-[10px] text-stone-400">returned on inspection</span>
             </div>
 
             {isAdmin && garment.purchaseCost !== undefined && (
-              <div className="bg-white p-4 rounded-2xl border border-[#E6E4DF] shadow-2xs">
-                <span className="text-[11px] text-slate-500 font-medium">Purchase Cost</span>
-                <div className="font-mono font-bold text-lg text-slate-600 mt-0.5">
+              <div className="bg-white p-4 rounded-2xl border border-[#E8DFD1] shadow-2xs">
+                <span className="text-[11px] text-stone-500 font-medium">Purchase Cost</span>
+                <div className="font-mono font-bold text-lg text-stone-600 mt-0.5">
                   {formatINR(garment.purchaseCost)}
                 </div>
                 <span className="text-[10px] text-emerald-600 font-medium">Asset Value</span>
@@ -373,36 +373,36 @@ function GarmentDetailContent() {
           </div>
 
           {/* Specifications Card */}
-          <div className="bg-white rounded-2xl border border-[#E6E4DF] p-5 shadow-2xs space-y-4">
-            <h3 className="font-bold text-slate-900 text-sm border-b border-slate-100 pb-2">
+          <div className="bg-white rounded-2xl border border-[#E8DFD1] p-5 shadow-2xs space-y-4">
+            <h3 className="font-bold text-stone-900 text-sm border-b border-stone-100 pb-2">
               Garment Specifications &amp; Sizing
             </h3>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold">Category</span>
-                <div className="font-semibold text-slate-800 mt-0.5">{garment.category}</div>
+                <span className="text-stone-400 text-[10px] uppercase font-bold">Category</span>
+                <div className="font-semibold text-stone-800 mt-0.5">{garment.category}</div>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold">Size</span>
-                <div className="font-semibold text-slate-800 mt-0.5">{garment.size}</div>
+                <span className="text-stone-400 text-[10px] uppercase font-bold">Size</span>
+                <div className="font-semibold text-stone-800 mt-0.5">{garment.size}</div>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold">Colour</span>
-                <div className="font-semibold text-slate-800 mt-0.5">{garment.colour || "—"}</div>
+                <span className="text-stone-400 text-[10px] uppercase font-bold">Colour</span>
+                <div className="font-semibold text-stone-800 mt-0.5">{garment.colour || "—"}</div>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold">Fabric</span>
-                <div className="font-semibold text-slate-800 mt-0.5">{garment.fabric || "—"}</div>
+                <span className="text-stone-400 text-[10px] uppercase font-bold">Fabric</span>
+                <div className="font-semibold text-stone-800 mt-0.5">{garment.fabric || "—"}</div>
               </div>
             </div>
 
             {garment.description && (
-              <div className="pt-2 border-t border-slate-100 text-xs">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block mb-1">
+              <div className="pt-2 border-t border-stone-100 text-xs">
+                <span className="text-stone-400 text-[10px] uppercase font-bold block mb-1">
                   Design &amp; Fitting Description
                 </span>
-                <p className="text-slate-700 leading-relaxed bg-[#FAF9F6] p-3 rounded-xl border border-slate-200/60">
+                <p className="text-stone-700 leading-relaxed bg-[#FBF8F2] p-3 rounded-xl border border-stone-200/60">
                   {garment.description}
                 </p>
               </div>
@@ -410,17 +410,17 @@ function GarmentDetailContent() {
           </div>
 
           {/* Status Update Card */}
-          <div className="bg-white rounded-2xl border border-[#E6E4DF] p-5 shadow-2xs space-y-3">
-            <h3 className="font-bold text-slate-900 text-sm">Update Asset Status</h3>
+          <div className="bg-white rounded-2xl border border-[#E8DFD1] p-5 shadow-2xs space-y-3">
+            <h3 className="font-bold text-stone-900 text-sm">Update Asset Status</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                   New Status
                 </label>
                 <select
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value as GarmentStatus)}
-                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl font-semibold text-slate-800"
+                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl font-semibold text-stone-800"
                 >
                   <option value="AVAILABLE">Available</option>
                   <option value="OUT_ON_RENT">Out on Rent</option>
@@ -432,7 +432,7 @@ function GarmentDetailContent() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase mb-1">
                   Status Note (Optional)
                 </label>
                 <input
@@ -440,7 +440,7 @@ function GarmentDetailContent() {
                   value={statusNote}
                   onChange={(e) => setStatusNote(e.target.value)}
                   placeholder="e.g. Sent for minor zari repair"
-                  className="w-full p-2.5 bg-[#F7F6F3] border border-[#E6E4DF] rounded-xl text-xs"
+                  className="w-full p-2.5 bg-[#FBF8F2] border border-[#E8DFD1] rounded-xl text-xs"
                 />
               </div>
             </div>
@@ -449,7 +449,7 @@ function GarmentDetailContent() {
               <button
                 onClick={handleUpdateStatus}
                 disabled={updatingStatus}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs flex items-center gap-1.5"
+                className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white font-semibold rounded-xl text-xs flex items-center gap-1.5"
               >
                 {updatingStatus && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Save Status Change</span>
@@ -458,41 +458,41 @@ function GarmentDetailContent() {
           </div>
 
           {/* Booking History & Lifetime Utilization */}
-          <div className="bg-white rounded-2xl border border-[#E6E4DF] p-5 shadow-2xs space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                <History className="w-4 h-4 text-slate-500" />
+          <div className="bg-white rounded-2xl border border-[#E8DFD1] p-5 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-2">
+              <h3 className="font-bold text-stone-900 text-sm flex items-center gap-2">
+                <History className="w-4 h-4 text-stone-500" />
                 <span>Booking History ({garment.history?.length || 0})</span>
               </h3>
 
               {isAdmin && garment.stats && (
-                <div className="text-xs text-slate-600 font-mono">
+                <div className="text-xs text-stone-600 font-mono">
                   Earned: <span className="font-bold text-emerald-700">{formatINR(garment.stats.revenue)}</span>
                 </div>
               )}
             </div>
 
             {garment.history && garment.history.length > 0 ? (
-              <div className="divide-y divide-slate-100 text-xs">
+              <div className="divide-y divide-stone-100 text-xs">
                 {garment.history.map((h, i) => (
                   <div key={i} className="py-2.5 flex items-center justify-between">
                     <div>
-                      <div className="font-semibold text-slate-800">
+                      <div className="font-semibold text-stone-800">
                         {h.customerName}
                       </div>
-                      <div className="text-[11px] text-slate-500 font-mono">
+                      <div className="text-[11px] text-stone-500 font-mono">
                         {h.from} → {h.to}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-mono text-slate-400">{h.bookingId}</span>
+                      <span className="text-[10px] font-mono text-stone-400">{h.bookingId}</span>
                       <StatusBadge status={h.status} />
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-6 text-xs text-slate-400">
+              <div className="text-center py-6 text-xs text-stone-400">
                 No past bookings recorded for this garment yet.
               </div>
             )}

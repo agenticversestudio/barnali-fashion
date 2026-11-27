@@ -89,13 +89,26 @@ export function ErpHeader() {
 
   // Clean page titles for header
   const getPageTitle = () => {
-    if (pathname.startsWith("/erp/dashboard")) return "Alerts & Today";
-    if (pathname.startsWith("/erp/bookings")) return "Orders";
-    if (pathname.startsWith("/erp/inventory")) return "Inventory";
-    if (pathname.startsWith("/erp/operations/laundry")) return "Return & Care";
-    if (pathname.startsWith("/erp/calendar")) return "Calendar";
-    if (pathname.startsWith("/erp/customers")) return "Customers";
-    return "Barnali Fashion";
+    const titles: [string, string][] = [
+      ["/erp/dashboard", "Studio Today"],
+      ["/erp/bookings/new", "New Counter Booking"],
+      ["/erp/bookings", "Orders"],
+      ["/erp/inventory", "Inventory"],
+      ["/erp/operations/laundry", "Return & Care"],
+      ["/erp/operations/pickup", "Pickup Desk"],
+      ["/erp/operations/returns", "Return Counter"],
+      ["/erp/operations/inspection", "Inspection"],
+      ["/erp/operations/maintenance", "Alterations"],
+      ["/erp/calendar", "Calendar"],
+      ["/erp/customers", "Customers"],
+      ["/erp/billing/cash-closing", "Cash Closing"],
+      ["/erp/billing/expenses", "Expenses"],
+      ["/erp/billing/deposits", "Deposit Register"],
+      ["/erp/reports", "Reports"],
+      ["/erp/staff", "Staff"],
+      ["/erp/settings", "Settings"],
+    ];
+    return titles.find(([prefix]) => pathname.startsWith(prefix))?.[1] ?? "Barnali Fashion";
   };
 
   // Role display label
@@ -150,135 +163,112 @@ export function ErpHeader() {
 
   return (
     <>
-      <header className="h-14 md:h-16 bg-white border-b border-[#E6E4DF] px-3.5 md:px-6 flex items-center justify-between sticky top-0 z-30 shadow-[0_1px_2px_rgba(0,0,0,0.03)] select-none">
-        {/* ========================================================= */}
-        {/* MOBILE COMPACT TOP BAR (< 768px): ZERO DUPLICATES         */}
-        {/* ========================================================= */}
-        <div className="flex md:hidden items-center justify-between w-full">
-          {/* Left: Hamburger Menu Trigger + Brand Mark + Page Title */}
+      <header className="h-14 md:h-16 bg-white/95 backdrop-blur border-b border-line px-3.5 md:px-6 flex items-center justify-between sticky top-0 z-30 select-none">
+        {/* MOBILE (< 768px): menu, mark + serif page title, search, alerts */}
+        <div className="flex md:hidden items-center justify-between w-full gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <button
               onClick={() => setShowMobileDrawer(true)}
-              className="w-8 h-8 rounded-lg text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors -ml-1"
-              aria-label="Open Navigation Menu"
+              className="w-10 h-10 -ml-1.5 rounded-lg text-ink-soft hover:bg-ivory-deep flex items-center justify-center shrink-0"
+              aria-label="Open navigation menu"
             >
-              <Menu className="w-5 h-5 text-slate-700" />
+              <Menu className="w-5 h-5" />
             </button>
-
             <Link
               href="/erp/dashboard"
-              className="w-7 h-7 rounded-lg bg-[#6B1D2F] flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-xs"
+              aria-label="Barnali Fashion home"
+              className="w-8 h-8 rounded-lg bg-plum flex items-center justify-center text-gold-light font-display font-bold text-sm shrink-0 ring-1 ring-gold/40"
             >
-              BF
+              B
             </Link>
-
-            <h1 className="font-semibold text-sm text-slate-900 tracking-tight truncate leading-none">
-              {getPageTitle()}
-            </h1>
+            <h1 className="page-title text-[17px] truncate">{getPageTitle()}</h1>
           </div>
 
-          {/* Right Action Controls: Search Icon + Notification Bell (NO DUPLICATE '+') */}
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* Search Icon Button */}
             <button
               onClick={() => setShowSearchModal(true)}
-              className="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center transition-colors"
-              aria-label="Search items"
+              className="w-10 h-10 rounded-lg bg-ivory hover:bg-ivory-deep border border-line text-ink-soft flex items-center justify-center"
+              aria-label="Search costumes, customers, orders"
             >
-              <Search className="w-4 h-4 text-slate-600" />
+              <Search className="w-4 h-4" />
             </button>
-
-            {/* Notification Bell */}
-            <button
-              onClick={() => setShowNotifMenu(!showNotifMenu)}
-              className="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center transition-colors relative"
-              aria-label="Notifications"
+            {/* on a phone the bell opens the dashboard, where every alert is listed with its actions */}
+            <Link
+              href="/erp/dashboard"
+              className="w-10 h-10 rounded-lg bg-ivory hover:bg-ivory-deep border border-line text-ink-soft flex items-center justify-center relative"
+              aria-label={`Alerts (${unreadCount})`}
             >
-              <Bell className="w-4 h-4 text-slate-600" />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-rose-600 rounded-full ring-2 ring-white animate-pulse" />
-              )}
-            </button>
+              <Bell className="w-4 h-4" />
+              {unreadCount > 0 && <span className="absolute top-2 right-2 w-2 h-2 bg-rose-600 rounded-full ring-2 ring-white" />}
+            </Link>
           </div>
         </div>
 
-        {/* ========================================================= */}
-        {/* DESKTOP & TABLET MINIMAL HEADER (>= 768px)                */}
-        {/* ========================================================= */}
-        <div className="hidden md:flex items-center justify-between w-full">
-          {/* Left: Tablet Hamburger (lg:hidden) + Global Search Bar */}
-          <div className="flex items-center gap-3">
+        {/* TABLET / DESKTOP (>= 768px) */}
+        <div className="hidden md:flex items-center justify-between w-full gap-4">
+          <div className="flex items-center gap-4 min-w-0">
             <button
               onClick={() => setShowMobileDrawer(true)}
-              className="lg:hidden w-10 h-10 rounded-lg text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors border border-[#E6E4DF] bg-white shrink-0 shadow-2xs active:bg-slate-100"
-              aria-label="Open Navigation Menu"
+              className="lg:hidden w-10 h-10 rounded-lg text-ink-soft hover:bg-ivory-deep flex items-center justify-center border border-line bg-white shrink-0"
+              aria-label="Open navigation menu"
             >
-              <Menu className="w-5 h-5 text-slate-700" />
+              <Menu className="w-5 h-5" />
             </button>
-
+            <h1 className="page-title text-xl hidden lg:block shrink-0">{getPageTitle()}</h1>
+            <span className="hidden lg:block h-6 w-px bg-line shrink-0" />
             <button
               onClick={() => setShowSearchModal(true)}
-              className="flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 border border-[#E6E4DF] text-xs text-slate-500 px-3.5 py-2.5 rounded-lg transition-colors w-72 md:w-80 lg:w-96 shadow-2xs"
+              className="flex items-center justify-between bg-ivory hover:bg-ivory-deep border border-line text-xs text-mute px-3.5 min-h-10 rounded-lg w-64 lg:w-96"
             >
-              <span className="flex items-center gap-2">
-                <Search className="w-4 h-4 text-slate-400" />
-                <span className="font-normal text-slate-500">
-                  Search Costume ID, Client, Order...
-                </span>
+              <span className="flex items-center gap-2 min-w-0">
+                <Search className="w-4 h-4 text-mute shrink-0" />
+                <span className="truncate">Search Costume ID, Client, Order...</span>
               </span>
-              <kbd className="bg-white text-[10px] text-slate-400 font-mono font-medium px-1.5 py-0.5 rounded border border-slate-200 shadow-2xs">
-                ⌘K
-              </kbd>
+              <kbd className="num bg-white text-[10px] text-mute font-medium px-1.5 py-0.5 rounded border border-line ml-2 shrink-0">⌘K</kbd>
             </button>
           </div>
 
-          {/* Right Controls: Notification Bell + Minimal User/Studio Avatar Pill */}
-          <div className="flex items-center gap-2.5">
-            {/* Notification Bell with Clean Dropdown */}
+          <div className="flex items-center gap-2.5 shrink-0">
             <div className="relative" ref={notifRef}>
               <button
                 onClick={() => setShowNotifMenu(!showNotifMenu)}
-                className="w-9 h-9 text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-[#E6E4DF] rounded-lg transition-colors flex items-center justify-center relative"
-                aria-label="Delivery Alerts & Alarms"
+                className="w-10 h-10 text-ink-soft hover:text-ink bg-ivory hover:bg-ivory-deep border border-line rounded-lg flex items-center justify-center relative"
+                aria-label={`Alerts (${alerts.length})`}
+                aria-expanded={showNotifMenu}
               >
-                <Bell className="w-4 h-4 text-slate-700" />
-                {alerts.length > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-600 rounded-full ring-2 ring-white animate-pulse" />
-                )}
+                <Bell className="w-4 h-4" />
+                {alerts.length > 0 && <span className="absolute top-2 right-2 w-2 h-2 bg-rose-600 rounded-full ring-2 ring-white" />}
               </button>
 
               {showNotifMenu && (
-                <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white border border-[#E6E4DF] rounded-xl shadow-2xl py-2 z-50 text-xs animate-in fade-in slide-in-from-top-1">
-                  <div className="px-3.5 py-2.5 border-b border-[#EFECE6] flex items-center justify-between">
+                <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white border border-line rounded-xl shadow-[0_12px_32px_rgba(60,40,20,0.16)] z-50 text-xs animate-in fade-in slide-in-from-top-1 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-line-soft flex items-center justify-between bg-ivory">
                     <div>
-                      <span className="font-semibold text-slate-900 text-sm">
-                        Operational Alerts
-                      </span>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        Pickups, Overdue Returns &amp; Pending Care
-                      </p>
+                      <span className="section-title text-[15px]">Operational alerts</span>
+                      <p className="text-[11px] text-mute mt-0.5">Pickups, returns, refunds &amp; care</p>
                     </div>
-                    <span className="text-[11px] bg-rose-50 text-rose-800 border border-rose-200 px-2 py-0.5 rounded-full font-semibold">
-                      {alerts.length} Due
+                    <span className="num text-[11px] bg-rose-50 text-rose-800 border border-rose-200 px-2 py-0.5 rounded-full font-semibold">
+                      {alerts.length} due
                     </span>
                   </div>
 
-                  <div className="max-h-80 overflow-y-auto divide-y divide-[#EFECE6]">
+                  <div className="max-h-80 overflow-y-auto divide-y divide-line-soft">
                     {alerts.length === 0 ? (
-                      <div className="p-6 text-center text-slate-400">All operations up to date</div>
+                      <div className="p-8 text-center">
+                        <p className="section-title text-sm">All caught up</p>
+                        <p className="text-[11px] text-mute mt-1">No pickups, returns or refunds need attention right now.</p>
+                      </div>
                     ) : (
                       alerts.map((a, idx) => (
-                        <div
+                        <button
                           key={idx}
+                          type="button"
                           onClick={() => {
-                            if (a.type === "PICKUP_SOON" || a.type === "RETURN_DUE" || a.type === "RETURN_OVERDUE") {
-                              router.push(`/erp/bookings?orderId=${a.refId}`);
-                            } else if (a.type === "CARE_OVERDUE") {
-                              router.push(`/erp/operations/laundry`);
-                            }
+                            if (a.type === "CARE_OVERDUE") router.push(`/erp/operations/laundry`);
+                            else router.push(`/erp/bookings?orderId=${a.refId}`);
                             setShowNotifMenu(false);
                           }}
-                          className="p-3 hover:bg-slate-50 cursor-pointer transition-colors"
+                          className="w-full text-left p-3.5 hover:bg-ivory cursor-pointer"
                         >
                           <div className="flex items-start gap-2.5">
                             {a.type.includes("OVERDUE") ? (
@@ -287,18 +277,12 @@ export function ErpHeader() {
                               <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                             )}
                             <div className="min-w-0 flex-1">
-                              <div className="font-semibold text-slate-900">{a.title}</div>
-                              <p className="text-slate-600 text-[11px] mt-0.5 leading-snug">
-                                {a.message}
-                              </p>
-                              {a.date && (
-                                <span className="text-[10px] text-slate-400 mt-1 block font-mono">
-                                  {a.date}
-                                </span>
-                              )}
+                              <div className="font-semibold text-ink">{a.title}</div>
+                              <p className="text-ink-soft text-[11px] mt-0.5 leading-snug">{a.message}</p>
+                              {a.date && <span className="num text-[10px] text-mute mt-1 block">{a.date}</span>}
                             </div>
                           </div>
-                        </div>
+                        </button>
                       ))
                     )}
                   </div>
@@ -306,60 +290,49 @@ export function ErpHeader() {
               )}
             </div>
 
-            {/* Minimal User / Studio Avatar Pill */}
+            {/* studio / user badge */}
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 p-1.5 pr-2.5 bg-white hover:bg-slate-50 border border-[#E6E4DF] rounded-lg transition-colors shadow-2xs"
-                aria-label="User Account Menu"
+                className="flex items-center gap-2.5 p-1 pr-3 bg-white hover:bg-ivory border border-line rounded-lg min-h-10"
+                aria-label="Account menu"
+                aria-expanded={showUserMenu}
               >
-                <div className="w-7 h-7 rounded-lg bg-[#6B1D2F] text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
-                  {isAdmin ? "AD" : "ST"}
+                <div className="w-8 h-8 rounded-md bg-plum text-gold-light flex items-center justify-center font-display font-bold text-xs shrink-0 ring-1 ring-gold/40">
+                  BF
                 </div>
                 <div className="text-left hidden lg:block">
-                  <div className="text-xs font-semibold text-slate-900 leading-none">
-                    {user?.name || "Barnali User"}
-                  </div>
-                  <div className="text-[10px] text-slate-500 font-medium leading-none mt-1 capitalize font-mono">
-                    {user?.role || "Staff"}
-                  </div>
+                  <div className="text-xs font-semibold text-ink leading-none">{user?.name || "Barnali User"}</div>
+                  <div className="text-[10px] text-mute font-medium mt-1 leading-none">{getRoleLabel(user?.role)}</div>
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                <ChevronDown className="w-3.5 h-3.5 text-mute" />
               </button>
 
               {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-64 bg-white border border-[#E6E4DF] rounded-xl shadow-2xl p-2 z-50 text-xs animate-in fade-in slide-in-from-top-1 space-y-2">
-                  {/* Studio Info Header */}
-                  <div className="p-2.5 bg-[#FAF9F6] rounded-lg border border-[#EFECE6]">
-                    <div className="font-semibold text-slate-900 text-xs">
-                      {user?.name || "Barnali User"}
-                    </div>
-                    <div className="text-[10px] text-slate-500 mt-0.5 font-mono">
-                      @{user?.username} · Role: {user?.role}
-                    </div>
+                <div className="absolute right-0 mt-2 w-64 bg-white border border-line rounded-xl shadow-[0_12px_32px_rgba(60,40,20,0.16)] p-2 z-50 text-xs animate-in fade-in slide-in-from-top-1 space-y-2">
+                  <div className="p-3 bg-ivory rounded-lg border border-line-soft">
+                    <div className="font-semibold text-ink text-sm">{user?.name || "Barnali User"}</div>
+                    <div className="num text-[10px] text-mute mt-0.5">@{user?.username} · {user?.role}</div>
                   </div>
-
-                  {/* Actions */}
-                  <div className="pt-1 border-t border-[#EFECE6] space-y-1">
+                  <div className="pt-1 border-t border-line-soft space-y-1">
                     <Link
                       href="/"
                       target="_blank"
                       onClick={() => setShowUserMenu(false)}
-                      className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
+                      className="flex items-center justify-between px-2.5 min-h-10 rounded-lg text-ink-soft hover:bg-ivory font-medium"
                     >
-                      <span>Public Storefront</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Public storefront</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-mute" />
                     </Link>
-
                     <button
                       onClick={() => {
                         setShowUserMenu(false);
                         logout();
                       }}
-                      className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-rose-700 hover:bg-rose-50 font-medium transition-colors"
+                      className="w-full flex items-center gap-1.5 px-2.5 min-h-10 rounded-lg text-rose-700 hover:bg-rose-50 font-medium"
                     >
                       <LogOut className="w-3.5 h-3.5" />
-                      <span>Log Out</span>
+                      <span>Log out</span>
                     </button>
                   </div>
                 </div>
@@ -377,30 +350,30 @@ export function ErpHeader() {
           {/* Backdrop */}
           <div
             onClick={() => setShowMobileDrawer(false)}
-            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in"
+            className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs transition-opacity animate-in fade-in"
           />
 
           {/* Slide-over Drawer Content */}
           <div className="relative bg-white w-4/5 max-w-xs h-full shadow-2xl flex flex-col justify-between p-4 z-10 animate-in slide-in-from-left duration-200">
             <div>
               {/* Drawer Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-[#EFECE6]">
+              <div className="flex items-center justify-between pb-3 border-b border-line-soft">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-[#6B1D2F] text-white flex items-center justify-center font-bold text-xs shadow-xs">
-                    BF
+                  <div className="w-9 h-9 rounded-xl bg-plum text-gold-light flex items-center justify-center font-display font-bold text-base ring-1 ring-gold/40">
+                    B
                   </div>
                   <div>
-                    <div className="font-bold text-slate-900 text-sm leading-tight">
-                      Barnali Fashion
+                    <div className="font-display font-semibold tracking-wide text-ink text-[15px] leading-tight">
+                      BARNALI FASHION
                     </div>
-                    <div className="text-[10px] text-slate-500 leading-tight mt-0.5">
+                    <div className="text-[10px] text-stone-500 leading-tight mt-0.5">
                       Rental Studio · Bargarh
                     </div>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowMobileDrawer(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg"
+                  className="w-10 h-10 flex items-center justify-center text-stone-400 hover:text-stone-700 rounded-lg"
                   aria-label="Close menu"
                 >
                   <X className="w-4 h-4" />
@@ -409,7 +382,7 @@ export function ErpHeader() {
 
               {/* Navigation Links */}
               <div className="py-3 space-y-1 text-xs">
-                <div className="px-2 pb-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                <div className="px-2 pb-1 eyebrow">
                   Navigation
                 </div>
 
@@ -430,14 +403,14 @@ export function ErpHeader() {
                       key={item.href}
                       href={item.href}
                       onClick={() => setShowMobileDrawer(false)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-colors ${
+                      className={`flex items-center gap-3 px-3 min-h-11 rounded-xl font-medium transition-colors ${
                         isActive
-                          ? "bg-[#6B1D2F]/10 text-[#6B1D2F] font-semibold"
-                          : "text-slate-700 hover:bg-slate-50"
+                          ? "bg-plum/10 text-plum font-semibold"
+                          : "text-stone-700 hover:bg-stone-50"
                       }`}
                     >
                       <Icon
-                        className={`w-4 h-4 ${isActive ? "text-[#6B1D2F]" : "text-slate-400"}`}
+                        className={`w-4 h-4 ${isActive ? "text-plum" : "text-stone-400"}`}
                       />
                       <span>{item.label}</span>
                     </Link>
@@ -448,26 +421,26 @@ export function ErpHeader() {
                   href="/"
                   target="_blank"
                   onClick={() => setShowMobileDrawer(false)}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-700 hover:bg-slate-50 font-medium"
+                  className="flex items-center justify-between px-3 py-2.5 rounded-xl text-stone-700 hover:bg-stone-50 font-medium"
                 >
                   <span className="flex items-center gap-3">
-                    <ExternalLink className="w-4 h-4 text-slate-400" />
+                    <ExternalLink className="w-4 h-4 text-stone-400" />
                     <span>Storefront</span>
                   </span>
-                  <span className="text-[10px] text-slate-400">View &rarr;</span>
+                  <span className="text-[10px] text-stone-400">View &rarr;</span>
                 </Link>
               </div>
 
               {/* Active User on Mobile Drawer */}
-              <div className="pt-2 border-t border-[#EFECE6]">
-                <div className="px-2 pb-1.5 text-[10px] font-semibold uppercase text-slate-400 tracking-wider">
+              <div className="pt-2 border-t border-line-soft">
+                <div className="px-2 pb-1.5 text-[10px] font-semibold uppercase text-stone-400 tracking-wider">
                   Logged In Account
                 </div>
                 {user ? (
-                  <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                  <div className="p-2.5 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between">
                     <div>
-                      <div className="font-bold text-xs text-slate-800">{user.name}</div>
-                      <div className="text-[10px] text-slate-500 font-mono capitalize">
+                      <div className="font-bold text-xs text-stone-800">{user.name}</div>
+                      <div className="text-[10px] text-stone-500 font-mono capitalize">
                         {user.role} · @{user.username}
                       </div>
                     </div>
@@ -485,7 +458,7 @@ export function ErpHeader() {
                   <Link
                     href="/erp/login"
                     onClick={() => setShowMobileDrawer(false)}
-                    className="block text-center py-2 bg-[#6B1D2F] text-white rounded-lg font-semibold text-xs"
+                    className="block text-center py-2 bg-plum text-white rounded-lg font-semibold text-xs"
                   >
                     Staff Login
                   </Link>
@@ -494,14 +467,14 @@ export function ErpHeader() {
             </div>
 
             {/* Drawer Footer: Studio Address */}
-            <div className="pt-3 border-t border-[#EFECE6] space-y-2 text-xs">
-              <div className="p-2.5 bg-[#FAF9F6] rounded-xl border border-[#EFECE6] text-[11px] text-slate-600 leading-snug">
-                <div className="font-semibold text-slate-800 flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-[#6B1D2F]" />
+            <div className="pt-3 border-t border-line-soft space-y-2 text-xs">
+              <div className="p-2.5 bg-ivory rounded-xl border border-line-soft text-[11px] text-stone-600 leading-snug">
+                <div className="font-semibold text-stone-800 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-plum" />
                   <span>Bargarh Studio</span>
                 </div>
-                <div className="text-[10px] text-slate-500 mt-0.5">LIC Office Rd, Bargarh</div>
-                <div className="text-[10px] text-slate-500 font-mono mt-0.5">+91 7978256488</div>
+                <div className="text-[10px] text-stone-500 mt-0.5">LIC Office Rd, Bargarh</div>
+                <div className="text-[10px] text-stone-500 font-mono mt-0.5">+91 7978256488</div>
               </div>
             </div>
           </div>
@@ -512,21 +485,22 @@ export function ErpHeader() {
       {/* FAST OPERATOR SEARCH MODAL (CMD+K / SEARCH ICON)          */}
       {/* ========================================================= */}
       {showSearchModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-start justify-center pt-3 md:pt-20 px-3 z-50 animate-in fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl border border-[#E6E4DF] w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-150">
-            <div className="p-3.5 border-b border-[#EFECE6] flex items-center gap-2.5">
-              <Search className="w-4 h-4 text-slate-400 shrink-0" />
+        <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-xs flex items-start justify-center pt-3 md:pt-20 px-3 z-50 animate-in fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl border border-line w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+            <div className="p-3.5 border-b border-line-soft flex items-center gap-2.5">
+              <Search className="w-4 h-4 text-stone-400 shrink-0" />
               <input
                 type="text"
                 autoFocus
                 placeholder="Search Costume ID (LF-001, SH-001), Client, Phone, Order..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full text-xs md:text-sm text-slate-900 focus:outline-hidden placeholder:text-slate-400 bg-transparent"
+                className="w-full text-xs md:text-sm text-stone-900 focus:outline-hidden placeholder:text-stone-400 bg-transparent"
               />
               <button
                 onClick={() => setShowSearchModal(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="w-10 h-10 flex items-center justify-center text-stone-400 hover:text-stone-600 rounded-lg"
+                aria-label="Close search"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -534,9 +508,9 @@ export function ErpHeader() {
 
             <div className="max-h-[70vh] md:max-h-96 overflow-y-auto p-3 space-y-3 text-xs">
               {searchQuery.trim() === "" ? (
-                <div className="text-center py-6 text-slate-400">
-                  <p className="font-semibold text-slate-700">Quick Shop Search</p>
-                  <p className="text-[11px] text-slate-400 mt-1">
+                <div className="text-center py-6 text-stone-400">
+                  <p className="section-title text-base">Quick shop search</p>
+                  <p className="text-[11px] text-stone-400 mt-1">
                     Enter Costume ID (`LF-001`), customer mobile number, or booking code.
                   </p>
                 </div>
@@ -544,8 +518,8 @@ export function ErpHeader() {
                 <>
                   {filteredGarments.length > 0 && (
                     <div>
-                      <div className="font-semibold text-slate-400 uppercase text-[10px] tracking-wider mb-1.5 flex items-center gap-1.5">
-                        <Shirt className="w-3 h-3 text-[#6B1D2F]" />
+                      <div className="font-semibold eyebrow-mute mb-1.5 flex items-center gap-1.5">
+                        <Shirt className="w-3 h-3 text-plum" />
                         <span>Costumes ({filteredGarments.length})</span>
                       </div>
                       <div className="space-y-1">
@@ -556,18 +530,18 @@ export function ErpHeader() {
                               setShowSearchModal(false);
                               router.push(`/erp/inventory?sku=${g.id}`);
                             }}
-                            className="p-2.5 hover:bg-slate-50 rounded-xl cursor-pointer flex items-center justify-between border border-[#EFECE6]"
+                            className="p-2.5 hover:bg-stone-50 rounded-xl cursor-pointer flex items-center justify-between border border-line-soft"
                           >
                             <div>
-                              <span className="font-mono font-bold text-[#6B1D2F] mr-2">
+                              <span className="font-mono font-bold text-plum mr-2">
                                 {g.id}
                               </span>
-                              <span className="font-medium text-slate-900">{g.name}</span>
-                              <span className="text-slate-400 text-[11px] ml-1.5">
+                              <span className="font-medium text-stone-900">{g.name}</span>
+                              <span className="text-stone-400 text-[11px] ml-1.5">
                                 · Rack: {g.rack || "Unassigned"}
                               </span>
                             </div>
-                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-700">
                               {g.status}
                             </span>
                           </div>
@@ -578,7 +552,7 @@ export function ErpHeader() {
 
                   {filteredBookings.length > 0 && (
                     <div>
-                      <div className="font-semibold text-slate-400 uppercase text-[10px] tracking-wider mb-1.5 flex items-center gap-1.5">
+                      <div className="font-semibold eyebrow-mute mb-1.5 flex items-center gap-1.5">
                         <ClipboardList className="w-3 h-3 text-amber-600" />
                         <span>Bookings ({filteredBookings.length})</span>
                       </div>
@@ -590,14 +564,14 @@ export function ErpHeader() {
                               setShowSearchModal(false);
                               router.push(`/erp/bookings?orderId=${b.id}`);
                             }}
-                            className="p-2.5 hover:bg-slate-50 rounded-xl cursor-pointer flex items-center justify-between border border-[#EFECE6]"
+                            className="p-2.5 hover:bg-stone-50 rounded-xl cursor-pointer flex items-center justify-between border border-line-soft"
                           >
                             <div>
-                              <span className="font-mono font-bold text-slate-900 mr-2">
+                              <span className="font-mono font-bold text-stone-900 mr-2">
                                 {b.id}
                               </span>
-                              <span className="font-medium text-slate-800">{b.customer?.name}</span>
-                              <span className="text-slate-400 text-[11px] ml-1.5 font-mono">
+                              <span className="font-medium text-stone-800">{b.customer?.name}</span>
+                              <span className="text-stone-400 text-[11px] ml-1.5 font-mono">
                                 {b.customer?.phone}
                               </span>
                             </div>
@@ -612,7 +586,7 @@ export function ErpHeader() {
 
                   {filteredCustomers.length > 0 && (
                     <div>
-                      <div className="font-semibold text-slate-400 uppercase text-[10px] tracking-wider mb-1.5 flex items-center gap-1.5">
+                      <div className="font-semibold eyebrow-mute mb-1.5 flex items-center gap-1.5">
                         <UsersIcon className="w-3 h-3 text-blue-600" />
                         <span>Customers ({filteredCustomers.length})</span>
                       </div>
@@ -624,15 +598,15 @@ export function ErpHeader() {
                               setShowSearchModal(false);
                               router.push(`/erp/customers?id=${c.id}`);
                             }}
-                            className="p-2.5 hover:bg-slate-50 rounded-xl cursor-pointer flex items-center justify-between border border-[#EFECE6]"
+                            className="p-2.5 hover:bg-stone-50 rounded-xl cursor-pointer flex items-center justify-between border border-line-soft"
                           >
                             <div>
-                              <span className="font-semibold text-slate-900 mr-2">{c.name}</span>
-                              <span className="text-slate-400 text-[11px] font-mono">
+                              <span className="font-semibold text-stone-900 mr-2">{c.name}</span>
+                              <span className="text-stone-400 text-[11px] font-mono">
                                 {c.phone} · {c.city || "Bargarh"}
                               </span>
                             </div>
-                            <span className="text-[10px] font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                            <span className="text-[10px] font-mono text-stone-600 bg-stone-100 px-1.5 py-0.5 rounded border border-stone-200">
                               {c.id}
                             </span>
                           </div>
@@ -644,8 +618,8 @@ export function ErpHeader() {
                   {filteredGarments.length === 0 &&
                     filteredBookings.length === 0 &&
                     filteredCustomers.length === 0 && (
-                      <div className="text-center py-6 text-slate-400">
-                        No matches found for &ldquo;{searchQuery}&rdquo;
+                      <div className="text-center py-6 text-stone-400">
+                        Nothing matches &ldquo;{searchQuery}&rdquo;. Try a costume code (LF-001), a 10-digit mobile number or a booking code.
                       </div>
                     )}
                 </>
