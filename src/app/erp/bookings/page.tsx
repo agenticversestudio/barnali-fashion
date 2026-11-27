@@ -243,6 +243,8 @@ function BookingsContent() {
             onClick={() => {
               setHandoverBooking(b);
               setHandoverPhotoIds([]);
+              setHandoverCondition("Excellent condition, fitting verified");
+              setHandoverPayMode("CASH");
             }}
             className={`${base} bg-emerald-600 hover:bg-emerald-700`}
           >
@@ -256,6 +258,11 @@ function BookingsContent() {
               setReturnBooking(b);
               setReturnPhotoIds([]);
               setActualReturnDate(new Date().toISOString().split("T")[0]);
+              setDamageCharge(0);
+              setCleaningCharge(0);
+              setReturnNotes("");
+              setNextAction("AVAILABLE");
+              setRefundPayMode("CASH");
             }}
             className={`${base} bg-plum hover:bg-plum-dark`}
           >
@@ -326,21 +333,21 @@ function BookingsContent() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="eyebrow text-[#B8893A]">COUNTER LEDGER</span>
+          <span className="eyebrow text-gold">COUNTER LEDGER</span>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
-            <h1 className="page-title text-2xl md:text-3xl text-[#1F1815]">Rental Orders</h1>
-            <span className="num text-[11px] font-semibold bg-[#F9F2E4] text-[#7A1624] border border-[#E6D5B8] px-3 py-0.5 rounded-full shadow-2xs">
+            <h1 className="page-title text-2xl md:text-3xl text-ink">Rental Orders</h1>
+            <span className="num text-[11px] font-semibold bg-gold-soft text-plum border border-line-strong px-3 py-0.5 rounded-full shadow-2xs">
               {bookings.length} booking{bookings.length === 1 ? "" : "s"}
             </span>
           </div>
-          <p className="text-xs text-[#6B5E55] mt-1.5">Selection, client, quote, handover and return settlement in one place.</p>
+          <p className="text-xs text-ink-soft mt-1.5">Selection, client, quote, handover and return settlement in one place.</p>
         </div>
 
         <Link
           href="/erp/bookings/new"
-          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-[#7A1624] hover:bg-[#5C0F1A] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
         >
-          <Plus className="w-4 h-4 text-[#F9F2E4]" />
+          <Plus className="w-4 h-4 text-gold-soft" />
           <span>New Counter Booking</span>
         </Link>
       </div>
@@ -354,14 +361,14 @@ function BookingsContent() {
               placeholder="Search by customer name, phone, SKU (e.g. LF-001) or Order ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-xs pl-9 pr-10 min-h-10 bg-[#FAF7F2] border border-[#EAE0D2] rounded-xl text-[#1F1815] placeholder-[#9C8E83] focus:outline-none focus:border-[#7A1624] focus:ring-2 focus:ring-[#7A1624]/15 transition-all"
+              className="w-full text-xs pl-9 pr-10 min-h-10 bg-ivory border border-line rounded-xl text-ink placeholder-mute focus:outline-none focus:border-plum focus:ring-2 focus:ring-plum/15 transition-all"
             />
-            <Search className="w-4 h-4 text-[#9C8E83] absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-mute absolute left-3 top-3" />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
                 aria-label="Clear search"
-                className="absolute right-1 top-1 w-8 h-8 flex items-center justify-center text-[#9C8E83] hover:text-[#1F1815]"
+                className="absolute right-0 top-0 w-10 h-10 flex items-center justify-center text-mute hover:text-ink"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -383,8 +390,8 @@ function BookingsContent() {
                 aria-pressed={statusFilter === tab.id}
                 className={`px-4 min-h-10 rounded-full text-xs whitespace-nowrap transition-colors shrink-0 border ${
                   statusFilter === tab.id
-                    ? "bg-[#7A1624] text-white font-semibold border-[#7A1624]"
-                    : "bg-white text-[#6B5E55] font-medium hover:bg-[#F4EDE3] border-[#EAE0D2]"
+                    ? "bg-plum text-white font-semibold border-plum"
+                    : "bg-white text-ink-soft font-medium hover:bg-ivory-deep border-line"
                 }`}
               >
                 {tab.label}
@@ -426,7 +433,7 @@ function BookingsContent() {
                     <div className="min-w-0">
                       <span className="num text-[11px] font-bold text-plum">{b.id}</span>
                       <h3 className="font-display font-semibold text-ink text-base leading-tight mt-0.5 truncate">{b.customer.name}</h3>
-                      <a href={`tel:${cleanPhone}`} className="num text-[11px] text-mute inline-block min-h-6">
+                      <a href={`tel:${cleanPhone}`} className="num text-[11px] text-mute inline-flex items-center min-h-10">
                         +91 {cleanPhone}
                       </a>
                     </div>
@@ -473,27 +480,27 @@ function BookingsContent() {
           </div>
 
           {/* Desktop: ledger table */}
-          <div className="hidden lg:block bg-white rounded-2xl border border-[#EAE0D2] shadow-2xs overflow-hidden">
+          <div className="hidden lg:block bg-white rounded-2xl border border-line shadow-2xs overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+              <table className="w-full text-left text-xs border-collapse min-w-[860px]">
                 <thead>
-                  <tr className="bg-[#F4EDE3] border-b border-[#EAE0D2]">
+                  <tr className="bg-ivory-deep border-b border-line">
                     {["Order & Customer", "Costumes", "Pickup → Return Due", "Status", "Tariff / Balance", "Actions"].map((h, i) => (
-                      <th key={h} className={`py-3.5 px-4 text-[11px] font-semibold uppercase tracking-wider text-[#6B5E55] ${i >= 4 ? "text-right" : ""}`}>
+                      <th key={h} className={`py-3.5 px-4 text-[11px] font-semibold uppercase tracking-wider text-ink-soft ${i >= 4 ? "text-right" : ""}`}>
                         {h}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F0E8DC]">
+                <tbody className="divide-y divide-line-soft">
                   {bookings.map((b) => {
                     const cleanPhone = b.customer.phone.replace(/\D/g, "").slice(-10);
                     return (
-                      <tr key={b.id} className="hover:bg-[#FAF7F2] transition-colors align-top">
+                      <tr key={b.id} className="hover:bg-ivory transition-colors align-top">
                         <td className="py-4 px-4">
-                          <div className="num font-bold text-xs text-[#7A1624]">{b.id}</div>
-                          <div className="font-display font-semibold text-[#1F1815] text-sm mt-0.5">{b.customer.name}</div>
-                          <div className="num text-[11px] text-[#9C8E83]">+91 {cleanPhone}</div>
+                          <div className="num font-bold text-xs text-plum">{b.id}</div>
+                          <div className="font-display font-semibold text-ink text-sm mt-0.5">{b.customer.name}</div>
+                          <div className="num text-[11px] text-mute">+91 {cleanPhone}</div>
                         </td>
 
                         <td className="py-4 px-4">
@@ -552,7 +559,7 @@ function BookingsContent() {
           <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-line shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="font-mono text-xs text-plum font-bold">
+                <span className="num text-xs text-plum font-bold">
                   {handoverBooking.id}
                 </span>
                 <h3 className="font-serif font-bold text-lg text-stone-900">
@@ -561,7 +568,7 @@ function BookingsContent() {
               </div>
               <button
                 onClick={() => setHandoverBooking(null)}
-                className="text-stone-400 hover:text-stone-600"
+                aria-label="Close" className="w-10 h-10 -mr-2 rounded-lg flex items-center justify-center text-mute hover:text-ink hover:bg-ivory-deep"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -571,14 +578,14 @@ function BookingsContent() {
               <div className="p-3 bg-stone-50 rounded-xl space-y-1 text-stone-700">
                 <div>Client: <strong className="text-stone-900">{handoverBooking.customer.name}</strong></div>
                 <div>Pieces: <strong>{handoverBooking.items.map((i) => i.name).join(", ")}</strong></div>
-                <div>Return Due Date: <strong className="font-mono text-rose-800">{handoverBooking.returnDueDate}</strong></div>
+                <div>Return Due Date: <strong className="num text-rose-800">{handoverBooking.returnDueDate}</strong></div>
               </div>
 
               {/* Balance Collection */}
               <div className="p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl space-y-2">
                 <div className="flex items-center justify-between font-bold text-amber-950">
                   <span>Balance Due Now:</span>
-                  <span className="font-mono text-sm">{formatINR(handoverBooking.balanceDue)}</span>
+                  <span className="num text-sm">{formatINR(handoverBooking.balanceDue)}</span>
                 </div>
                 {handoverBooking.balanceDue > 0 && (
                   <div>
@@ -650,7 +657,7 @@ function BookingsContent() {
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-line shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="font-mono text-xs text-plum font-bold">
+                <span className="num text-xs text-plum font-bold">
                   {returnBooking.id}
                 </span>
                 <h3 className="font-serif font-bold text-lg text-stone-900">
@@ -659,7 +666,7 @@ function BookingsContent() {
               </div>
               <button
                 onClick={() => setReturnBooking(null)}
-                className="text-stone-400 hover:text-stone-600"
+                aria-label="Close" className="w-10 h-10 -mr-2 rounded-lg flex items-center justify-center text-mute hover:text-ink hover:bg-ivory-deep"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -668,8 +675,8 @@ function BookingsContent() {
             <div className="space-y-3.5 text-xs">
               <div className="p-3 bg-stone-50 rounded-xl space-y-1">
                 <div>Client: <strong className="text-stone-900">{returnBooking.customer.name}</strong></div>
-                <div>Due Date: <span className="font-mono">{returnBooking.returnDueDate}</span></div>
-                <div>Security Deposit Held: <strong className="font-mono text-emerald-800">{formatINR(returnBooking.depositTotal)}</strong></div>
+                <div>Due Date: <span className="num">{returnBooking.returnDueDate}</span></div>
+                <div>Security Deposit Held: <strong className="num text-emerald-800">{formatINR(returnBooking.depositTotal)}</strong></div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -681,7 +688,7 @@ function BookingsContent() {
                     type="date"
                     value={actualReturnDate}
                     onChange={(e) => setActualReturnDate(e.target.value)}
-                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono font-medium"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl num font-medium"
                     required
                   />
                 </div>
@@ -727,7 +734,7 @@ function BookingsContent() {
                     type="number"
                     value={damageCharge}
                     onChange={(e) => setDamageCharge(Number(e.target.value) || 0)}
-                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl num"
                   />
                 </div>
 
@@ -739,7 +746,7 @@ function BookingsContent() {
                     type="number"
                     value={cleaningCharge}
                     onChange={(e) => setCleaningCharge(Number(e.target.value) || 0)}
-                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl num"
                   />
                 </div>
               </div>
@@ -823,7 +830,7 @@ function BookingsContent() {
               </div>
               <button
                 onClick={() => setWhatsappReceipt(null)}
-                className="text-stone-400 hover:text-stone-600"
+                aria-label="Close" className="w-10 h-10 -mr-2 rounded-lg flex items-center justify-center text-mute hover:text-ink hover:bg-ivory-deep"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -860,7 +867,7 @@ function BookingsContent() {
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-line shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="font-mono text-xs text-plum font-bold">
+                <span className="num text-xs text-plum font-bold">
                   {selectedOrder.id}
                 </span>
                 <h3 className="font-serif font-bold text-lg text-stone-900">
@@ -869,7 +876,7 @@ function BookingsContent() {
               </div>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="text-stone-400 hover:text-stone-600"
+                aria-label="Close" className="w-10 h-10 -mr-2 rounded-lg flex items-center justify-center text-mute hover:text-ink hover:bg-ivory-deep"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -878,7 +885,7 @@ function BookingsContent() {
             <div className="space-y-3 text-xs">
               <div className="p-3 bg-stone-50 rounded-xl space-y-1">
                 <div>Client: <strong className="text-stone-900">{selectedOrder.customer.name}</strong></div>
-                <div>Phone: <strong className="font-mono">+91 {selectedOrder.customer.phone}</strong></div>
+                <div>Phone: <strong className="num">+91 {selectedOrder.customer.phone}</strong></div>
                 <div>Status: <StatusBadge status={selectedOrder.status} className="ml-2" /></div>
               </div>
 
@@ -890,11 +897,11 @@ function BookingsContent() {
                   {selectedOrder.items.map((i, idx) => (
                     <div key={idx} className="flex items-center justify-between py-1 text-xs">
                       <div>
-                        <span className="font-mono font-bold text-plum mr-2">{i.garmentId}</span>
+                        <span className="num font-bold text-plum mr-2">{i.garmentId}</span>
                         <span className="font-semibold">{i.name}</span>
                         {i.rack && <span className="text-stone-400 text-[10px] ml-1">({i.rack})</span>}
                       </div>
-                      <span className="font-mono font-bold text-stone-800">{formatINR(i.rentalPrice)}</span>
+                      <span className="num font-bold text-stone-800">{formatINR(i.rentalPrice)}</span>
                     </div>
                   ))}
                 </div>
@@ -903,20 +910,20 @@ function BookingsContent() {
               <div className="grid grid-cols-2 gap-2 p-3 bg-stone-50 rounded-xl">
                 <div>
                   <span className="text-stone-400 text-[10px] block">Grand Total</span>
-                  <span className="font-mono font-bold text-stone-900 text-sm">{formatINR(selectedOrder.grandTotal)}</span>
+                  <span className="num font-bold text-stone-900 text-sm">{formatINR(selectedOrder.grandTotal)}</span>
                 </div>
                 <div>
                   <span className="text-stone-400 text-[10px] block">Amount Paid</span>
-                  <span className="font-mono font-bold text-emerald-800 text-sm">{formatINR(selectedOrder.amountPaid)}</span>
+                  <span className="num font-bold text-emerald-800 text-sm">{formatINR(selectedOrder.amountPaid)}</span>
                 </div>
                 <div>
                   <span className="text-stone-400 text-[10px] block">Deposit Held</span>
-                  <span className="font-mono font-semibold text-amber-900">{formatINR(selectedOrder.depositTotal)}</span>
+                  <span className="num font-semibold text-amber-900">{formatINR(selectedOrder.depositTotal)}</span>
                 </div>
                 <div>
                   <span className="text-stone-400 text-[10px] block">Balance Due</span>
                   <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-rose-800">{formatINR(selectedOrder.balanceDue)}</span>
+                    <span className="num font-bold text-rose-800">{formatINR(selectedOrder.balanceDue)}</span>
                     {(selectedOrder.status === "CONFIRMED" || selectedOrder.status === "OUT_ON_RENT") && selectedOrder.balanceDue > 0 && (
                       <button
                         type="button"
@@ -936,7 +943,7 @@ function BookingsContent() {
                   <div className="col-span-2 p-2.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center justify-between mt-1">
                     <div>
                       <span className="text-rose-900 font-bold block text-xs">Amount Client Still Owes</span>
-                      <span className="font-mono font-bold text-rose-700 text-sm">
+                      <span className="num font-bold text-rose-700 text-sm">
                         {formatINR(selectedOrder.additionalDue)}
                       </span>
                     </div>
@@ -958,7 +965,7 @@ function BookingsContent() {
                     <div>
                       <span className="text-amber-900 font-bold block text-xs">Deposit Refund Pending</span>
                       <span className="text-[11px] text-amber-800">
-                        Refund of <strong className="font-mono text-sm">{formatINR(selectedOrder.refundAmount)}</strong> is held in shop vault awaiting handover to customer.
+                        Refund of <strong className="num text-sm">{formatINR(selectedOrder.refundAmount)}</strong> is held in shop vault awaiting handover to customer.
                       </span>
                     </div>
                     <button
@@ -983,7 +990,7 @@ function BookingsContent() {
                   </span>
                   <div className="divide-y divide-stone-100 border border-stone-200 rounded-xl bg-white p-2 text-[11px]">
                     {selectedOrder.payments.map((p) => (
-                      <div key={p.id} className="flex items-center justify-between py-1 font-mono">
+                      <div key={p.id} className="flex items-center justify-between py-1 num">
                         <div>
                           <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold mr-2 ${
                             p.kind === "EXTRA"
@@ -998,8 +1005,8 @@ function BookingsContent() {
                           {p.note && <span className="text-stone-400 text-[10px] ml-1">({p.note})</span>}
                         </div>
                         <div className="text-right">
-                          <span className="font-bold text-stone-900">{formatINR(p.amount)}</span>
-                          <span className="text-stone-400 text-[9px] block">{p.paidOn}</span>
+                          <span className="num font-bold text-ink">{formatINR(p.amount)}</span>
+                          <span className="num text-mute text-[9px] block">{p.paidOn}</span>
                         </div>
                       </div>
                     ))}

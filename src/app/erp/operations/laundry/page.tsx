@@ -86,6 +86,22 @@ export default function StitchingAndDryCleanPage() {
     loadData();
   }, [loadData]);
 
+  const closeCreateModal = () => {
+    setShowCreateModal(false);
+    setCreateGarmentId("");
+    setCreateKind("DRY_CLEAN");
+    setVendorName("Bargarh Modern Dry Cleaners");
+    setSubType("Steam Wash & Press");
+    setCost("350");
+    setNotes("");
+  };
+
+  const closeReceiveModal = () => {
+    setReceiveJob(null);
+    setRcvCost("");
+    setNextStatus("AVAILABLE");
+  };
+
   const handleCreateJob = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!createGarmentId || !vendorName.trim()) {
@@ -106,8 +122,7 @@ export default function StitchingAndDryCleanPage() {
         notes: notes.trim() || undefined,
       });
 
-      setShowCreateModal(false);
-      setNotes("");
+      closeCreateModal();
       await loadData();
     } catch (err: any) {
       alert(err?.message || "Failed to dispatch care job");
@@ -126,7 +141,7 @@ export default function StitchingAndDryCleanPage() {
         cost: rcvCost ? Number(rcvCost) : undefined,
       });
 
-      setReceiveJob(null);
+      closeReceiveModal();
       await loadData();
     } catch (err: any) {
       alert(err?.message || "Failed to mark care job as received");
@@ -181,21 +196,21 @@ export default function StitchingAndDryCleanPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="eyebrow text-[#B8893A]">VENDOR DISPATCH</span>
+          <span className="eyebrow text-gold">VENDOR DISPATCH</span>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
-            <h1 className="page-title text-2xl md:text-3xl text-[#1F1815]">Care &amp; Laundry</h1>
-            <span className="num text-[11px] font-semibold bg-[#F9F2E4] text-[#7A1624] border border-[#E6D5B8] px-3 py-0.5 rounded-full shadow-2xs">
+            <h1 className="page-title text-2xl md:text-3xl text-ink">Care &amp; Laundry</h1>
+            <span className="num text-[11px] font-semibold bg-gold-soft text-plum border border-line-strong px-3 py-0.5 rounded-full shadow-2xs">
               {filteredJobs.length} job{filteredJobs.length === 1 ? "" : "s"}
             </span>
           </div>
-          <p className="text-xs text-[#6B5E55] mt-1.5">Dry cleaning, tailoring alterations and repair turnaround at outside vendors.</p>
+          <p className="text-xs text-ink-soft mt-1.5">Dry cleaning, tailoring alterations and repair turnaround at outside vendors.</p>
         </div>
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-[#7A1624] hover:bg-[#5C0F1A] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0"
         >
-          <Plus className="w-4 h-4 text-[#F9F2E4]" />
+          <Plus className="w-4 h-4 text-gold-soft" />
           <span>Dispatch New Job</span>
         </button>
       </div>
@@ -224,8 +239,8 @@ export default function StitchingAndDryCleanPage() {
               aria-pressed={activeTab === tab.id}
               className={`px-4 min-h-10 rounded-full text-xs whitespace-nowrap transition-colors shrink-0 border ${
                 activeTab === tab.id
-                  ? "bg-[#7A1624] text-white font-semibold border-[#7A1624]"
-                  : "bg-white text-[#6B5E55] font-medium hover:bg-[#F4EDE3] border-[#EAE0D2]"
+                  ? "bg-plum text-white font-semibold border-plum"
+                  : "bg-white text-ink-soft font-medium hover:bg-ivory-deep border-line"
               }`}
             >
               {tab.label}
@@ -233,12 +248,12 @@ export default function StitchingAndDryCleanPage() {
           ))}
         </div>
 
-        <div className="flex items-center bg-[#F4EDE3] p-1 rounded-xl border border-[#EAE0D2] text-xs shrink-0" role="group" aria-label="Job status">
+        <div className="flex items-center bg-ivory-deep p-1 rounded-xl border border-line text-xs shrink-0" role="group" aria-label="Job status">
           <button
             onClick={() => setStatusFilter("OUT")}
             aria-pressed={statusFilter === "OUT"}
-            className={`px-4 min-h-9 rounded-lg font-semibold transition-colors ${
-              statusFilter === "OUT" ? "bg-white text-[#7A1624] shadow-2xs" : "text-[#9C8E83] hover:text-[#1F1815]"
+            className={`px-4 min-h-10 rounded-lg font-semibold transition-colors ${
+              statusFilter === "OUT" ? "bg-white text-plum shadow-2xs" : "text-mute hover:text-ink"
             }`}
           >
             Currently Out ({careJobs.filter((j) => j.status === "OUT").length})
@@ -246,8 +261,8 @@ export default function StitchingAndDryCleanPage() {
           <button
             onClick={() => setStatusFilter("RECEIVED")}
             aria-pressed={statusFilter === "RECEIVED"}
-            className={`px-4 min-h-9 rounded-lg font-semibold transition-colors ${
-              statusFilter === "RECEIVED" ? "bg-white text-[#7A1624] shadow-2xs" : "text-[#9C8E83] hover:text-[#1F1815]"
+            className={`px-4 min-h-10 rounded-lg font-semibold transition-colors ${
+              statusFilter === "RECEIVED" ? "bg-white text-plum shadow-2xs" : "text-mute hover:text-ink"
             }`}
           >
             Past Received
@@ -364,8 +379,8 @@ export default function StitchingAndDryCleanPage() {
                 <p className="text-[11px] text-stone-500">Record garment dispatch for care/alteration</p>
               </div>
               <button
-                onClick={() => setShowCreateModal(false)}
-                className="text-stone-400 hover:text-stone-600"
+                onClick={closeCreateModal}
+                aria-label="Close" className="w-10 h-10 -mr-2 rounded-lg flex items-center justify-center text-mute hover:text-ink hover:bg-ivory-deep"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -430,7 +445,7 @@ export default function StitchingAndDryCleanPage() {
                     type="date"
                     value={outDate}
                     onChange={(e) => setOutDate(e.target.value)}
-                    className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-mono"
+                    className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum num"
                     required
                   />
                 </div>
@@ -443,7 +458,7 @@ export default function StitchingAndDryCleanPage() {
                     type="date"
                     value={expectedDate}
                     onChange={(e) => setExpectedDate(e.target.value)}
-                    className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-mono"
+                    className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum num"
                   />
                 </div>
               </div>
@@ -470,7 +485,7 @@ export default function StitchingAndDryCleanPage() {
                     type="number"
                     value={cost}
                     onChange={(e) => setCost(e.target.value)}
-                    className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-mono"
+                    className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum num"
                   />
                 </div>
               </div>
@@ -491,7 +506,7 @@ export default function StitchingAndDryCleanPage() {
               <div className="flex items-center gap-3 pt-3 border-t border-line-soft">
                 <button
                   type="button"
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={closeCreateModal}
                   className="flex-1 min-h-11 rounded-xl border border-line text-stone-700 font-semibold"
                 >
                   Cancel
@@ -516,14 +531,14 @@ export default function StitchingAndDryCleanPage() {
           <div className="bg-white rounded-3xl max-w-sm w-full p-6 border border-line shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-line-soft">
               <div>
-                <span className="font-mono text-xs text-plum font-bold">{receiveJob.id}</span>
+                <span className="num text-xs text-plum font-bold">{receiveJob.id}</span>
                 <h3 className="font-display font-semibold text-base text-stone-900">
                   Receive Piece from Vendor
                 </h3>
               </div>
               <button
-                onClick={() => setReceiveJob(null)}
-                className="text-stone-400 hover:text-stone-600"
+                onClick={closeReceiveModal}
+                aria-label="Close" className="w-10 h-10 -mr-2 rounded-lg flex items-center justify-center text-mute hover:text-ink hover:bg-ivory-deep"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -543,7 +558,7 @@ export default function StitchingAndDryCleanPage() {
                   type="date"
                   value={rcvDate}
                   onChange={(e) => setRcvDate(e.target.value)}
-                  className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-mono font-medium"
+                  className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum num font-medium"
                 />
               </div>
 
@@ -571,14 +586,14 @@ export default function StitchingAndDryCleanPage() {
                   value={rcvCost}
                   onChange={(e) => setRcvCost(e.target.value)}
                   placeholder="e.g. 350"
-                  className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum font-mono font-bold"
+                  className="w-full px-3 min-h-10 bg-ivory border border-line rounded-xl focus:outline-none focus:border-plum num font-bold"
                 />
               </div>
             </div>
 
             <div className="flex items-center gap-2 pt-2 border-t border-line-soft">
               <button
-                onClick={() => setReceiveJob(null)}
+                onClick={closeReceiveModal}
                 className="flex-1 min-h-11 rounded-xl border border-line text-stone-700 font-semibold"
               >
                 Cancel

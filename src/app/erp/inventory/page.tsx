@@ -178,7 +178,7 @@ export default function InventoryPage() {
       </div>
       <button
         onClick={() => openRackEditor(g)}
-        className="w-9 h-9 flex items-center justify-center text-mute hover:text-plum rounded-md"
+        className="w-10 h-10 flex items-center justify-center text-mute hover:text-plum rounded-md"
         title="Edit rack location"
         aria-label={`Edit rack location for ${g.id}`}
       >
@@ -198,12 +198,12 @@ export default function InventoryPage() {
         <div>
           <span className="eyebrow">The wardrobe</span>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
-            <h1 className="page-title text-2xl md:text-3xl text-[#1F1815]">Costumes &amp; Inventory</h1>
-            <span className="num text-[11px] font-semibold bg-[#F9F2E4] text-[#7A1624] border border-[#E6D5B8] px-3 py-0.5 rounded-full shadow-2xs">
+            <h1 className="page-title text-2xl md:text-3xl text-ink">Costumes &amp; Inventory</h1>
+            <span className="num text-[11px] font-semibold bg-gold-soft text-plum border border-line-strong px-3 py-0.5 rounded-full shadow-2xs">
               {garments.length} piece{garments.length === 1 ? "" : "s"}
             </span>
           </div>
-          <p className="text-xs text-[#6B5E55] mt-1.5">Godown rack tracking, booking availability and care states.</p>
+          <p className="text-xs text-ink-soft mt-1.5">Godown rack tracking, booking availability and care states.</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -211,21 +211,22 @@ export default function InventoryPage() {
             <button
               onClick={() => {
                 setCostumeId(`LF-${String(garments.length + 1).padStart(3, "0")}`);
+                setAddError(null);
                 setShowAddModal(true);
               }}
-              className="flex items-center gap-2 px-5 min-h-11 bg-[#7A1624] hover:bg-[#5C0F1A] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors shrink-0"
+              className="flex items-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white rounded-xl text-xs font-semibold shadow-xs transition-colors shrink-0"
             >
-              <Plus className="w-4 h-4 text-[#F9F2E4]" />
+              <Plus className="w-4 h-4 text-gold-soft" />
               <span>Add Costume</span>
             </button>
           )}
 
-          <div className="flex items-center bg-[#F4EDE3] p-1 rounded-xl border border-[#EAE0D2]" role="group" aria-label="View mode">
+          <div className="flex items-center bg-ivory-deep p-1 rounded-xl border border-line" role="group" aria-label="View mode">
             <button
               onClick={() => setViewMode("grid")}
               aria-pressed={viewMode === "grid"}
-              className={`w-10 h-9 flex items-center justify-center rounded-lg transition-colors ${
-                viewMode === "grid" ? "bg-white text-[#7A1624] shadow-2xs border border-[#EAE0D2]" : "text-[#6B5E55] hover:text-[#1F1815]"
+              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${
+                viewMode === "grid" ? "bg-white text-plum shadow-2xs border border-line" : "text-ink-soft hover:text-ink"
               }`}
               title="Grid view"
             >
@@ -234,8 +235,8 @@ export default function InventoryPage() {
             <button
               onClick={() => setViewMode("table")}
               aria-pressed={viewMode === "table"}
-              className={`w-10 h-9 flex items-center justify-center rounded-lg transition-colors ${
-                viewMode === "table" ? "bg-white text-[#7A1624] shadow-2xs border border-[#EAE0D2]" : "text-[#6B5E55] hover:text-[#1F1815]"
+              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${
+                viewMode === "table" ? "bg-white text-plum shadow-2xs border border-line" : "text-ink-soft hover:text-ink"
               }`}
               title="Table view"
             >
@@ -261,7 +262,7 @@ export default function InventoryPage() {
               <button
                 onClick={() => setSearchTerm("")}
                 aria-label="Clear search"
-                className="absolute right-1 top-1 w-9 h-9 flex items-center justify-center text-mute hover:text-ink"
+                className="absolute right-0 top-0 w-10 h-10 flex items-center justify-center text-mute hover:text-ink"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -401,27 +402,27 @@ export default function InventoryPage() {
         </div>
       ) : (
         /* Table View */
-        <div className="bg-white rounded-2xl border border-[#EAE0D2] shadow-2xs overflow-hidden">
+        <div className="bg-white rounded-2xl border border-line shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse min-w-[780px]">
               <thead>
-                <tr className="bg-[#F4EDE3] border-b border-[#EAE0D2]">
+                <tr className="bg-ivory-deep border-b border-line">
                   {["Garment SKU", "Category & Specs", "Current Status", "Godown Location", "Rental / Deposit", "Actions"].map((h, i) => (
-                    <th key={h} className={`py-3.5 px-4 text-[11px] font-semibold uppercase tracking-wider text-[#6B5E55] ${i >= 4 ? "text-right" : ""}`}>
+                    <th key={h} className={`py-3.5 px-4 text-[11px] font-semibold uppercase tracking-wider text-ink-soft ${i >= 4 ? "text-right" : ""}`}>
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F0E8DC]">
+              <tbody className="divide-y divide-line-soft">
                 {garments.map((g) => (
-                  <tr key={g.id} className="hover:bg-[#FAF7F2] transition-colors">
+                  <tr key={g.id} className="hover:bg-ivory transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <CostumeThumb src={g.mainPhotoUrl} alt={g.name} className="w-12 h-14 rounded-lg border border-[#EAE0D2] shrink-0" />
+                        <CostumeThumb src={g.mainPhotoUrl} alt={g.name} className="w-12 h-14 rounded-lg border border-line shrink-0" />
                         <div className="min-w-0">
-                          <span className="num font-bold text-xs text-[#7A1624]">{g.id}</span>
-                          <div className="font-display font-semibold text-[#1F1815] line-clamp-1">{g.name}</div>
+                          <span className="num font-bold text-xs text-plum">{g.id}</span>
+                          <div className="font-display font-semibold text-ink line-clamp-1">{g.name}</div>
                         </div>
                       </div>
                     </td>
@@ -481,13 +482,13 @@ export default function InventoryPage() {
             <div className="flex items-center justify-between pb-2 border-b border-stone-100">
               <div>
                 <h3 className="font-bold text-stone-900 text-sm">Update Godown Rack</h3>
-                <span className="text-[11px] font-mono text-plum font-semibold">
+                <span className="text-[11px] num text-plum font-semibold">
                   {editingRackGarment.id} · {editingRackGarment.name}
                 </span>
               </div>
               <button
                 onClick={() => setEditingRackGarment(null)}
-                className="text-stone-400 hover:text-stone-600"
+                aria-label="Close" className="w-10 h-10 -mr-2 rounded-lg flex items-center justify-center text-mute hover:text-ink hover:bg-ivory-deep"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -549,12 +550,15 @@ export default function InventoryPage() {
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-line shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
-                <h3 className="font-serif font-bold text-stone-900 text-base">Add New Rental Costume</h3>
+                <h3 className="font-display font-semibold text-ink text-base">Add New Rental Costume</h3>
                 <p className="text-[11px] text-stone-500">Persists directly to live Turso database</p>
               </div>
               <button
-                onClick={() => setShowAddModal(false)}
-                className="text-stone-400 hover:text-stone-600"
+                onClick={() => {
+                  setShowAddModal(false);
+                  setAddError(null);
+                }}
+                aria-label="Close" className="w-10 h-10 -mr-2 rounded-lg flex items-center justify-center text-mute hover:text-ink hover:bg-ivory-deep"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -578,7 +582,7 @@ export default function InventoryPage() {
                     value={costumeId}
                     onChange={(e) => setCostumeId(e.target.value)}
                     placeholder="e.g. LF-041"
-                    className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono font-bold text-stone-800"
+                    className="w-full p-2.5 bg-ivory border border-line rounded-xl num font-bold text-stone-800"
                     required
                   />
                 </div>
@@ -664,7 +668,7 @@ export default function InventoryPage() {
                     type="number"
                     value={rentalPrice}
                     onChange={(e) => setRentalPrice(e.target.value)}
-                    className="w-full p-2 bg-ivory border border-line rounded-xl font-mono font-bold text-plum"
+                    className="w-full p-2 bg-ivory border border-line rounded-xl num font-bold text-plum"
                     required
                   />
                 </div>
@@ -676,7 +680,7 @@ export default function InventoryPage() {
                     type="number"
                     value={securityDeposit}
                     onChange={(e) => setSecurityDeposit(e.target.value)}
-                    className="w-full p-2 bg-ivory border border-line rounded-xl font-mono font-bold"
+                    className="w-full p-2 bg-ivory border border-line rounded-xl num font-bold"
                     required
                   />
                 </div>
@@ -688,7 +692,7 @@ export default function InventoryPage() {
                     type="number"
                     value={purchaseCost}
                     onChange={(e) => setPurchaseCost(e.target.value)}
-                    className="w-full p-2 bg-ivory border border-line rounded-xl font-mono text-stone-500"
+                    className="w-full p-2 bg-ivory border border-line rounded-xl num text-stone-500"
                   />
                 </div>
               </div>
@@ -737,7 +741,10 @@ export default function InventoryPage() {
               <div className="flex items-center gap-3 pt-3 border-t border-stone-100">
                 <button
                   type="button"
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => {
+                  setShowAddModal(false);
+                  setAddError(null);
+                }}
                   className="flex-1 py-2.5 rounded-xl border border-stone-200 text-stone-700 font-semibold"
                 >
                   Cancel

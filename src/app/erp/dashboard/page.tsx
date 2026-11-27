@@ -176,17 +176,17 @@ export default function DashboardPage() {
       {/* Welcome */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="eyebrow text-[#B8893A]">BARNALI FASHION STUDIO · BARGARH</span>
-          <h1 className="page-title text-2xl md:text-3xl text-[#1F1815] mt-1">Today&apos;s Studio</h1>
-          <p className="text-xs text-[#6B5E55] mt-1.5">
-            Welcome back, {user?.name || "Operator"}. {todayStr && <span className="num font-semibold text-[#1F1815]">{formatDate(todayStr)}</span>}
+          <span className="eyebrow text-gold">BARNALI FASHION STUDIO · BARGARH</span>
+          <h1 className="page-title text-2xl md:text-3xl text-ink mt-1">Today&apos;s Studio</h1>
+          <p className="text-xs text-ink-soft mt-1.5">
+            Welcome back, {user?.name || "Operator"}. {todayStr && <span className="num font-semibold text-ink">{formatDate(todayStr)}</span>}
           </p>
         </div>
         <Link
           href="/erp/bookings/new"
-          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-[#7A1624] hover:bg-[#5C0F1A] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-5 min-h-11 bg-plum hover:bg-plum-dark text-white rounded-xl text-xs font-semibold shadow-xs transition-colors shrink-0"
         >
-          <Plus className="w-4 h-4 text-[#F9F2E4]" />
+          <Plus className="w-4 h-4 text-gold-soft" />
           <span>New Booking</span>
         </Link>
       </div>
@@ -195,21 +195,21 @@ export default function DashboardPage() {
       <section
         className={cn(
           "rounded-2xl border p-4 md:p-5 shadow-2xs transition-all",
-          pendingTotal > 0 ? "bg-[#F9F2E4] border-[#EAE0D2]" : "bg-white border-[#EAE0D2]"
+          pendingTotal > 0 ? "bg-gold-soft border-line" : "bg-white border-line"
         )}
         aria-label="Today's pending actions"
       >
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-white border border-[#EAE0D2] flex items-center justify-center shadow-2xs">
-              <Bell className="w-4 h-4 text-[#B8893A]" />
+            <div className="w-8 h-8 rounded-full bg-white border border-line flex items-center justify-center shadow-2xs">
+              <Bell className="w-4 h-4 text-gold" />
             </div>
-            <h2 className="section-title text-base text-[#1F1815]">Today&apos;s Pending Actions</h2>
+            <h2 className="section-title text-base text-ink">Today&apos;s Pending Actions</h2>
           </div>
           <span
             className={cn(
               "num text-[11px] font-semibold px-3 py-0.5 rounded-full border shadow-2xs",
-              pendingTotal > 0 ? "bg-white text-[#9F1239] border-[#FECDD3]" : "bg-[#ECFDF3] text-[#065F46] border-[#A7F3D0]"
+              pendingTotal > 0 ? "bg-white text-rose-800 border-rose-200" : "bg-emerald-50 text-emerald-800 border-emerald-200"
             )}
           >
             {loading ? "Loading..." : pendingTotal > 0 ? `${pendingTotal} to do` : "All clear"}
@@ -226,13 +226,13 @@ export default function DashboardPage() {
             <Link
               key={x.label}
               href={x.href}
-              className="bg-white hover:bg-[#FAF7F2] border border-[#EAE0D2] rounded-xl px-3.5 min-h-14 py-2.5 flex items-center justify-between gap-2 shadow-2xs transition-all hover:border-[#D6C6B0]"
+              className="bg-white hover:bg-ivory border border-line rounded-xl px-3.5 min-h-14 py-2.5 flex items-center justify-between gap-2 shadow-2xs transition-all hover:border-line-strong"
             >
               <span className="flex items-center gap-2.5 min-w-0">
-                <x.icon className="w-4 h-4 text-[#9C8E83] shrink-0" />
-                <span className="text-xs font-medium text-[#6B5E55] truncate">{x.label}</span>
+                <x.icon className="w-4 h-4 text-mute shrink-0" />
+                <span className="text-xs font-medium text-ink-soft truncate">{x.label}</span>
               </span>
-              <span className={cn("num font-display font-semibold text-xl", x.n > 0 && x.hot ? "text-[#9F1239]" : "text-[#1F1815]")}>
+              <span className={cn("num font-display font-semibold text-xl", x.n > 0 && x.hot ? "text-rose-800" : "text-ink")}>
                 {x.n}
               </span>
             </Link>
@@ -244,10 +244,10 @@ export default function DashboardPage() {
       <section className="surface p-4 md:p-5" aria-label="Delivery date alerts">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <span className="eyebrow text-[#B8893A]">COUNTDOWN TO PICKUP</span>
-            <h2 className="section-title text-lg text-[#1F1815] mt-0.5">Delivery Date Alerts</h2>
+            <span className="eyebrow text-gold">COUNTDOWN TO PICKUP</span>
+            <h2 className="section-title text-lg text-ink mt-0.5">Delivery Date Alerts</h2>
           </div>
-          <span className="num text-[11px] text-[#6B5E55] bg-[#FAF7F2] px-2.5 py-0.5 rounded-full border border-[#EAE0D2]">
+          <span className="num text-[11px] text-ink-soft bg-ivory px-2.5 py-0.5 rounded-full border border-line">
             {milestones.length} booking{milestones.length === 1 ? "" : "s"}
           </span>
         </div>
@@ -268,31 +268,31 @@ export default function DashboardPage() {
                 ? `Namaste ${b.customer.name}, this is Barnali Fashion. Your trial for ${b.items.map((i) => i.name).join(", ")} is due. Please visit the studio before your pickup on ${formatDate(b.pickupDate)}.`
                 : `Namaste ${b.customer.name}, this is Barnali Fashion. Your costume is being packed and will be ready for pickup on ${formatDate(b.pickupDate)}.`;
               return (
-                <article key={b.id} className="bg-[#FAF7F2] border border-[#EAE0D2] rounded-2xl p-4 flex flex-col gap-3 surface-interactive">
+                <article key={b.id} className="bg-ivory border border-line rounded-2xl p-4 flex flex-col gap-3 surface-interactive">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <span
                         className={cn(
                           "num inline-flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full border shadow-2xs",
-                          trial ? "bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]" : "bg-[#FBF2F4] text-[#7A1624] border-[#FECDD3]"
+                          trial ? "bg-amber-100 text-amber-800 border-amber-200" : "bg-plum-soft text-plum border-rose-200"
                         )}
                       >
                         {days}D · {trial ? "Trial due" : "Packing ready"}
                       </span>
-                      <h3 className="font-display font-semibold text-[#1F1815] text-base mt-2 truncate">{b.customer.name}</h3>
-                      <p className="text-[11px] text-[#6B5E55] truncate">
-                        {b.eventName} · <span className="num font-semibold text-[#1F1815]">{b.id}</span>
+                      <h3 className="font-display font-semibold text-ink text-base mt-2 truncate">{b.customer.name}</h3>
+                      <p className="text-[11px] text-ink-soft truncate">
+                        {b.eventName} · <span className="num font-semibold text-ink">{b.id}</span>
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="num text-xs font-semibold text-[#1F1815]">{formatDate(b.pickupDate)}</div>
-                      <div className="text-[10px] text-[#9C8E83]">{relativeDays(todayStr, b.pickupDate)}</div>
+                      <div className="num text-xs font-semibold text-ink">{formatDate(b.pickupDate)}</div>
+                      <div className="text-[10px] text-mute">{relativeDays(todayStr, b.pickupDate)}</div>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap gap-1.5">
                     {b.items.map((it) => (
-                      <span key={it.garmentId} className="num text-[10px] font-medium bg-white border border-[#EAE0D2] text-[#6B5E55] px-2 py-0.5 rounded-md shadow-2xs">
+                      <span key={it.garmentId} className="num text-[10px] font-medium bg-white border border-line text-ink-soft px-2 py-0.5 rounded-md shadow-2xs">
                         {it.garmentId}
                       </span>
                     ))}
@@ -303,24 +303,24 @@ export default function DashboardPage() {
                       href={waLink(wa, msg)}
                       target="_blank"
                       rel="noreferrer"
-                      className="min-h-10 flex items-center justify-center gap-1.5 rounded-xl bg-[#ECFDF3] hover:bg-emerald-100 text-[#065F46] border border-[#A7F3D0] text-[11px] font-semibold transition-colors shadow-2xs"
+                      className="min-h-10 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-semibold transition-colors shadow-2xs"
                     >
                       <MessageCircle className="w-3.5 h-3.5" />
                       <span>WhatsApp</span>
                     </a>
                     <a
                       href={`tel:${b.customer.phone}`}
-                      className="min-h-10 flex items-center justify-center gap-1.5 rounded-xl bg-white hover:bg-[#F4EDE3] border border-[#EAE0D2] text-[#6B5E55] text-[11px] font-semibold transition-colors shadow-2xs"
+                      className="min-h-10 flex items-center justify-center gap-1.5 rounded-xl bg-white hover:bg-ivory-deep border border-line text-ink-soft text-[11px] font-semibold transition-colors shadow-2xs"
                     >
                       <Phone className="w-3.5 h-3.5" />
                       <span>Call</span>
                     </a>
                     <Link
                       href={`/erp/bookings?orderId=${b.id}`}
-                      className="min-h-10 flex items-center justify-center gap-1 rounded-xl bg-[#7A1624] hover:bg-[#5C0F1A] text-white text-[11px] font-semibold transition-colors shadow-2xs"
+                      className="min-h-10 flex items-center justify-center gap-1 rounded-xl bg-plum hover:bg-plum-dark text-white text-[11px] font-semibold transition-colors shadow-2xs"
                     >
                       <span>Details</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-[#F9F2E4]" />
+                      <ChevronRight className="w-3.5 h-3.5 text-gold-soft" />
                     </Link>
                   </div>
                 </article>
@@ -342,11 +342,11 @@ export default function DashboardPage() {
       <section className="surface p-4 md:p-5" aria-label="Costume calendar, next 7 days">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <span className="eyebrow text-[#B8893A]">NEXT 7 DAYS</span>
-            <h2 className="section-title text-lg text-[#1F1815] mt-0.5">Costume Calendar</h2>
+            <span className="eyebrow text-gold">NEXT 7 DAYS</span>
+            <h2 className="section-title text-lg text-ink mt-0.5">Costume Calendar</h2>
           </div>
-          <div className="hidden sm:flex items-center gap-3 text-[11px] text-[#6B5E55]">
-            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#F59E0B]" />Pickup</span>
+          <div className="hidden sm:flex items-center gap-3 text-[11px] text-ink-soft">
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500" />Pickup</span>
             <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-sky-500" />Return due</span>
           </div>
         </div>
@@ -360,12 +360,12 @@ export default function DashboardPage() {
                   key={d.date}
                   className={cn(
                     "rounded-xl border p-2.5 min-h-24 flex flex-col gap-1.5 shadow-2xs transition-all",
-                    i === 0 ? "bg-[#F9F2E4] border-[#EAE0D2]" : "bg-[#FAF7F2] border-[#EAE0D2]"
+                    i === 0 ? "bg-gold-soft border-line" : "bg-ivory border-line"
                   )}
                 >
                   <div className="flex items-baseline justify-between">
                     <span className="eyebrow-mute text-[9.5px]">{i === 0 ? "Today" : dt.toLocaleDateString("en-IN", { weekday: "short" })}</span>
-                    <span className="num text-xs font-semibold text-[#1F1815]">{dt.getDate()}</span>
+                    <span className="num text-xs font-semibold text-ink">{dt.getDate()}</span>
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {d.chips.slice(0, 6).map((c, k) => (
@@ -376,15 +376,15 @@ export default function DashboardPage() {
                         className={cn(
                           "num text-[10px] font-semibold px-1.5 py-0.5 rounded-md border shadow-2xs",
                           c.kind === "pickup"
-                            ? "bg-[#FEF3C7] text-[#92400E] border-[#FDE68A] hover:bg-amber-100"
+                            ? "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100"
                             : "bg-sky-50 text-sky-900 border-sky-200 hover:bg-sky-100"
                         )}
                       >
                         {c.code}
                       </Link>
                     ))}
-                    {d.chips.length > 6 && <span className="num text-[10px] text-[#9C8E83] self-center">+{d.chips.length - 6}</span>}
-                    {d.chips.length === 0 && <span className="text-[10px] text-[#9C8E83]/60">free</span>}
+                    {d.chips.length > 6 && <span className="num text-[10px] text-mute self-center">+{d.chips.length - 6}</span>}
+                    {d.chips.length === 0 && <span className="text-[10px] text-mute/60">free</span>}
                   </div>
                 </div>
               );
@@ -392,7 +392,7 @@ export default function DashboardPage() {
           </div>
         </div>
         {!weekHasAny && !loading && (
-          <p className="text-[11px] text-[#9C8E83] mt-3">No pickups or returns scheduled this week.</p>
+          <p className="text-[11px] text-mute mt-3">No pickups or returns scheduled this week.</p>
         )}
       </section>
 
@@ -400,19 +400,19 @@ export default function DashboardPage() {
       <section className="surface p-4 md:p-5" aria-label="Inventory by state">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <span className="eyebrow text-[#B8893A]">WARDROBE LEDGER</span>
-            <h2 className="section-title text-lg text-[#1F1815] mt-0.5">
-              Stock by State <span className="num text-sm text-[#6B5E55] font-sans font-normal">({totalStock} pieces)</span>
+            <span className="eyebrow text-gold">WARDROBE LEDGER</span>
+            <h2 className="section-title text-lg text-ink mt-0.5">
+              Stock by State <span className="num text-sm text-ink-soft font-sans font-normal">({totalStock} pieces)</span>
             </h2>
           </div>
-          <Link href="/erp/inventory" className="text-xs font-semibold text-[#7A1624] hover:underline flex items-center gap-1 min-h-10">
+          <Link href="/erp/inventory" className="text-xs font-semibold text-plum hover:underline flex items-center gap-1 min-h-10">
             <span>View all</span>
-            <ChevronRight className="w-3.5 h-3.5 text-[#B8893A]" />
+            <ChevronRight className="w-3.5 h-3.5 text-gold" />
           </Link>
         </div>
 
         {totalStock > 0 ? (
-          <div className="mt-3 flex h-3 w-full overflow-hidden rounded-full bg-[#F4EDE3] border border-[#EAE0D2]" role="img" aria-label="Proportion of costumes in each state">
+          <div className="mt-3 flex h-3 w-full overflow-hidden rounded-full bg-ivory-deep border border-line" role="img" aria-label="Proportion of costumes in each state">
             {STATE_META.map((m) =>
               counts[m.key] > 0 ? (
                 <div
@@ -430,12 +430,12 @@ export default function DashboardPage() {
 
         <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
           {STATE_META.map((m) => (
-            <div key={m.key} className="rounded-xl border border-[#EAE0D2] bg-[#FAF7F2] px-3 py-2.5 shadow-2xs">
-              <span className="flex items-center gap-1.5 text-[11px] text-[#6B5E55]">
+            <div key={m.key} className="rounded-xl border border-line bg-ivory px-3 py-2.5 shadow-2xs">
+              <span className="flex items-center gap-1.5 text-[11px] text-ink-soft">
                 <span className={cn("w-1.5 h-1.5 rounded-full", m.dot)} />
                 {m.label}
               </span>
-              <span className="num font-display font-semibold text-xl text-[#1F1815] block mt-1 leading-none">{counts[m.key]}</span>
+              <span className="num font-display font-semibold text-xl text-ink block mt-1 leading-none">{counts[m.key]}</span>
             </div>
           ))}
         </div>
@@ -443,9 +443,9 @@ export default function DashboardPage() {
 
       {/* Live alerts */}
       <section className="surface p-4 md:p-5" aria-label="Operational alerts">
-        <div className="flex items-center justify-between gap-3 border-b border-[#EAE0D2] pb-3">
-          <h2 className="section-title text-lg text-[#1F1815]">Operational Alerts</h2>
-          <span className="num text-[11px] font-semibold bg-[#FFF1F2] text-[#9F1239] px-2.5 py-0.5 rounded-full border border-[#FECDD3]">
+        <div className="flex items-center justify-between gap-3 border-b border-line pb-3">
+          <h2 className="section-title text-lg text-ink">Operational Alerts</h2>
+          <span className="num text-[11px] font-semibold bg-rose-50 text-rose-800 px-2.5 py-0.5 rounded-full border border-rose-200">
             {alerts.length} pending
           </span>
         </div>

@@ -163,13 +163,13 @@ export function ErpHeader() {
 
   return (
     <>
-      <header className="h-16 bg-[#FAF7F2]/90 backdrop-blur-md border-b border-[#EAE0D2] px-3.5 md:px-6 flex items-center justify-between sticky top-0 z-30 select-none">
+      <header className="h-16 bg-ivory/90 backdrop-blur-md border-b border-line px-3.5 md:px-6 flex items-center justify-between sticky top-0 z-30 select-none">
         {/* MOBILE (< 768px): menu, mark + serif page title, search, alerts */}
         <div className="flex md:hidden items-center justify-between w-full gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <button
               onClick={() => setShowMobileDrawer(true)}
-              className="w-10 h-10 -ml-1.5 rounded-lg text-[#6B5E55] hover:bg-[#F4EDE3] flex items-center justify-center shrink-0"
+              className="w-10 h-10 -ml-1.5 rounded-lg text-ink-soft hover:bg-ivory-deep flex items-center justify-center shrink-0"
               aria-label="Open navigation menu"
             >
               <Menu className="w-5 h-5" />
@@ -177,17 +177,17 @@ export function ErpHeader() {
             <Link
               href="/erp/dashboard"
               aria-label="Barnali Fashion home"
-              className="w-8 h-8 rounded-lg bg-[#7A1624] border border-[#B8893A]/50 flex items-center justify-center text-[#F9F2E4] font-display font-bold text-xs shrink-0 shadow-2xs"
+              className="w-8 h-8 rounded-lg bg-plum border border-gold/50 flex items-center justify-center text-gold-soft font-display font-bold text-xs shrink-0 shadow-2xs"
             >
               BF
             </Link>
-            <h1 className="page-title text-[17px] text-[#1F1815] truncate">{getPageTitle()}</h1>
+            <h1 className="page-title text-[17px] text-ink truncate">{getPageTitle()}</h1>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={() => setShowSearchModal(true)}
-              className="w-10 h-10 rounded-xl bg-white hover:bg-[#F4EDE3] border border-[#EAE0D2] text-[#6B5E55] flex items-center justify-center shadow-2xs"
+              className="w-10 h-10 rounded-xl bg-white hover:bg-ivory-deep border border-line text-ink-soft flex items-center justify-center shadow-2xs"
               aria-label="Search costumes, customers, orders"
             >
               <Search className="w-4 h-4" />
@@ -195,11 +195,11 @@ export function ErpHeader() {
             {/* on a phone the bell opens the dashboard, where every alert is listed with its actions */}
             <Link
               href="/erp/dashboard"
-              className="w-10 h-10 rounded-xl bg-white hover:bg-[#F4EDE3] border border-[#EAE0D2] text-[#6B5E55] flex items-center justify-center relative shadow-2xs"
+              className="w-10 h-10 rounded-xl bg-white hover:bg-ivory-deep border border-line text-ink-soft flex items-center justify-center relative shadow-2xs"
               aria-label={`Alerts (${unreadCount})`}
             >
               <Bell className="w-4 h-4" />
-              {unreadCount > 0 && <span className="absolute top-2 right-2 w-2 h-2 bg-[#9F1239] rounded-full ring-2 ring-white" />}
+              {unreadCount > 0 && <span className="absolute top-2 right-2 w-2 h-2 bg-rose-800 rounded-full ring-2 ring-white" />}
             </Link>
           </div>
         </div>
@@ -209,22 +209,22 @@ export function ErpHeader() {
           <div className="flex items-center gap-4 min-w-0">
             <button
               onClick={() => setShowMobileDrawer(true)}
-              className="lg:hidden w-10 h-10 rounded-xl text-[#6B5E55] hover:bg-[#F4EDE3] flex items-center justify-center border border-[#EAE0D2] bg-white shrink-0"
+              className="lg:hidden w-10 h-10 rounded-xl text-ink-soft hover:bg-ivory-deep flex items-center justify-center border border-line bg-white shrink-0"
               aria-label="Open navigation menu"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h1 className="page-title text-xl text-[#1F1815] hidden lg:block shrink-0">{getPageTitle()}</h1>
-            <span className="hidden lg:block h-6 w-px bg-[#EAE0D2] shrink-0" />
+            <h1 className="page-title text-xl text-ink hidden lg:block shrink-0">{getPageTitle()}</h1>
+            <span className="hidden lg:block h-6 w-px bg-line shrink-0" />
             <button
               onClick={() => setShowSearchModal(true)}
-              className="flex items-center justify-between bg-white hover:bg-[#F4EDE3]/40 border border-[#EAE0D2] text-xs text-[#6B5E55] px-4 min-h-10 rounded-xl w-64 lg:w-96 shadow-2xs transition-colors"
+              className="flex items-center justify-between bg-white hover:bg-ivory-deep/40 border border-line text-xs text-ink-soft px-4 min-h-10 rounded-xl w-64 lg:w-96 shadow-2xs transition-colors"
             >
               <span className="flex items-center gap-2.5 min-w-0">
-                <Search className="w-4 h-4 text-[#9C8E83] shrink-0" />
+                <Search className="w-4 h-4 text-mute shrink-0" />
                 <span className="truncate">Search Costume ID, Client, Order...</span>
               </span>
-              <kbd className="num bg-[#F4EDE3] text-[10px] text-[#6B5E55] font-semibold px-2 py-0.5 rounded border border-[#EAE0D2] ml-2 shrink-0">⌘K</kbd>
+              <kbd className="num bg-ivory-deep text-[10px] text-ink-soft font-semibold px-2 py-0.5 rounded border border-line ml-2 shrink-0">⌘K</kbd>
             </button>
           </div>
 
@@ -232,12 +232,12 @@ export function ErpHeader() {
             <div className="relative" ref={notifRef}>
               <button
                 onClick={() => setShowNotifMenu(!showNotifMenu)}
-                className="w-10 h-10 text-[#6B5E55] hover:text-[#1F1815] bg-white hover:bg-[#F4EDE3] border border-[#EAE0D2] rounded-xl flex items-center justify-center relative shadow-2xs transition-colors"
+                className="w-10 h-10 text-ink-soft hover:text-ink bg-white hover:bg-ivory-deep border border-line rounded-xl flex items-center justify-center relative shadow-2xs transition-colors"
                 aria-label={`Alerts (${alerts.length})`}
                 aria-expanded={showNotifMenu}
               >
                 <Bell className="w-4 h-4" />
-                {alerts.length > 0 && <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#9F1239] rounded-full ring-2 ring-white" />}
+                {alerts.length > 0 && <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-800 rounded-full ring-2 ring-white" />}
               </button>
 
               {showNotifMenu && (

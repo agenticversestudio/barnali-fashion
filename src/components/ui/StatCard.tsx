@@ -5,13 +5,13 @@ import { cn } from "@/lib/utils";
 type Tone = "gold" | "plum" | "amber" | "rose" | "violet" | "emerald" | "sky";
 
 const TONES: Record<Tone, { chip: string; value: string }> = {
-  gold: { chip: "bg-[#F9F2E4] text-[#B8893A] border border-[#EAE0D2]", value: "text-[#1F1815]" },
-  plum: { chip: "bg-[#FBF2F4] text-[#7A1624] border border-[#FECDD3]", value: "text-[#1F1815]" },
-  amber: { chip: "bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]", value: "text-[#1F1815]" },
-  rose: { chip: "bg-[#FFF1F2] text-[#9F1239] border border-[#FECDD3]", value: "text-[#9F1239]" },
-  violet: { chip: "bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB]", value: "text-[#1F1815]" },
-  emerald: { chip: "bg-[#ECFDF3] text-[#065F46] border border-[#A7F3D0]", value: "text-[#1F1815]" },
-  sky: { chip: "bg-sky-50 text-sky-700 border border-sky-200", value: "text-[#1F1815]" },
+  gold: { chip: "bg-gold-soft text-gold border border-line", value: "text-ink" },
+  plum: { chip: "bg-plum-soft text-plum border border-rose-200", value: "text-ink" },
+  amber: { chip: "bg-amber-100 text-amber-800 border border-amber-200", value: "text-ink" },
+  rose: { chip: "bg-rose-50 text-rose-800 border border-rose-200", value: "text-rose-800" },
+  violet: { chip: "bg-gray-100 text-gray-700 border border-gray-200", value: "text-ink" },
+  emerald: { chip: "bg-emerald-50 text-emerald-800 border border-emerald-200", value: "text-ink" },
+  sky: { chip: "bg-sky-50 text-sky-700 border border-sky-200", value: "text-ink" },
 };
 
 interface StatCardProps {
