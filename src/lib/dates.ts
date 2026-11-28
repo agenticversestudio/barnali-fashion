@@ -33,5 +33,7 @@ export function relativeDays(fromISO: string, toISO: string): string {
 export function waLink(phone: string, text?: string): string {
   const d = phone.replace(/\D/g, "");
   const n = d.length === 10 ? `91${d}` : d;
-  return `https://wa.me/${n}${text ? `?text=${encodeURIComponent(text)}` : ""}`;
+  if (!text) return `https://wa.me/${n}`;
+  const normalized = text.replace(/\r?\n/g, "\r\n");
+  return `https://wa.me/${n}?text=${encodeURIComponent(normalized)}`;
 }

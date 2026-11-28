@@ -24,6 +24,7 @@ import {
 import { bookingsApi, customersApi, garmentsApi } from "@/lib/api";
 import { formatINR } from "@/lib/utils";
 import { localISO, addDaysISO } from "@/lib/dates";
+import { buildWhatsAppLink, getGarmentEmoji } from "@/lib/whatsappReceipt";
 import type { CustomerDto, GarmentDto, QuoteResponse, PayMode, ConflictInfo } from "@/types/api";
 
 function NewBookingWizardContent() {
@@ -915,33 +916,35 @@ function NewBookingWizardContent() {
           {/* Quick WhatsApp Share Button */}
           <div className="pt-2">
             <a
-              href={`https://wa.me/91${customerPhone.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
+              href={buildWhatsAppLink(
+                customerPhone,
                 `👑 *BARNALI FASHION*\n` +
-                `_Bridal & Festive Couture Studio_\n` +
-                `━━━━━━━━━━━━━━━━━━━━\n` +
+                `_Bridal & Festive Couture Studio_ 🌺\n` +
+                `━━━━━━━━━━━━━━━━━━━━\n\n` +
                 `🧾 *BOOKING CONFIRMATION SLIP*\n` +
-                `*Order ID:* \`#${createdBookingId}\`\n` +
+                `🏷️ *Receipt No:* \`#${createdBookingId}\`\n` +
                 `━━━━━━━━━━━━━━━━━━━━\n\n` +
                 `👤 *CUSTOMER DETAILS*\n` +
                 `• *Client Name:* ${customerName}\n` +
-                `• *Phone:* ${customerPhone}\n\n` +
+                (customerPhone ? `• *Phone:* ${customerPhone}\n\n` : `\n`) +
                 `📅 *RENTAL SCHEDULE*\n` +
-                `• *Pickup Date:* ${pickupDate}\n` +
-                `• *Return Due Date:* *${returnDueDate}*\n\n` +
-                `👗 *RESERVED OUTFITS*\n` +
-                selectedCostumes.map((g, idx) => `*${idx + 1}. ${g.name}* (\`${g.id}\`)`).join("\n") +
-                `\n────────────────────\n` +
+                `• 📦 *Pickup Date:* ${pickupDate}\n` +
+                `• ⏳ *Return Due Date:* *${returnDueDate}*\n\n` +
+                `👗 *RESERVED COUTURE PIECES*\n` +
+                selectedCostumes.map((g, idx) => `*${idx + 1}. ${getGarmentEmoji(g.name, g.category)} ${g.name}* (\`${g.id}\`)`).join("\n") +
+                `\n────────────────────\n\n` +
                 `💰 *PAYMENT SUMMARY*\n` +
                 `• Grand Total: ₹${quote?.grandTotal || 0}\n` +
-                `✅ *Advance Received:* ₹${advanceAmount} (${paymentMode})\n` +
-                `⚠️ *Balance Due at Handover:* *₹${quote?.balanceDue || 0}*\n` +
+                `• ✅ *Advance Received:* ₹${advanceAmount} (${paymentMode})\n` +
+                `• ⚠️ *Balance Due at Handover:* *₹${quote?.balanceDue || 0}*\n` +
                 `━━━━━━━━━━━━━━━━━━━━\n\n` +
-                `🛡️ *SECURITY DEPOSIT POLICY*\n` +
-                `Security deposit is 100% refundable upon safe return of the outfits in original condition.\n\n` +
+                `🛡️ *STUDIO POLICY HIGHLIGHTS*\n` +
+                `• Security deposit is 100% refundable upon safe return of outfits.\n` +
+                `• Please do not wash or iron delicate bridal embroidery at home.\n\n` +
                 `📍 *Studio Address:* LIC Office Road, Bargarh, Odisha\n` +
                 `📞 *Helpline:* +91 79782 56488\n\n` +
-                `_Thank you for choosing Barnali Fashion!_ ✨`
-              )}`}
+                `_Thank you for choosing Barnali Fashion! We look forward to making your special day memorable._ ✨💖`
+              )}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition-colors"

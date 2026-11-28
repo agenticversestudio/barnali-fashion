@@ -28,6 +28,7 @@ import {
 import { alertsApi, bookingsApi, garmentsApi, syncApi } from "@/lib/api";
 import { formatDate, formatINR, cn, plural } from "@/lib/utils";
 import { addDaysISO, daysBetween, localISO, relativeDays, waLink } from "@/lib/dates";
+import { formatTrialReminderWhatsApp, formatPackingReadyWhatsApp } from "@/lib/whatsappReceipt";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatCard } from "@/components/ui/StatCard";
 import type { AlertDto, BookingDto, GarmentDto, SyncStatus } from "@/types/api";
@@ -373,9 +374,10 @@ export default function DashboardPage() {
             {milestones.map(({ booking: b, days }) => {
               const trial = days === 4;
               const wa = b.customer.whatsapp || b.customer.phone;
+              const garmentNames = b.items.map((i) => i.name);
               const msg = trial
-                ? `Namaste ${b.customer.name}, this is Barnali Fashion. Your trial for ${b.items.map((i) => i.name).join(", ")} is due. Please visit the studio before your pickup on ${formatDate(b.pickupDate)}.`
-                : `Namaste ${b.customer.name}, this is Barnali Fashion. Your costume is being packed and will be ready for pickup on ${formatDate(b.pickupDate)}.`;
+                ? formatTrialReminderWhatsApp(b.customer.name, garmentNames, b.pickupDate)
+                : formatPackingReadyWhatsApp(b.customer.name, garmentNames, b.pickupDate);
               return (
                 <article key={b.id} className="bg-[#F8F6FA] border border-[#E8E2F0] rounded-2xl p-4 flex flex-col gap-3 surface-interactive">
                   <div className="flex items-start justify-between gap-3">
