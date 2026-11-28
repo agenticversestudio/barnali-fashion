@@ -59,6 +59,15 @@ function toQueryString(params: Record<string, any>): string {
   return str ? `?${str}` : "";
 }
 
+/**
+ * The server wraps single-object responses ({ booking }, { garment }, { job }, ...).
+ * Unwrap by key so callers get the bare DTO their types promise; a bare object passes through unchanged.
+ */
+async function unwrap<T>(p: Promise<any>, key: string): Promise<T> {
+  const res = await p;
+  return (res && typeof res === "object" && key in res ? res[key] : res) as T;
+}
+
 // ======================== AUTH ========================
 export const authApi = {
   login: (data: LoginRequest) => api.post<LoginResponse>("/auth/login", data),
@@ -87,20 +96,24 @@ export const garmentsApi = {
     };
   },
 
-  getById: (id: string) => api.get<GarmentDetailDto>(`/garments/${id}`),
+  getById: (id: string) => unwrap<GarmentDetailDto>(api.get(`/garments/${id}`), "garment"),
 
-  create: (data: CreateGarmentRequest) => api.post<GarmentDto>("/garments", data),
+  create: (data: CreateGarmentRequest) => unwrap<GarmentDto>(api.post("/garments", data), "garment"),
 
-  update: (id: string, data: UpdateGarmentRequest) => api.patch<GarmentDto>(`/garments/${id}`, data),
+  update: (id: string, data: UpdateGarmentRequest) => unwrap<GarmentDto>(api.patch(`/garments/${id}`, data), "garment"),
 
   updateLocation: (id: string, data: UpdateLocationRequest) =>
-    api.patch<{ garmentId: string; rack: string; shelf?: string }>(`/garments/${id}/location`, data),
+    unwrap<GarmentDto>(api.patch(`/garments/${id}/location`, data), "garment"),
 
   updateStatus: (id: string, data: UpdateStatusRequest) =>
-    api.patch<{ garmentId: string; status: string }>(`/garments/${id}/status`, data),
+    unwrap<GarmentDto>(api.patch(`/garments/${id}/status`, data), "garment"),
 
-  getAvailability: (from: string, to: string, category?: string) =>
-    api.get<{ items: AvailabilityRow[] }>(`/garments/availability${toQueryString({ from, to, category })}`),
+  getAvailability: async (from: string, to: string, category?: string) => {
+    const res = await api.get<{ rows?: AvailabilityRow[]; items?: AvailabilityRow[] }>(
+      `/garments/availability${toQueryString({ from, to, category })}`
+    );
+    return { items: res.items ?? res.rows ?? [] };
+  },
 };
 
 // ======================== CUSTOMERS ========================
@@ -114,18 +127,18 @@ export const customersApi = {
     };
   },
 
-  getById: (id: string) => api.get<CustomerDto>(`/customers/${id}`),
+  getById: (id: string) => unwrap<CustomerDto>(api.get(`/customers/${id}`), "customer"),
 
-  createOrUpdate: (data: CustomerInput) => api.post<CustomerDto>("/customers", data),
+  createOrUpdate: (data: CustomerInput) => unwrap<CustomerDto>(api.post("/customers", data), "customer"),
 
-  update: (id: string, data: Partial<CustomerInput>) => api.patch<CustomerDto>(`/customers/${id}`, data),
+  update: (id: string, data: Partial<CustomerInput>) => unwrap<CustomerDto>(api.patch(`/customers/${id}`, data), "customer"),
 };
 
 // ======================== BOOKINGS ========================
 export const bookingsApi = {
   quote: (data: QuoteRequest) => api.post<QuoteResponse>("/bookings/quote", data),
 
-  create: (data: CreateBookingRequest) => api.post<BookingDto>("/bookings", data),
+  create: (data: CreateBookingRequest) => unwrap<BookingDto>(api.post("/bookings", data), "booking"),
 
   list: async (query: BookingListQuery = {}) => {
     const res = await api.get<{ bookings?: BookingDto[]; items?: BookingDto[]; nextCursor?: string }>(
@@ -137,17 +150,17 @@ export const bookingsApi = {
     };
   },
 
-  getById: (id: string) => api.get<BookingDto>(`/bookings/${id}`),
+  getById: (id: string) => unwrap<BookingDto>(api.get(`/bookings/${id}`), "booking"),
 
-  update: (id: string, data: UpdateBookingRequest) => api.patch<BookingDto>(`/bookings/${id}`, data),
+  update: (id: string, data: UpdateBookingRequest) => unwrap<BookingDto>(api.patch(`/bookings/${id}`, data), "booking"),
 
-  pickup: (id: string, data: PickupRequest) => api.post<BookingDto>(`/bookings/${id}/pickup`, data),
+  pickup: (id: string, data: PickupRequest) => unwrap<BookingDto>(api.post(`/bookings/${id}/pickup`, data), "booking"),
 
   return: (id: string, data: ReturnRequest) => api.post<ReturnResponse>(`/bookings/${id}/return`, data),
 
-  addPayment: (id: string, data: AddPaymentRequest) => api.post<BookingDto>(`/bookings/${id}/payments`, data),
+  addPayment: (id: string, data: AddPaymentRequest) => unwrap<BookingDto>(api.post(`/bookings/${id}/payments`, data), "booking"),
 
-  cancel: (id: string, data: CancelRequest) => api.post<BookingDto>(`/bookings/${id}/cancel`, data),
+  cancel: (id: string, data: CancelRequest) => unwrap<BookingDto>(api.post(`/bookings/${id}/cancel`, data), "booking"),
 };
 
 // ======================== CARE ========================
@@ -161,9 +174,9 @@ export const careApi = {
     };
   },
 
-  create: (data: CreateCareRequest) => api.post<CareJobDto>("/care", data),
+  create: (data: CreateCareRequest) => unwrap<CareJobDto>(api.post("/care", data), "job"),
 
-  receive: (id: string, data: ReceiveCareRequest) => api.post<CareJobDto>(`/care/${id}/receive`, data),
+  receive: (id: string, data: ReceiveCareRequest) => unwrap<CareJobDto>(api.post(`/care/${id}/receive`, data), "job"),
 };
 
 // ======================== ALERTS ========================
@@ -182,9 +195,9 @@ export const expensesApi = {
     };
   },
 
-  create: (data: Omit<ExpenseDto, "id">) => api.post<ExpenseDto>("/expenses", data),
+  create: (data: Omit<ExpenseDto, "id">) => unwrap<ExpenseDto>(api.post("/expenses", data), "expense"),
 
-  update: (id: string, data: Partial<Omit<ExpenseDto, "id">>) => api.patch<ExpenseDto>(`/expenses/${id}`, data),
+  update: (id: string, data: Partial<Omit<ExpenseDto, "id">>) => unwrap<ExpenseDto>(api.patch(`/expenses/${id}`, data), "expense"),
 
   delete: (id: string) => api.del<{ ok: boolean }>(`/expenses/${id}`),
 };
@@ -193,7 +206,7 @@ export const expensesApi = {
 export const cashApi = {
   getToday: (date?: string) => api.get<CashTodayDto>(`/cash/today${toQueryString({ date })}`),
 
-  close: (data: CloseCashRequest) => api.post<CashClosingDto>("/cash/closing", data),
+  close: (data: CloseCashRequest) => unwrap<CashClosingDto>(api.post("/cash/closing", data), "closing"),
 
   getClosings: (limit?: number) => api.get<{ closings: CashClosingDto[] }>(`/cash/closings${toQueryString({ limit })}`),
 };
@@ -235,7 +248,7 @@ export const syncApi = {
 
 // ======================== SETTINGS ========================
 export const settingsApi = {
-  get: () => api.get<SettingsDto>("/settings"),
+  get: () => unwrap<SettingsDto>(api.get("/settings"), "settings"),
 
-  update: (data: Partial<SettingsDto>) => api.patch<SettingsDto>("/settings", data),
+  update: (data: Partial<SettingsDto>) => unwrap<SettingsDto>(api.patch("/settings", data), "settings"),
 };
