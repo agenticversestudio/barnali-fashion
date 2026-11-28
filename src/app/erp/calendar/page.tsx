@@ -29,12 +29,18 @@ export default function AvailabilityCalendarPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
 
   // Date range navigation: Month / Year (defaults to current date)
-  const [year, setYear] = useState(() => new Date().getFullYear());
-  const [month, setMonth] = useState(() => new Date().getMonth() + 1);
+  // Placeholder values keep prerender deterministic; real date is set after mount.
+  const [year, setYear] = useState(2026);
+  const [month, setMonth] = useState(1);
   const [todayStr, setTodayStr] = useState("");
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setTodayStr(new Date().toISOString().split("T")[0]);
+    const now = new Date();
+    setYear(now.getFullYear());
+    setMonth(now.getMonth() + 1);
+    setTodayStr(now.toISOString().split("T")[0]);
+    setReady(true);
   }, []);
   const [selectedCell, setSelectedCell] = useState<{
     garmentId: string;
@@ -67,8 +73,8 @@ export default function AvailabilityCalendarPage() {
   }, [fromDateStr, toDateStr, selectedCategory]);
 
   useEffect(() => {
-    loadAvailability();
-  }, [loadAvailability]);
+    if (ready) loadAvailability();
+  }, [ready, loadAvailability]);
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
