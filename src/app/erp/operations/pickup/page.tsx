@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Clock,
   Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import { bookingsApi } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
@@ -31,16 +32,30 @@ function PickupOperationsContent() {
   const [submitting, setSubmitting] = useState(false);
 
   // Verification checks
-  const [accessoriesChecked, setAccessoriesChecked] = useState(true);
-  const [conditionChecked, setConditionChecked] = useState(true);
+  // The checklist starts unticked on purpose: staff must actually confirm each item for every handover.
+  const DEFAULT_CONDITION = "Fitting checked with client, zari intact, wooden hanger & dust cover bag verified";
+  const [accessoriesChecked, setAccessoriesChecked] = useState(false);
+  const [conditionChecked, setConditionChecked] = useState(false);
   const [balancePayMode, setBalancePayMode] = useState<PayMode>("CASH");
-  const [handoverCondition, setHandoverCondition] = useState(
-    "Fitting checked with client, zari intact, wooden hanger & dust cover bag verified"
-  );
+  const [handoverCondition, setHandoverCondition] = useState(DEFAULT_CONDITION);
   const [photoIds, setPhotoIds] = useState<string[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [doneMsg, setDoneMsg] = useState<{ text: string; bookingId: string } | null>(null);
+
+  // every booking starts from a clean form so one order's remarks/photos/mode never leak into the next
+  const resetForm = () => {
+    setPhotoIds([]);
+    setAccessoriesChecked(false);
+    setConditionChecked(false);
+    setBalancePayMode("CASH");
+    setHandoverCondition(DEFAULT_CONDITION);
+    setActionError(null);
+  };
 
   const loadPickups = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await bookingsApi.list({ status: "CONFIRMED" });
       const items = res.items || [];
@@ -50,8 +65,8 @@ function PickupOperationsContent() {
       } else {
         setSelectedBooking(null);
       }
-    } catch (err) {
-      console.error("Failed to load confirmed bookings for pickup:", err);
+    } catch (err: any) {
+      setLoadError(err?.message || "Could not load the pickup queue.");
     } finally {
       setLoading(false);
     }
@@ -63,8 +78,9 @@ function PickupOperationsContent() {
 
   const handleIssueGarments = async () => {
     if (!selectedBooking) return;
+    setActionError(null);
     if (!accessoriesChecked || !conditionChecked) {
-      alert("Please confirm the accessories checklist and condition check before handing over the garment.");
+      setActionError("Tick both checks (accessories verified, condition confirmed by client) before handing over.");
       return;
     }
 
@@ -85,11 +101,14 @@ function PickupOperationsContent() {
         payments: payments.length > 0 ? payments : undefined,
       });
 
-      alert(`Handover completed! Garments are now OUT ON RENT to ${selectedBooking.customer?.name}.`);
-      setPhotoIds([]);
+      setDoneMsg({
+        text: `Handover complete. ${selectedBooking.customer?.name}'s garments are now OUT ON RENT.`,
+        bookingId: selectedBooking.id,
+      });
+      resetForm();
       await loadPickups();
     } catch (err: any) {
-      alert(err?.message || "Failed to complete pickup handover");
+      setActionError(err?.message || "Failed to complete pickup handover");
     } finally {
       setSubmitting(false);
     }
@@ -108,6 +127,26 @@ function PickupOperationsContent() {
           Execute physical garment handovers, verify accompanying accessories, and log balance settlements.
         </p>
       </div>
+
+      {doneMsg && (
+        <div role="status" className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs flex items-center justify-between gap-3 flex-wrap">
+          <span className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            {doneMsg.text}
+          </span>
+          <Link href={`/erp/billing/invoices?bookingId=${doneMsg.bookingId}`} className="font-bold underline">
+            Print / share receipt
+          </Link>
+        </div>
+      )}
+
+      {loadError && (
+        <div role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>{loadError}</span>
+          <button onClick={loadPickups} className="ml-auto font-bold underline cursor-pointer">Retry</button>
+        </div>
+      )}
 
       {loading ? (
         <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-[#5B5566]">
@@ -130,9 +169,20 @@ function PickupOperationsContent() {
                 {bookings.map((b) => (
                   <div
                     key={b.id}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedBooking(b);
+                        resetForm();
+                        setDoneMsg(null);
+                      }
+                    }}
                     onClick={() => {
                       setSelectedBooking(b);
-                      setPhotoIds([]);
+                      resetForm();
+                      setDoneMsg(null);
                     }}
                     className={`p-3 rounded-xl border cursor-pointer transition-all text-xs ${
                       selectedBooking?.id === b.id
@@ -248,7 +298,7 @@ function PickupOperationsContent() {
                         <select
                           value={balancePayMode}
                           onChange={(e) => setBalancePayMode(e.target.value as PayMode)}
-                          className="p-1.5 bg-white border border-amber-300 rounded-lg font-bold text-xs"
+                          className="p-1.5 min-h-10 bg-white border border-amber-300 rounded-lg font-bold text-xs"
                         >
                           <option value="CASH">Cash in Drawer</option>
                           <option value="UPI">UPI (GPay / PhonePe)</option>
@@ -316,6 +366,13 @@ function PickupOperationsContent() {
                   </label>
                 </div>
 
+                {actionError && (
+                  <div role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>{actionError}</span>
+                  </div>
+                )}
+
                 {/* Dispatch Action */}
                 <div className="pt-3 border-t border-line-soft flex items-center justify-between">
                   <div>
@@ -326,7 +383,7 @@ function PickupOperationsContent() {
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/erp/billing/invoices?bookingId=${selectedBooking.id}`}
-                      className="p-2.5 bg-[#F5F2F8] hover:bg-[#F5F2F8] text-[#5B5566] rounded-xl font-bold flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 min-h-10 bg-[#F5F2F8] hover:bg-[#EDE8F3] text-[#5B5566] rounded-xl font-bold flex items-center gap-1.5 cursor-pointer"
                     >
                       <Printer className="w-4 h-4" />
                       <span>Print Issue Slip</span>
@@ -334,7 +391,7 @@ function PickupOperationsContent() {
                     <button
                       onClick={handleIssueGarments}
                       disabled={submitting}
-                      className="bg-plum hover:bg-plum-dark disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-xl shadow-xs transition-colors flex items-center gap-2 cursor-pointer"
+                      className="bg-plum hover:bg-plum-dark disabled:opacity-50 text-white font-bold px-5 min-h-10 rounded-xl shadow-xs transition-colors flex items-center gap-2 cursor-pointer"
                     >
                       {submitting ? (
                         <Loader2 className="w-4 h-4 animate-spin text-gold-light" />

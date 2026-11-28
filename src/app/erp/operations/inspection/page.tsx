@@ -21,14 +21,16 @@ import { EmptyState } from "@/components/ui/EmptyState";
 function InspectionBayContent() {
   const [completedBookings, setCompletedBookings] = useState<BookingDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadInspections = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await bookingsApi.list({ status: "COMPLETED", limit: 30 });
       setCompletedBookings(res.items || []);
-    } catch (err) {
-      console.error("Failed to load completed return inspections:", err);
+    } catch (err: any) {
+      setLoadError(err?.message || "Could not load return inspections.");
     } finally {
       setLoading(false);
     }
@@ -62,13 +64,21 @@ function InspectionBayContent() {
             <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
             Loading inspection history...
           </div>
+        ) : loadError ? (
+          <div role="alert" className="py-10 text-center text-xs text-rose-800 space-y-2">
+            <AlertTriangle className="w-5 h-5 text-rose-500 mx-auto" />
+            <div>{loadError}</div>
+            <button onClick={loadInspections} className="font-bold underline cursor-pointer">Retry</button>
+          </div>
         ) : completedBookings.length === 0 ? (
           <EmptyState title="No completed return inspections on record yet." className="py-12" />
         ) : (
           <div className="space-y-3">
             {completedBookings.map((b) => {
-              const totalDeductions = (b.damageCharge || 0) + (b.cleaningCharge || 0);
+              // late fee is also a deduction from the deposit, so it counts here
+              const totalDeductions = (b.damageCharge || 0) + (b.cleaningCharge || 0) + (b.lateFee || 0);
               const hasDefects = totalDeductions > 0;
+              const refundPending = b.depositStatus === "HELD" && b.refundAmount > 0;
 
               return (
                 <div
@@ -102,13 +112,20 @@ function InspectionBayContent() {
                           hasDefects ? "text-rose-700" : "text-emerald-700"
                         }`}
                       >
-                        {hasDefects ? `Deducted: ${formatINR(totalDeductions)}` : "Refunded in Full"}
+                        {refundPending
+                          ? `Refund pending: ${formatINR(b.refundAmount)}`
+                          : hasDefects
+                          ? `Deducted: ${formatINR(totalDeductions)}`
+                          : "Refunded in Full"}
                       </div>
+                      {b.additionalDue > 0 && (
+                        <div className="text-[10px] font-bold text-rose-700">Extra due: {formatINR(b.additionalDue)}</div>
+                      )}
                     </div>
 
                     <Link
                       href={`/erp/billing/invoices?bookingId=${b.id}`}
-                      className="px-3 py-1.5 bg-white border border-line rounded-lg font-bold text-plum hover:bg-gold-soft min-h-10"
+                      className="px-3 min-h-10 inline-flex items-center bg-white border border-line rounded-lg font-bold text-plum hover:bg-gold-soft"
                     >
                       Receipt →
                     </Link>

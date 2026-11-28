@@ -19,7 +19,7 @@ import { useAuth } from "@/context/AuthContext";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function CashClosingPage() {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin, loading: authLoading } = useAuth();
   const [todayData, setTodayData] = useState<CashTodayDto | null>(null);
   const [closings, setClosings] = useState<CashClosingDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,9 +28,13 @@ export default function CashClosingPage() {
   const [actualCash, setActualCash] = useState<string>("");
   const [closingNotes, setClosingNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [savedMsg, setSavedMsg] = useState<string | null>(null);
 
   const loadCashData = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const [today, history] = await Promise.all([
         cashApi.getToday(),
@@ -44,35 +48,54 @@ export default function CashClosingPage() {
       } else {
         setActualCash(String(today.expectedCash));
       }
-    } catch (err) {
-      console.error("Failed to load cash data:", err);
+    } catch (err: any) {
+      setLoadError(err?.message || "Could not load today's cash figures.");
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    // cash endpoints are admin-only: don't call them for staff
+    if (authLoading) return;
+    if (!isAdmin) {
+      setLoading(false);
+      return;
+    }
     loadCashData();
-  }, [loadCashData]);
+  }, [authLoading, isAdmin, loadCashData]);
 
   const handleSaveClosing = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!actualCash) {
-      alert("Please enter the actual physical cash amount counted in the drawer.");
+    setFormError(null);
+    setSavedMsg(null);
+    const trimmed = actualCash.trim();
+    if (trimmed === "") {
+      setFormError("Enter the cash you counted in the drawer.");
       return;
     }
+    const counted = Number(trimmed);
+    if (!Number.isInteger(counted) || counted < 0) {
+      setFormError("Counted cash must be a whole rupee amount, 0 or more.");
+      return;
+    }
+    const diff = todayData ? counted - todayData.expectedCash : 0;
+    const msg =
+      diff === 0
+        ? "Freeze today's cash closing? It cannot be edited afterwards."
+        : `Drawer is ${diff > 0 ? "over" : "short"} by ${formatINR(Math.abs(diff))}. Freeze the closing anyway? It cannot be edited afterwards.`;
+    if (!window.confirm(msg)) return;
 
     setSubmitting(true);
     try {
       await cashApi.close({
-        actualCash: Number(actualCash),
+        actualCash: counted,
         notes: closingNotes.trim() || undefined,
       });
-
-      alert("Cash closing saved and frozen for today!");
       await loadCashData();
+      setSavedMsg("Cash closing saved and frozen for today.");
     } catch (err: any) {
-      alert(err?.message || "Failed to save cash closing");
+      setFormError(err?.message || "Failed to save cash closing");
     } finally {
       setSubmitting(false);
     }
@@ -82,11 +105,36 @@ export default function CashClosingPage() {
   const variance = todayData ? countedNum - todayData.expectedCash : 0;
   const isBalanced = variance === 0;
 
-  if (loading) {
+  if (!authLoading && !isAdmin) {
+    return (
+      <div className="bg-white rounded-2xl border border-line p-12 text-center">
+        <Lock className="w-6 h-6 text-stone-400 mx-auto mb-2" />
+        <div className="text-sm font-semibold text-stone-800">Owner access only</div>
+        <div className="text-xs text-stone-500 mt-1">Daily cash closing can only be done by an admin account.</div>
+      </div>
+    );
+  }
+
+  if (loading || authLoading) {
     return (
       <div className="bg-white rounded-2xl border border-line p-12 text-center">
         <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
         <div className="text-xs text-stone-500">Reconciling today&apos;s cash payments and drawer totals...</div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="bg-white rounded-2xl border border-rose-200 p-12 text-center space-y-3">
+        <AlertTriangle className="w-6 h-6 text-rose-500 mx-auto" />
+        <div className="text-xs text-rose-800">{loadError}</div>
+        <button
+          onClick={loadCashData}
+          className="px-4 min-h-10 rounded-xl border border-stone-200 text-xs font-semibold text-stone-700 hover:bg-stone-50"
+        >
+          Try again
+        </button>
       </div>
     );
   }
@@ -169,6 +217,9 @@ export default function CashClosingPage() {
                 value={actualCash}
                 disabled={todayData?.closed}
                 onChange={(e) => setActualCash(e.target.value)}
+                min={0}
+                step={1}
+                inputMode="numeric"
                 placeholder="Count all notes in drawer..."
                 className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono font-bold text-base text-stone-900 focus:outline-none focus:border-plum"
                 required
@@ -207,6 +258,19 @@ export default function CashClosingPage() {
               className="w-full p-2.5 bg-ivory border border-line rounded-xl"
             />
           </div>
+
+          {formError && (
+            <div role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{formError}</span>
+            </div>
+          )}
+          {savedMsg && (
+            <div role="status" className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{savedMsg}</span>
+            </div>
+          )}
 
           {!todayData?.closed && (
             <div className="pt-2 flex justify-end">

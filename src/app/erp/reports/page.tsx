@@ -6,52 +6,122 @@ import {
   Download,
   Printer,
   Award,
-  Wallet,
   Calendar,
-  Layers,
-  Percent,
-  Coins,
   Loader2,
-  FileSpreadsheet,
+  AlertTriangle,
+  Lock,
 } from "lucide-react";
 import { reportsApi } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 import { formatINR } from "@/lib/utils";
 import type { ReportSummary } from "@/types/api";
 import { EmptyState } from "@/components/ui/EmptyState";
 
+type CsvType = Parameters<typeof reportsApi.getExportUrl>[0];
+const CSV_EXPORTS: { type: CsvType; label: string }[] = [
+  { type: "bookings", label: "Bookings" },
+  { type: "payments", label: "Payments" },
+  { type: "expenses", label: "Expenses" },
+  { type: "garments", label: "Garments" },
+  { type: "customers", label: "Customers" },
+  { type: "cashclosings", label: "Cash Closings" },
+];
+
+/** Local calendar date as YYYY-MM-DD (toISOString would shift it by the UTC offset around midnight). */
+function localISO(d: Date): string {
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
 export default function ReportsPage() {
+  const { isAdmin, loading: authLoading } = useAuth();
   const [summary, setSummary] = useState<ReportSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState<CsvType | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   // Date filters (defaults to start of current month to today, set in useEffect)
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
 
-  const loadSummary = useCallback(async (from?: string, to?: string) => {
+  const loadSummary = useCallback(async (from: string, to: string) => {
+    if (!from || !to) {
+      setError("Pick both a start and an end date.");
+      return;
+    }
+    if (from > to) {
+      setError("The start date must not be after the end date.");
+      return;
+    }
     setLoading(true);
+    setError(null);
     try {
-      const f = from || fromDate;
-      const t = to || toDate;
-      if (!f || !t) return;
-      const data = await reportsApi.getSummary(f, t);
-      setSummary(data);
-    } catch (err) {
-      console.error("Failed to load report summary:", err);
+      setSummary(await reportsApi.getSummary(from, to));
+    } catch (err: any) {
+      setSummary(null);
+      setError(err?.message || "Failed to load the report.");
     } finally {
       setLoading(false);
     }
-  }, [fromDate, toDate]);
+  }, []);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!isAdmin) {
+      setLoading(false);
+      return;
+    }
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-      .toISOString()
-      .split("T")[0];
-    const today = now.toISOString().split("T")[0];
-    setFromDate(startOfMonth);
+    const start = localISO(new Date(now.getFullYear(), now.getMonth(), 1));
+    const today = localISO(now);
+    setFromDate(start);
     setToDate(today);
-    loadSummary(startOfMonth, today);
-  }, []);
+    loadSummary(start, today);
+  }, [authLoading, isAdmin, loadSummary]);
+
+  // fetch (not a bare link) so a failed/expired session shows a message instead of saving an error page as .csv
+  const downloadCsv = async (type: CsvType) => {
+    setExporting(type);
+    setExportError(null);
+    try {
+      const res = await fetch(reportsApi.getExportUrl(type), { credentials: "same-origin" });
+      if (!res.ok) {
+        let msg = `Export failed (${res.status}).`;
+        try {
+          const j = await res.json();
+          if (j?.error?.message) msg = j.error.message;
+        } catch {
+          /* not JSON */
+        }
+        throw new Error(msg);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `barnali-${type}-${localISO(new Date())}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setExportError(err?.message || "Export failed.");
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  if (!authLoading && !isAdmin) {
+    return (
+      <div className="bg-white rounded-2xl border border-line p-12 text-center">
+        <Lock className="w-6 h-6 text-stone-400 mx-auto mb-2" />
+        <div className="text-sm font-semibold text-stone-800">Owner access only</div>
+        <div className="text-xs text-stone-500 mt-1">Financial reports can only be viewed by an admin account.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -85,18 +155,20 @@ export default function ReportsPage() {
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
-            className="p-1.5 bg-ivory border border-line rounded-lg font-mono text-xs"
+            max={toDate || undefined}
+            className="p-1.5 min-h-10 bg-ivory border border-line rounded-lg font-mono text-xs"
           />
           <span className="text-[#8C8499]">to</span>
           <input
             type="date"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
-            className="p-1.5 bg-ivory border border-line rounded-lg font-mono text-xs"
+            min={fromDate || undefined}
+            className="p-1.5 min-h-10 bg-ivory border border-line rounded-lg font-mono text-xs"
           />
           <button
-            onClick={() => loadSummary()}
-            className="px-3 py-1.5 bg-plum text-white rounded-lg font-bold hover:bg-plum-dark cursor-pointer"
+            onClick={() => loadSummary(fromDate, toDate)}
+            className="px-3 min-h-10 bg-plum text-white rounded-lg font-bold hover:bg-plum-dark cursor-pointer"
           >
             Apply
           </button>
@@ -104,41 +176,35 @@ export default function ReportsPage() {
 
         {/* CSV Export Links */}
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[#8C8499] font-semibold text-[11px]">Download Raw CSV:</span>
-          <a
-            href={reportsApi.getExportUrl("bookings")}
-            download
-            className="bg-ivory hover:bg-gold-soft text-[#5B5566] border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
-          >
-            <Download className="w-3 h-3 text-gold" />
-            <span>Bookings</span>
-          </a>
-          <a
-            href={reportsApi.getExportUrl("payments")}
-            download
-            className="bg-ivory hover:bg-gold-soft text-[#5B5566] border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
-          >
-            <Download className="w-3 h-3 text-gold" />
-            <span>Payments</span>
-          </a>
-          <a
-            href={reportsApi.getExportUrl("expenses")}
-            download
-            className="bg-ivory hover:bg-gold-soft text-[#5B5566] border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
-          >
-            <Download className="w-3 h-3 text-gold" />
-            <span>Expenses</span>
-          </a>
-          <a
-            href={reportsApi.getExportUrl("garments")}
-            download
-            className="bg-ivory hover:bg-gold-soft text-[#5B5566] border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10"
-          >
-            <Download className="w-3 h-3 text-gold" />
-            <span>Garments</span>
-          </a>
+          <span className="text-[#8C8499] font-semibold text-[11px]">Download Raw CSV (all dates):</span>
+          {CSV_EXPORTS.map((c) => (
+            <button
+              key={c.type}
+              type="button"
+              onClick={() => downloadCsv(c.type)}
+              disabled={exporting !== null}
+              className="bg-ivory hover:bg-gold-soft disabled:opacity-60 text-[#5B5566] border border-line px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 min-h-10 cursor-pointer"
+            >
+              {exporting === c.type ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3 text-gold" />}
+              <span>{c.label}</span>
+            </button>
+          ))}
         </div>
       </div>
+
+      {exportError && (
+        <div role="alert" className="no-print p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>{exportError}</span>
+        </div>
+      )}
+
+      {error && summary && (
+        <div role="alert" className="no-print p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
       {loading ? (
         <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-[#5B5566]">
@@ -146,7 +212,10 @@ export default function ReportsPage() {
           Aggregating financial and asset utilization analytics...
         </div>
       ) : !summary ? (
-        <EmptyState title="Failed to load summary." className="py-12" />
+        <div role="alert" className="bg-white rounded-2xl border border-rose-200 p-10 text-center text-xs text-rose-800 space-y-2">
+          <AlertTriangle className="w-5 h-5 text-rose-500 mx-auto" />
+          <div>{error || "Failed to load summary."}</div>
+        </div>
       ) : (
         <>
           {/* Top 3 Primary Metrics */}
@@ -220,7 +289,7 @@ export default function ReportsPage() {
                   <span className="font-mono font-bold text-[#18141E]">{formatINR(summary.revenue.transit)}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-[#E8E2F0]">
-                  <span className="text-[#5B5566]">Late Fees Collected (15%/day):</span>
+                  <span className="text-[#5B5566]">Late Fees Collected:</span>
                   <span className="font-mono font-bold text-amber-700">{formatINR(summary.revenue.lateFees)}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-[#E8E2F0]">

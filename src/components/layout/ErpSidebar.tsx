@@ -25,16 +25,6 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { alertsApi } from "@/lib/api";
 
-/** The 6 costume states every screen uses; dot colours match <StatusBadge>. */
-const COSTUME_STATES = [
-  { label: "Available", dot: "bg-emerald-500" },
-  { label: "Booked", dot: "bg-amber-500" },
-  { label: "Out on rent", dot: "bg-sky-500" },
-  { label: "Cleaning", dot: "bg-violet-500" },
-  { label: "Damaged / Repair", dot: "bg-rose-500" },
-  { label: "Unavailable", dot: "bg-stone-500" },
-];
-
 const OPERATIONS_NAV = [
   { label: "Dashboard", href: "/erp/dashboard", icon: LayoutDashboard, color: "text-[#E11D48] bg-[#FFE4E6]" },
   { label: "Orders", href: "/erp/bookings", icon: ClipboardList, color: "text-[#4F46E5] bg-[#E0E7FF]" },
@@ -139,19 +129,6 @@ export function ErpSidebar() {
             </div>
           </div>
         </Link>
-      </div>
-
-      {/* Costume-state legend */}
-      <div className="px-4 py-2.5 bg-[#F8F6FA]/70 border-b border-[#EBE6F0]">
-        <div className="text-[9.5px] font-bold tracking-wider uppercase text-[#8C8499] mb-1.5">Costume States</div>
-        <div className="grid grid-cols-2 gap-x-2.5 gap-y-1">
-          {COSTUME_STATES.map((s) => (
-            <span key={s.label} className="flex items-center gap-1.5 text-[10.5px] text-[#5B5566] leading-none">
-              <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", s.dot)} />
-              <span className="truncate">{s.label}</span>
-            </span>
-          ))}
-        </div>
       </div>
 
       {/* Navigation */}

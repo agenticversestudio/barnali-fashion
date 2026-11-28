@@ -13,6 +13,9 @@ import {
   ShieldCheck,
   CheckCircle,
   Loader2,
+  MessageCircle,
+  Copy,
+  AlertTriangle,
 } from "lucide-react";
 import { bookingsApi, settingsApi } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
@@ -20,17 +23,21 @@ import type { BookingDto, SettingsDto } from "@/types/api";
 
 function InvoiceContent() {
   const searchParams = useSearchParams();
-  const queryBookingId = searchParams.get("bookingId");
+  // older links used ?orderId=, newer ones ?bookingId=; accept both
+  const queryBookingId = searchParams.get("bookingId") || searchParams.get("orderId");
 
   const [bookings, setBookings] = useState<BookingDto[]>([]);
   const [selectedBooking, setSelectedBooking] = useState<BookingDto | null>(null);
   const [settings, setSettings] = useState<SettingsDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [printLayout, setPrintLayout] = useState<"A4" | "thermal">("A4");
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     async function initData() {
       setLoading(true);
+      setLoadError(null);
       try {
         const [bookingsRes, stg] = await Promise.all([
           bookingsApi.list({ limit: 50 }),
@@ -47,6 +54,7 @@ function InvoiceContent() {
           } else {
             try {
               const direct = await bookingsApi.getById(queryBookingId);
+              setBookings([direct, ...list]);
               setSelectedBooking(direct);
             } catch {
               if (list.length > 0) setSelectedBooking(list[0]);
@@ -55,8 +63,8 @@ function InvoiceContent() {
         } else if (list.length > 0) {
           setSelectedBooking(list[0]);
         }
-      } catch (err) {
-        console.error("Failed to load invoice booking data:", err);
+      } catch (err: any) {
+        setLoadError(err?.message || "Could not load bookings.");
       } finally {
         setLoading(false);
       }
@@ -70,6 +78,15 @@ function InvoiceContent() {
       <div className="bg-white rounded-2xl border border-line-soft p-12 text-center text-xs text-[#5B5566]">
         <Loader2 className="w-6 h-6 animate-spin text-plum mx-auto mb-2" />
         Loading booking invoice &amp; voucher...
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="bg-white rounded-2xl border border-rose-200 p-12 text-center text-xs text-rose-800 space-y-2">
+        <AlertTriangle className="w-6 h-6 text-rose-500 mx-auto" />
+        <div>{loadError}</div>
       </div>
     );
   }
@@ -88,9 +105,50 @@ function InvoiceContent() {
     settings?.shopAddress ||
     "In front of LIC Office, Near Keshariya Restaurant, Bargarh Road, Bargarh, Odisha — 768028";
 
-  const advancePayment =
-    selectedBooking.payments?.find((p) => p.kind === "ADVANCE")?.amount ??
-    selectedBooking.amountPaid;
+  // everything collected so far (advance + balance + deposit), so Total - Paid = Balance always adds up
+  const advancePayment = selectedBooking.amountPaid;
+  const latePct = settings?.lateFeePercent ?? 15;
+  const returned = selectedBooking.status === "COMPLETED";
+  const extraDue = selectedBooking.additionalDue || 0;
+
+  const whatsappText = [
+    `*${shopName.toUpperCase()} — ${returned ? "RETURN RECEIPT" : "BOOKING RECEIPT"}*`,
+    `Order ID: ${selectedBooking.id}`,
+    `Client: ${selectedBooking.customer.name}`,
+    `Event: ${selectedBooking.eventName}`,
+    `Pickup: ${formatDate(selectedBooking.pickupDate)}`,
+    `Return due: ${formatDate(selectedBooking.returnDueDate)}`,
+    `-------------------------`,
+    ...selectedBooking.items.map((i) => `• ${i.name} (${i.garmentId}) — Rent ${formatINR(i.rentalPrice)}, Deposit ${formatINR(i.securityDeposit)}`),
+    `-------------------------`,
+    `Rental: ${formatINR(selectedBooking.rentalTotal)}`,
+    `Security deposit: ${formatINR(selectedBooking.depositTotal)}`,
+    ...(selectedBooking.dryCleanCharge > 0 ? [`Dry clean: ${formatINR(selectedBooking.dryCleanCharge)}`] : []),
+    ...(selectedBooking.transitCharge > 0 ? [`Delivery: ${formatINR(selectedBooking.transitCharge)}`] : []),
+    `*Grand total: ${formatINR(selectedBooking.grandTotal)}*`,
+    `Paid so far: ${formatINR(advancePayment)}`,
+    `*Balance due: ${formatINR(selectedBooking.balanceDue)}*`,
+    ...(returned
+      ? [
+          `-------------------------`,
+          `Deposit refund: ${formatINR(selectedBooking.refundAmount)}`,
+          ...(extraDue > 0 ? [`*Extra amount due: ${formatINR(extraDue)}*`] : []),
+        ]
+      : []),
+    `-------------------------`,
+    `Security deposit is refundable on undamaged return. Thank you!`,
+  ].join("\n");
+  const waPhone = (selectedBooking.customer.whatsapp || selectedBooking.customer.phone || "").replace(/\D/g, "").slice(-10);
+  const waHref = `https://wa.me/${waPhone.length === 10 ? "91" + waPhone : ""}?text=${encodeURIComponent(whatsappText)}`;
+  const copyText = async () => {
+    try {
+      await navigator.clipboard.writeText(whatsappText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -104,7 +162,7 @@ function InvoiceContent() {
           <h1 className="text-2xl page-title">Invoices &amp; Receipts</h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Format Toggle */}
           <div className="bg-white p-1 rounded-xl border border-line flex text-xs">
             <button
@@ -125,9 +183,26 @@ function InvoiceContent() {
             </button>
           </div>
 
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 min-h-10 rounded-xl shadow-xs flex items-center gap-1.5 transition-colors"
+          >
+            <MessageCircle className="w-4 h-4" />
+            <span>WhatsApp</span>
+          </a>
+          <button
+            onClick={copyText}
+            className="bg-white border border-line hover:bg-ivory text-[#5B5566] font-bold text-xs px-3 min-h-10 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <Copy className="w-4 h-4" />
+            <span>{copied ? "Copied" : "Copy text"}</span>
+          </button>
+
           <button
             onClick={() => window.print()}
-            className="bg-gold hover:bg-gold-dark text-ink font-bold text-xs px-4 py-2 rounded-xl shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="bg-gold hover:bg-gold-dark text-ink font-bold text-xs px-4 min-h-10 rounded-xl shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Printer className="w-4 h-4" />
             <span>Print Invoice</span>
@@ -175,7 +250,7 @@ function InvoiceContent() {
 
             <div className="text-right">
               <div className="font-bold text-[#8C8499] uppercase text-[10px] tracking-wider">
-                Tax Invoice / Rental Voucher
+                Rental Invoice / Voucher
               </div>
               <div className="text-lg font-mono font-bold text-plum mt-0.5">
                 {selectedBooking.id}
@@ -262,7 +337,7 @@ function InvoiceContent() {
                 Standard Rental Terms
               </div>
               <div>• Garment security deposit is 100% refundable upon undamaged return.</div>
-              <div>• Strict return due deadline applies. Late fee: 15% of rental tariff per day.</div>
+              <div>• Strict return due deadline applies. Late fee: {latePct}% of rental tariff per day.</div>
               <div>• Do not machine wash or iron directly on metallic zari or stone embroidery.</div>
               <div>• Minor food stains are covered by standard dry clean; heavy rips or burns attract deduction.</div>
             </div>
@@ -281,14 +356,26 @@ function InvoiceContent() {
                   {formatINR(selectedBooking.depositTotal)}
                 </span>
               </div>
+              {selectedBooking.dryCleanCharge > 0 && (
+                <div className="flex justify-between font-bold text-[#5B5566]">
+                  <span>Dry Clean Charge:</span>
+                  <span className="font-mono text-[#18141E]">{formatINR(selectedBooking.dryCleanCharge)}</span>
+                </div>
+              )}
+              {selectedBooking.transitCharge > 0 && (
+                <div className="flex justify-between font-bold text-[#5B5566]">
+                  <span>Transit / Delivery:</span>
+                  <span className="font-mono text-[#18141E]">{formatINR(selectedBooking.transitCharge)}</span>
+                </div>
+              )}
               <div className="border-t border-line pt-2 flex justify-between font-bold text-sm text-plum">
-                <span>Total Amount Initial:</span>
+                <span>Grand Total:</span>
                 <span className="font-mono">
                   {formatINR(selectedBooking.grandTotal)}
                 </span>
               </div>
               <div className="flex justify-between text-emerald-700 font-semibold pt-1">
-                <span>Advance / Paid:</span>
+                <span>Received to date:</span>
                 <span className="font-mono">− {formatINR(advancePayment)}</span>
               </div>
               <div className="border-t-2 border-plum pt-2 flex justify-between font-black text-sm text-[#18141E]">
@@ -297,6 +384,38 @@ function InvoiceContent() {
                   {formatINR(selectedBooking.balanceDue)}
                 </span>
               </div>
+              {returned && (
+                <div className="pt-2 border-t border-line space-y-1 text-[11px] font-semibold text-[#5B5566]">
+                  {selectedBooking.lateFee > 0 && (
+                    <div className="flex justify-between">
+                      <span>Late fee ({selectedBooking.lateDays} day{selectedBooking.lateDays === 1 ? "" : "s"}):</span>
+                      <span className="font-mono">{formatINR(selectedBooking.lateFee)}</span>
+                    </div>
+                  )}
+                  {selectedBooking.damageCharge > 0 && (
+                    <div className="flex justify-between">
+                      <span>Damage deduction:</span>
+                      <span className="font-mono">{formatINR(selectedBooking.damageCharge)}</span>
+                    </div>
+                  )}
+                  {selectedBooking.cleaningCharge > 0 && (
+                    <div className="flex justify-between">
+                      <span>Cleaning deduction:</span>
+                      <span className="font-mono">{formatINR(selectedBooking.cleaningCharge)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-emerald-700">
+                    <span>Deposit refund:</span>
+                    <span className="font-mono">{formatINR(selectedBooking.refundAmount)}</span>
+                  </div>
+                  {extraDue > 0 && (
+                    <div className="flex justify-between text-rose-700">
+                      <span>Extra amount due:</span>
+                      <span className="font-mono">{formatINR(extraDue)}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -350,14 +469,44 @@ function InvoiceContent() {
               <span>Security Deposit:</span>
               <span>{formatINR(selectedBooking.depositTotal)}</span>
             </div>
+            {selectedBooking.dryCleanCharge > 0 && (
+              <div className="flex justify-between">
+                <span>Dry Clean:</span>
+                <span>{formatINR(selectedBooking.dryCleanCharge)}</span>
+              </div>
+            )}
+            {selectedBooking.transitCharge > 0 && (
+              <div className="flex justify-between">
+                <span>Delivery:</span>
+                <span>{formatINR(selectedBooking.transitCharge)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-bold">
+              <span>Grand Total:</span>
+              <span>{formatINR(selectedBooking.grandTotal)}</span>
+            </div>
             <div className="flex justify-between">
-              <span>Advance Paid:</span>
+              <span>Received:</span>
               <span>− {formatINR(advancePayment)}</span>
             </div>
             <div className="flex justify-between font-bold text-xs pt-1 border-t border-[#E8E2F0]">
               <span>Balance Due:</span>
               <span>{formatINR(selectedBooking.balanceDue)}</span>
             </div>
+            {returned && (
+              <>
+                <div className="flex justify-between">
+                  <span>Deposit Refund:</span>
+                  <span>{formatINR(selectedBooking.refundAmount)}</span>
+                </div>
+                {extraDue > 0 && (
+                  <div className="flex justify-between font-bold">
+                    <span>Extra Due:</span>
+                    <span>{formatINR(extraDue)}</span>
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
           <div className="text-center pt-2 text-[9px] text-[#5B5566]">

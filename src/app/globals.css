@@ -225,6 +225,19 @@ button:disabled {
   .no-print {
     display: none !important;
   }
+  /* app chrome never prints: only the page content (invoice / receipt) */
+  body header,
+  body aside,
+  body nav {
+    display: none !important;
+  }
+  [class*="lg:pl-64"] {
+    padding-left: 0 !important;
+  }
+  main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
   .print-only {
     display: block !important;
   }

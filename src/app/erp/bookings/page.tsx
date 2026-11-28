@@ -1027,7 +1027,7 @@ function BookingsContent() {
               )}
 
               <Link
-                href={`/erp/billing/invoices?orderId=${selectedOrder.id}`}
+                href={`/erp/billing/invoices?bookingId=${selectedOrder.id}`}
                 className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white font-semibold rounded-xl text-xs ml-auto"
               >
                 Print Invoice

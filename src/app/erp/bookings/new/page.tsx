@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, Suspense } from "react";
+import React, { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -35,6 +35,10 @@ function NewBookingWizardContent() {
   // Data
   const [customers, setCustomers] = useState<CustomerDto[]>([]);
   const [garments, setGarments] = useState<GarmentDto[]>([]);
+  const garmentCache = useRef<Map<string, GarmentDto>>(new Map());
+  const [loadingGarments, setLoadingGarments] = useState(false);
+  const [stepError, setStepError] = useState<string | null>(null);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
   const [garmentSearch, setGarmentSearch] = useState("");
   const [customerSearch, setCustomerSearch] = useState("");
 
@@ -84,31 +88,62 @@ function NewBookingWizardContent() {
   const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Pre-fill from query params if available
+  // Pre-fill from query params if available (lists are loaded separately)
   useEffect(() => {
     const qSku = searchParams.get("sku");
     const qCustId = searchParams.get("customerId");
     const qName = searchParams.get("name");
     const qPhone = searchParams.get("phone");
 
-    if (qSku) {
-      setSelectedGarmentIds([qSku]);
-    }
-    if (qCustId) {
-      setSelectedCustomerId(qCustId);
-    }
-    if (qName) {
-      setCustomerName(qName);
-    }
+    if (qSku) setSelectedGarmentIds([qSku.toUpperCase()]);
+    if (qCustId) setSelectedCustomerId(qCustId);
+    if (qName) setCustomerName(qName);
     if (qPhone) {
       setCustomerPhone(qPhone);
       setCustomerWhatsapp(qPhone);
     }
-
-    // Load available garments and customers
-    garmentsApi.list({ limit: 100 }).then((res) => setGarments(res.items || []));
-    customersApi.list().then((res) => setCustomers(res.items || []));
   }, [searchParams]);
+
+  useEffect(() => {
+    customersApi
+      .list()
+      .then((res) => {
+        const items = res.items || [];
+        setCustomers(items);
+        // a ?customerId= link only carries the id: fill the rest from the directory
+        const qCustId = searchParams.get("customerId");
+        const hit = qCustId ? items.find((c) => c.id === qCustId) : undefined;
+        if (hit) {
+          setCustomerName(hit.name);
+          setCustomerPhone(hit.phone);
+          setCustomerWhatsapp(hit.whatsapp || hit.phone);
+          setCustomerAddress(hit.address || "");
+          setCustomerCity(hit.city || "Bargarh");
+        }
+      })
+      .catch(() => setCustomers([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Only costumes that are free for the chosen dates (server applies the buffer days + status rules)
+  useEffect(() => {
+    if (!pickupDate || !returnDueDate || returnDueDate < pickupDate) return;
+    let alive = true;
+    setLoadingGarments(true);
+    garmentsApi
+      .list({ limit: 100, availableFrom: pickupDate, availableTo: returnDueDate })
+      .then((res) => {
+        if (!alive) return;
+        const items = res.items || [];
+        items.forEach((g) => garmentCache.current.set(g.id, g));
+        setGarments(items);
+      })
+      .catch(() => alive && setGarments([]))
+      .finally(() => alive && setLoadingGarments(false));
+    return () => {
+      alive = false;
+    };
+  }, [pickupDate, returnDueDate]);
 
   // Handle selecting an existing customer
   const handleSelectCustomer = (c: CustomerDto) => {
@@ -131,9 +166,10 @@ function NewBookingWizardContent() {
 
   // Fetch Live Server Quote whenever garments, dates or charges change
   const fetchQuote = useCallback(async () => {
-    if (selectedGarmentIds.length === 0 || !pickupDate || !returnDueDate) {
+    if (selectedGarmentIds.length === 0 || !pickupDate || !returnDueDate || returnDueDate < pickupDate) {
       setQuote(null);
       setConflicts([]);
+      setQuoteError(null);
       return;
     }
 
@@ -143,14 +179,16 @@ function NewBookingWizardContent() {
         garmentIds: selectedGarmentIds,
         pickupDate,
         returnDueDate,
-        dryCleanCharge: Number(dryCleanCharge) || 0,
-        transitCharge: Number(transitCharge) || 0,
-        advance: Number(advanceAmount) || 0,
+        dryCleanCharge: Math.max(0, Math.round(Number(dryCleanCharge) || 0)),
+        transitCharge: Math.max(0, Math.round(Number(transitCharge) || 0)),
+        advance: Math.max(0, Math.round(Number(advanceAmount) || 0)),
       });
       setQuote(q);
       setConflicts(q.conflicts || []);
-    } catch (err) {
-      console.error("Quote calculation error:", err);
+      setQuoteError(null);
+    } catch (err: any) {
+      setQuote(null);
+      setQuoteError(err?.message || "Could not calculate the quote.");
     } finally {
       setQuoting(false);
     }
@@ -160,20 +198,54 @@ function NewBookingWizardContent() {
     fetchQuote();
   }, [fetchQuote]);
 
+  // Per-step validation: returns the first problem, or null when the step is complete
+  const validateStep = (s: number): string | null => {
+    if (s >= 1) {
+      if (!customerName.trim()) return "Customer name is required.";
+      if (!/^\d{10}$/.test(customerPhone.trim())) return "Phone must be a 10-digit mobile number.";
+      if (customerWhatsapp.trim() && !/^\d{10}$/.test(customerWhatsapp.trim())) return "WhatsApp must be a 10-digit number (or leave it empty).";
+    }
+    if (s >= 2) {
+      if (!eventDate || !pickupDate || !returnDueDate) return "Event, pickup and return dates are required.";
+      if (today && pickupDate < today) return "Pickup date cannot be in the past.";
+      if (returnDueDate < pickupDate) return "Return date cannot be before pickup date.";
+      if ((Date.parse(returnDueDate) - Date.parse(pickupDate)) / 86400000 + 1 > 30) return "A rental cannot be longer than 30 days.";
+    }
+    if (s >= 3) {
+      if (selectedGarmentIds.length === 0) return "Select at least one costume.";
+    }
+    if (s >= 4) {
+      if (conflicts.length > 0) return "A selected costume is already reserved for these dates. Remove it or change the dates.";
+      if (quoteError) return quoteError;
+      if (!quote) return "Wait for the quote to load.";
+      const adv = Math.round(Number(advanceAmount) || 0);
+      if (adv < 0) return "Advance cannot be negative.";
+      if (adv > quote.grandTotal) return `Advance cannot be more than the grand total (${formatINR(quote.grandTotal)}).`;
+    }
+    return null;
+  };
+
+  const goToStep = (target: number) => {
+    // going back is always allowed; going forward needs every earlier step to be valid
+    if (target > step) {
+      const err = validateStep(target - 1);
+      if (err) {
+        setStepError(err);
+        return;
+      }
+    }
+    setStepError(null);
+    setStep(target);
+  };
+
   // Submit Booking to Live Database
   const handleSubmitBooking = async () => {
-    if (selectedGarmentIds.length === 0) {
-      alert("Please select at least one costume.");
+    const err = validateStep(4);
+    if (err) {
+      setStepError(err);
       return;
     }
-    if (!customerName.trim() || !customerPhone.trim()) {
-      alert("Customer Name and Phone number are required.");
-      return;
-    }
-    if (conflicts.length > 0) {
-      alert("Cannot create booking due to scheduling conflict. Please resolve conflicting dates or garments.");
-      return;
-    }
+    setStepError(null);
 
     setSubmitting(true);
     setSubmitError(null);
@@ -193,10 +265,10 @@ function NewBookingWizardContent() {
         pickupDate,
         returnDueDate,
         garmentIds: selectedGarmentIds,
-        dryCleanCharge: Number(dryCleanCharge) || 0,
-        transitCharge: Number(transitCharge) || 0,
+        dryCleanCharge: Math.max(0, Math.round(Number(dryCleanCharge) || 0)),
+        transitCharge: Math.max(0, Math.round(Number(transitCharge) || 0)),
         advance: {
-          amount: Number(advanceAmount) || 0,
+          amount: Math.max(0, Math.round(Number(advanceAmount) || 0)),
           mode: paymentMode,
         },
         notes: bookingNotes.trim() || undefined,
@@ -211,7 +283,9 @@ function NewBookingWizardContent() {
     }
   };
 
-  const selectedCostumes = garments.filter((g) => selectedGarmentIds.includes(g.id));
+  const selectedCostumes = selectedGarmentIds
+    .map((id) => garmentCache.current.get(id) || garments.find((g) => g.id === id))
+    .filter((g): g is GarmentDto => !!g);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -226,7 +300,7 @@ function NewBookingWizardContent() {
           </Link>
           <div>
             <h1 className="font-serif font-bold text-lg md:text-xl text-stone-900">
-              5-Step Counter Booking Wizard
+              New Booking
             </h1>
             <p className="text-xs text-stone-500">
               Transactional booking with automated quote and double-booking conflict check.
@@ -256,7 +330,7 @@ function NewBookingWizardContent() {
             return (
               <button
                 key={item.s}
-                onClick={() => setStep(item.s)}
+                onClick={() => goToStep(item.s)}
                 className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-colors ${
                   isCurrent
                     ? "bg-plum text-white border-plum font-bold shadow-xs"
@@ -270,6 +344,13 @@ function NewBookingWizardContent() {
               </button>
             );
           })}
+        </div>
+      )}
+
+      {stepError && step < 5 && (
+        <div role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>{stepError}</span>
         </div>
       )}
 
@@ -371,9 +452,13 @@ function NewBookingWizardContent() {
                 type="tel"
                 value={customerPhone}
                 onChange={(e) => {
-                  setCustomerPhone(e.target.value);
-                  if (!customerWhatsapp) setCustomerWhatsapp(e.target.value);
+                  const v = e.target.value.replace(/\D/g, "").slice(0, 10);
+                  setCustomerPhone(v);
+                  if (!customerWhatsapp) setCustomerWhatsapp(v);
+                  // a different number means a different person: let the server match/create by phone
+                  setSelectedCustomerId("");
                 }}
+                inputMode="numeric"
                 placeholder="9876543210"
                 maxLength={10}
                 className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono font-bold"
@@ -388,7 +473,8 @@ function NewBookingWizardContent() {
               <input
                 type="tel"
                 value={customerWhatsapp}
-                onChange={(e) => setCustomerWhatsapp(e.target.value)}
+                onChange={(e) => setCustomerWhatsapp(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                inputMode="numeric"
                 placeholder="9876543210"
                 maxLength={10}
                 className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono"
@@ -424,13 +510,7 @@ function NewBookingWizardContent() {
 
           <div className="flex justify-end pt-3">
             <button
-              onClick={() => {
-                if (!customerName.trim() || !customerPhone.trim()) {
-                  alert("Customer Name and Phone are required.");
-                  return;
-                }
-                setStep(2);
-              }}
+              onClick={() => goToStep(2)}
               className="px-6 py-2.5 bg-plum text-white font-semibold rounded-xl text-xs shadow-xs hover:bg-plum-dark"
             >
               Next: Event &amp; Dates &rarr;
@@ -483,7 +563,11 @@ function NewBookingWizardContent() {
                 type="date"
                 value={pickupDate}
                 min={today}
-                onChange={(e) => setPickupDate(e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setPickupDate(v);
+                  if (v && returnDueDate && returnDueDate < v) setReturnDueDate(v);
+                }}
                 className="w-full p-2.5 bg-ivory border border-line rounded-xl font-mono font-semibold text-plum"
                 required
               />
@@ -506,13 +590,13 @@ function NewBookingWizardContent() {
 
           <div className="flex justify-between pt-3">
             <button
-              onClick={() => setStep(1)}
+              onClick={() => goToStep(1)}
               className="px-5 py-2.5 rounded-xl border border-stone-200 text-stone-700 text-xs font-semibold"
             >
               &larr; Back
             </button>
             <button
-              onClick={() => setStep(3)}
+              onClick={() => goToStep(3)}
               className="px-6 py-2.5 bg-plum text-white font-semibold rounded-xl text-xs shadow-xs hover:bg-plum-dark"
             >
               Next: Select Costumes &rarr;
@@ -545,6 +629,12 @@ function NewBookingWizardContent() {
             />
             <Search className="w-4 h-4 text-stone-400 absolute left-3 top-2.5" />
           </div>
+
+          <p className="text-[11px] text-stone-500">
+            Showing costumes free from <span className="font-mono font-semibold">{pickupDate}</span> to{" "}
+            <span className="font-mono font-semibold">{returnDueDate}</span> (cleaning buffer included).
+            {loadingGarments && <span className="ml-2 text-plum">Checking availability…</span>}
+          </p>
 
           {/* Garments Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[480px] overflow-y-auto pr-1">
@@ -588,21 +678,21 @@ function NewBookingWizardContent() {
               })}
           </div>
 
+          {!loadingGarments && garments.length === 0 && (
+            <div className="p-6 text-center text-xs text-stone-500 border border-dashed border-stone-200 rounded-xl">
+              No costume is free for these dates. Go back and try different dates.
+            </div>
+          )}
+
           <div className="flex justify-between pt-3 border-t border-stone-100">
             <button
-              onClick={() => setStep(2)}
+              onClick={() => goToStep(2)}
               className="px-5 py-2.5 rounded-xl border border-stone-200 text-stone-700 text-xs font-semibold"
             >
               &larr; Back
             </button>
             <button
-              onClick={() => {
-                if (selectedGarmentIds.length === 0) {
-                  alert("Please select at least one garment.");
-                  return;
-                }
-                setStep(4);
-              }}
+              onClick={() => goToStep(4)}
               className="px-6 py-2.5 bg-plum text-white font-semibold rounded-xl text-xs shadow-xs hover:bg-plum-dark"
             >
               Next: Financial Quote &rarr;
@@ -649,6 +739,8 @@ function NewBookingWizardContent() {
               </label>
               <input
                 type="number"
+                min={0}
+                step={1}
                 value={dryCleanCharge}
                 onChange={(e) => setDryCleanCharge(Number(e.target.value) || 0)}
                 className="w-full p-2 bg-ivory border border-line rounded-xl font-mono text-stone-800"
@@ -661,6 +753,8 @@ function NewBookingWizardContent() {
               </label>
               <input
                 type="number"
+                min={0}
+                step={1}
                 value={transitCharge}
                 onChange={(e) => setTransitCharge(Number(e.target.value) || 0)}
                 className="w-full p-2 bg-ivory border border-line rounded-xl font-mono text-stone-800"
@@ -673,6 +767,8 @@ function NewBookingWizardContent() {
               </label>
               <input
                 type="number"
+                min={0}
+                step={1}
                 value={advanceAmount}
                 onChange={(e) => setAdvanceAmount(Number(e.target.value) || 0)}
                 className="w-full p-2 bg-ivory border border-line rounded-xl font-mono font-bold text-plum"
@@ -717,6 +813,11 @@ function NewBookingWizardContent() {
             <div className="p-4 bg-stone-50 rounded-xl text-center text-xs text-stone-500 flex items-center justify-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin text-plum" />
               <span>Fetching server-side quote...</span>
+            </div>
+          ) : quoteError ? (
+            <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 text-xs flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+              <span>{quoteError}</span>
             </div>
           ) : quote ? (
             <div className="p-4 bg-ivory border border-line rounded-xl space-y-2 text-xs">
@@ -764,14 +865,14 @@ function NewBookingWizardContent() {
 
           <div className="flex justify-between pt-3 border-t border-stone-100">
             <button
-              onClick={() => setStep(3)}
+              onClick={() => goToStep(3)}
               className="px-5 py-2.5 rounded-xl border border-stone-200 text-stone-700 text-xs font-semibold"
             >
               &larr; Back
             </button>
             <button
               onClick={handleSubmitBooking}
-              disabled={submitting || conflicts.length > 0}
+              disabled={submitting || quoting || !quote || conflicts.length > 0}
               className="px-6 py-2.5 bg-plum hover:bg-plum-dark disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-xs flex items-center gap-2"
             >
               {submitting ? (
@@ -838,7 +939,7 @@ function NewBookingWizardContent() {
 
           <div className="flex items-center justify-center gap-3 pt-4 border-t border-stone-100">
             <Link
-              href={`/erp/billing/invoices?orderId=${createdBookingId}`}
+              href={`/erp/billing/invoices?bookingId=${createdBookingId}`}
               className="px-4 py-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 text-stone-700 font-semibold text-xs"
             >
               Print Receipt / Invoice
