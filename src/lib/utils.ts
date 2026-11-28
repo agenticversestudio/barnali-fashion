@@ -5,6 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** "1 client" / "2 clients" as ONE string (a single text node, never split across spans). */
+export function plural(n: number, singular: string, pluralForm?: string): string {
+  return `${n} ${n === 1 ? singular : (pluralForm ?? singular + "s")}`;
+}
+
 export function formatINR(amount: number): string {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",

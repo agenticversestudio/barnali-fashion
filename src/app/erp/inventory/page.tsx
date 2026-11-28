@@ -23,7 +23,7 @@ import {
   Check,
 } from "lucide-react";
 import { garmentsApi } from "@/lib/api";
-import { formatINR } from "@/lib/utils";
+import { formatINR, formatDate, plural } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { CostumeThumb } from "@/components/ui/CostumeThumb";
@@ -188,7 +188,7 @@ export default function InventoryPage() {
   );
 
   const sizePill = (g: GarmentDto) => (
-    <span className="num text-[10px] font-semibold bg-white border border-line text-ink-soft px-2 py-0.5 rounded-full">{g.size}</span>
+    <span className="num text-[11px] font-bold bg-plum/10 border border-plum/30 text-plum px-2.5 py-0.5 rounded-full whitespace-nowrap">Size {g.size}</span>
   );
 
   return (
@@ -200,7 +200,7 @@ export default function InventoryPage() {
           <div className="flex items-center gap-3 mt-1 flex-wrap">
             <h1 className="text-[26px] md:text-[30px] font-semibold tracking-[-0.02em] text-[#18141E]">Costumes &amp; Inventory</h1>
             <span className="num text-[11px] font-semibold bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0] px-3 py-0.5 rounded-full">
-              {garments.length} piece{garments.length === 1 ? "" : "s"}
+              {plural(garments.length, "piece")}
             </span>
           </div>
           <p className="text-xs text-[#5B5566] mt-1.5">Godown rack tracking, booking availability and care states.</p>
@@ -340,7 +340,6 @@ export default function InventoryPage() {
                 <CostumeThumb
                   src={g.mainPhotoUrl}
                   alt={g.name}
-                  code={g.id}
                   className="absolute inset-0"
                   imgClassName="group-hover:scale-105 transition-transform duration-500"
                 />
@@ -361,8 +360,8 @@ export default function InventoryPage() {
                     {g.colour && <span className="text-[11px] text-mute">{g.colour}</span>}
                   </div>
                   {g.nextBooking && (
-                    <div className="num text-[10px] text-amber-800 font-medium mt-1.5">
-                      Next: {g.nextBooking.from} · {g.nextBooking.customerName}
+                    <div className="num text-[11px] text-amber-900 bg-amber-50 border border-amber-200 rounded-md px-2 py-1 font-medium mt-2 leading-snug">
+                      Reserved from {formatDate(g.nextBooking.from)} · {g.nextBooking.customerName}
                     </div>
                   )}
                 </div>

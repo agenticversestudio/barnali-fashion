@@ -23,9 +23,10 @@ import {
   CheckCircle2,
   Wrench,
   Archive,
+  Calendar,
 } from "lucide-react";
 import { alertsApi, bookingsApi, garmentsApi, syncApi } from "@/lib/api";
-import { formatDate, cn } from "@/lib/utils";
+import { formatDate, formatINR, cn, plural } from "@/lib/utils";
 import { addDaysISO, daysBetween, localISO, relativeDays, waLink } from "@/lib/dates";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatCard } from "@/components/ui/StatCard";
@@ -131,12 +132,12 @@ export default function DashboardPage() {
     if (!todayStr) return [];
     return Array.from({ length: 7 }, (_, i) => {
       const date = addDaysISO(todayStr, i);
-      const chips: { code: string; kind: "pickup" | "return"; bookingId: string }[] = [];
+      const chips: { code: string; name: string; kind: "pickup" | "return"; bookingId: string }[] = [];
       for (const b of bookings) {
         if (b.status === "CONFIRMED" && b.pickupDate === date)
-          b.items.forEach((it) => chips.push({ code: it.garmentId, kind: "pickup", bookingId: b.id }));
+          b.items.forEach((it) => chips.push({ code: it.garmentId, name: it.name, kind: "pickup", bookingId: b.id }));
         if (b.status === "OUT_ON_RENT" && b.returnDueDate === date)
-          b.items.forEach((it) => chips.push({ code: it.garmentId, kind: "return", bookingId: b.id }));
+          b.items.forEach((it) => chips.push({ code: it.garmentId, name: it.name, kind: "return", bookingId: b.id }));
       }
       return { date, chips };
     });
@@ -147,7 +148,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-5 md:space-y-6 animate-in fade-in">
       {/* Google Sheets sync (admin) */}
-      {isAdmin && syncStatus && (
+      {isAdmin && syncStatus?.configured && (
         <div className="surface p-3 flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="p-2 bg-emerald-50 text-emerald-800 rounded-lg shrink-0">
@@ -160,7 +161,7 @@ export default function DashboardPage() {
                   ? syncStatus.lastSyncAt
                     ? `Last synced ${formatDate(syncStatus.lastSyncAt)} (${syncStatus.lastStatus})`
                     : "Configured, awaiting first sync"
-                  : "Not configured yet (see SHEETS_SETUP.md)"}
+                  : ""}
               </span>
             </div>
           </div>
@@ -188,7 +189,7 @@ export default function DashboardPage() {
             Welcome back, <span className="font-semibold text-[#18141E]">{user?.name || "Operator"}</span>.{" "}
             {pendingTotal > 0 ? (
               <span>
-                You have <span className="font-semibold text-[#E11D48]">{pendingTotal} pending action{pendingTotal === 1 ? "" : "s"}</span> and{" "}
+                You have <span className="font-semibold text-[#E11D48]">{plural(pendingTotal, "pending action")}</span> and{" "}
                 <span className="font-semibold text-[#059669]">{counts.AVAILABLE} ready costumes</span> on racks.
               </span>
             ) : (
@@ -211,36 +212,36 @@ export default function DashboardPage() {
       {/* Top 4 Multi-Color KPI Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         <StatCard
-          label="Pickups due"
-          value={upcomingPickups.length}
-          hint="Ready for handover"
+          label="Active rentals"
+          value={bookings.filter((b) => b.status === "OUT_ON_RENT").length}
+          hint="Currently with clients"
           icon={PackageCheck}
           tone="plum"
-          href="/erp/bookings?filter=today"
-        />
-        <StatCard
-          label="Returns due"
-          value={dueReturns.length}
-          hint="Settlement pending"
-          icon={AlertTriangle}
-          tone="coral"
           href="/erp/bookings?filter=overdue"
         />
         <StatCard
-          label="At care"
-          value={counts.IN_CARE + counts.RETURNED_CLEANING}
-          hint="Dry clean & tailoring"
-          icon={Sparkles}
-          tone="sky"
-          href="/erp/operations/laundry"
+          label="Upcoming orders"
+          value={bookings.filter((b) => b.status === "CONFIRMED").length}
+          hint="Confirmed, not yet collected"
+          icon={Calendar}
+          tone="coral"
+          href="/erp/bookings?filter=today"
         />
         <StatCard
-          label="Available"
-          value={counts.AVAILABLE}
-          hint="Ready on racks"
-          icon={Shirt}
+          label="Deposits held"
+          value={formatINR(bookings.filter((b) => b.depositStatus === "HELD").reduce((s, b) => s + b.depositTotal, 0))}
+          hint="Refundable security"
+          icon={Wallet}
+          tone="sky"
+          href="/erp/billing/invoices"
+        />
+        <StatCard
+          label="At care"
+          value={counts.IN_CARE + counts.RETURNED_CLEANING + counts.DAMAGED_REPAIR}
+          hint="Cleaning, tailoring, repair"
+          icon={Sparkles}
           tone="emerald"
-          href="/erp/inventory"
+          href="/erp/operations/laundry"
         />
       </div>
 
@@ -356,7 +357,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <span className="num text-xs font-semibold text-[#5B5566] bg-[#F5F2F8] px-3 py-1 rounded-full border border-[#E8E2F0]">
-            {milestones.length} booking{milestones.length === 1 ? "" : "s"}
+            {plural(milestones.length, "booking")}
           </span>
         </div>
 
@@ -478,9 +479,9 @@ export default function DashboardPage() {
                       <Link
                         key={`${c.bookingId}-${c.code}-${k}`}
                         href={`/erp/bookings?orderId=${c.bookingId}`}
-                        title={c.kind === "pickup" ? "Pickup" : "Return due"}
+                        title={`${c.kind === "pickup" ? "Pickup" : "Return due"}: ${c.name}`}
                         className={cn(
-                          "num text-[10px] font-semibold px-2 py-0.5 rounded-full border",
+                          "text-[10px] font-semibold px-2 py-1 rounded-lg border w-full block leading-tight",
                           isToday
                             ? "bg-white/20 text-white border-white/30 hover:bg-white/30"
                             : c.kind === "pickup"
@@ -488,7 +489,8 @@ export default function DashboardPage() {
                               : "bg-[#E0F2FE] text-[#075985] border-[#BAE6FD]"
                         )}
                       >
-                        {c.code}
+                        <span className="num block">{c.code}</span>
+                        <span className="block font-medium truncate opacity-80">{c.name}</span>
                       </Link>
                     ))}
                     {d.chips.length > 6 && (

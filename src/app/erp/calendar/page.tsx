@@ -166,6 +166,15 @@ export default function AvailabilityCalendarPage() {
         ))}
       </div>
 
+      {/* Legend */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-ink-soft px-1" aria-label="Calendar legend">
+        <span className="inline-flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded bg-amber-500/80" />Booked (confirmed)</span>
+        <span className="inline-flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded bg-blue-500/80" />Out on rent</span>
+        <span className="inline-flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded bg-stone-300" />Care / repair / retired</span>
+        <span className="inline-flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded border border-line bg-white" />Free</span>
+        <span className="text-mute">Tap any cell for details.</span>
+      </div>
+
       {/* Main Sticky Calendar Matrix */}
       {loading ? (
         <div className="bg-white rounded-2xl border border-line p-12 text-center">
@@ -182,7 +191,7 @@ export default function AvailabilityCalendarPage() {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-ivory border-b border-line">
-                  <th className="sticky left-0 bg-ivory z-20 w-52 py-3 px-3.5 border-r border-line shadow-[2px_0_4px_rgba(0,0,0,0.03)] font-bold text-stone-700 uppercase text-[10px]">
+                  <th className="sticky left-0 bg-ivory z-20 w-32 sm:w-52 min-w-32 sm:min-w-52 py-3 px-3.5 border-r border-line shadow-[2px_0_4px_rgba(0,0,0,0.03)] font-bold text-stone-700 uppercase text-[10px]">
                     Costume SKU / Piece
                   </th>
                   {dayNumbers.map((d) => {
@@ -213,9 +222,9 @@ export default function AvailabilityCalendarPage() {
                         >
                           {row.garmentId}
                         </Link>
-                        <span className="text-[10px] text-stone-400 font-mono">{row.rack}</span>
+                        <span className="hidden sm:block text-[10px] text-stone-400 font-mono truncate max-w-24" title={row.rack}>{row.rack}</span>
                       </div>
-                      <div className="font-semibold text-stone-800 text-[11px] truncate w-44">
+                      <div className="font-semibold text-stone-800 text-[11px] leading-tight line-clamp-2 sm:line-clamp-1 w-28 sm:w-44" title={row.name}>
                         {row.name}
                       </div>
                     </td>
@@ -302,6 +311,9 @@ export default function AvailabilityCalendarPage() {
                     </div>
                     <div className="text-[11px] text-stone-600">
                       Booking: <strong className="font-mono">{selectedCell.booking.bookingId}</strong>
+                    </div>
+                    <div className="text-[11px] text-stone-600">
+                      Status: <strong>{selectedCell.booking.status === "OUT_ON_RENT" ? "Out on rent" : "Confirmed booking"}</strong>
                     </div>
                     <div className="text-[11px] text-stone-500 font-mono">
                       Dates: {selectedCell.booking.from} → {selectedCell.booking.to}

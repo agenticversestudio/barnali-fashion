@@ -18,7 +18,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { careApi, garmentsApi } from "@/lib/api";
-import { formatINR, formatDate } from "@/lib/utils";
+import { formatINR, formatDate, plural } from "@/lib/utils";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatCard } from "@/components/ui/StatCard";
 import { daysBetween, localISO } from "@/lib/dates";
@@ -200,7 +200,7 @@ export default function StitchingAndDryCleanPage() {
           <div className="flex items-center gap-3 mt-1 flex-wrap">
             <h1 className="text-[26px] md:text-[30px] font-semibold tracking-[-0.02em] text-[#18141E]">Care &amp; Laundry</h1>
             <span className="num text-[11px] font-semibold bg-[#E0F2FE] text-[#0284C7] border border-[#BAE6FD] px-3 py-0.5 rounded-full">
-              {filteredJobs.length} job{filteredJobs.length === 1 ? "" : "s"}
+              {plural(filteredJobs.length, "job")}
             </span>
           </div>
           <p className="text-xs text-[#5B5566] mt-1.5">Dry cleaning, tailoring alterations and repair turnaround at outside vendors.</p>
@@ -217,10 +217,10 @@ export default function StitchingAndDryCleanPage() {
 
       {/* Summary tiles (currently-out jobs) */}
       {statusFilter === "OUT" && !loading && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 items-stretch">
           <StatCard label="At vendors" value={outJobs.length} hint="pieces out" icon={Sparkles} tone="violet" />
-          <StatCard label="Overdue" value={overdueCount} hint="past expected date" icon={AlertTriangle} tone="rose" />
-          <StatCard label="Pending cost" value={formatINR(outCost)} hint="estimated" icon={Scissors} tone="amber" className="[&_.font-display]:text-2xl" />
+          <StatCard label="Overdue" value={overdueCount} hint="past due" icon={AlertTriangle} tone="rose" />
+          <StatCard label="Pending cost" value={formatINR(outCost)} hint="estimated" icon={Scissors} tone="amber" />
         </div>
       )}
 
@@ -312,7 +312,7 @@ export default function StitchingAndDryCleanPage() {
                       <KindIcon className="w-3 h-3" />
                       {meta.label}
                     </span>
-                    <h3 className="font-display font-semibold text-ink text-base mt-2 leading-tight truncate">{j.garmentName}</h3>
+                    <h3 className="font-display font-semibold text-ink text-base mt-2 leading-tight">{j.garmentName}</h3>
                     <div className="num text-[11px] text-mute mt-0.5">
                       {j.garmentId} · <span className="text-plum font-semibold">{j.id}</span>
                     </div>
@@ -330,7 +330,7 @@ export default function StitchingAndDryCleanPage() {
                 <div className="bg-ivory border border-line-soft rounded-xl p-3 space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <span className="eyebrow-mute">Vendor</span>
-                    <span className="text-xs font-semibold text-ink text-right truncate">{j.vendorName}</span>
+                    <span className="text-xs font-semibold text-ink text-right break-words">{j.vendorName}</span>
                   </div>
                   {j.subType && <div className="text-[11px] text-ink-soft">{j.subType}</div>}
                   <div className="grid grid-cols-2 gap-2 pt-2 border-t border-line-soft">

@@ -25,7 +25,7 @@ import {
   Ban,
 } from "lucide-react";
 import { bookingsApi } from "@/lib/api";
-import { formatINR, formatDate } from "@/lib/utils";
+import { formatINR, formatDate, plural } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { BookingDto, BookingStatus, PayMode, Settlement, NextAction } from "@/types/api";
@@ -337,7 +337,7 @@ function BookingsContent() {
           <div className="flex items-center gap-3 mt-1 flex-wrap">
             <h1 className="text-[26px] md:text-[30px] font-semibold tracking-[-0.02em] text-[#18141E]">Rental Orders</h1>
             <span className="num text-[11px] font-semibold bg-[#E0E7FF] text-[#4F46E5] border border-[#C7D2FE] px-3 py-0.5 rounded-full">
-              {bookings.length} booking{bookings.length === 1 ? "" : "s"}
+              {plural(bookings.length, "booking")}
             </span>
           </div>
           <p className="text-xs text-[#5B5566] mt-1.5">Selection, client, quote, handover and return settlement in one place.</p>
@@ -428,7 +428,7 @@ function BookingsContent() {
             {bookings.map((b) => {
               const cleanPhone = b.customer.phone.replace(/\D/g, "").slice(-10);
               return (
-                <article key={b.id} className="surface p-4 space-y-3">
+                <article key={b.id} className={`surface p-4 space-y-3 ${b.status === "CANCELLED" ? "opacity-60 bg-[#F8F6FA]" : ""}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <span className="num text-[11px] font-bold text-plum">{b.id}</span>
@@ -452,25 +452,25 @@ function BookingsContent() {
                     ))}
                   </div>
 
-                  <div className="flex items-center justify-between gap-3 pt-2 border-t border-line-soft">
-                    <div>
-                      <div className="eyebrow-mute">Pickup → Return</div>
-                      <div className="num text-xs font-semibold text-ink mt-0.5">
+                  <div className="pt-2 border-t border-line-soft space-y-2.5">
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <div className="num text-xs font-semibold text-ink">
                         {b.pickupDate} → {b.returnDueDate}
                       </div>
                       {b.isOverdue && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.5 rounded mt-1">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.5 rounded">
                           <AlertTriangle className="w-3 h-3" /> Overdue return
                         </span>
                       )}
                     </div>
-                    <div className="text-right">
-                      <div className="eyebrow-mute">Total</div>
-                      <div className="num font-display font-semibold text-lg text-ink leading-tight">{formatINR(b.grandTotal)}</div>
-                      {b.depositStatus === "HELD" && (
-                        <div className="num text-[10px] text-amber-800 font-medium">Deposit held {formatINR(b.depositTotal)}</div>
-                      )}
-                    </div>
+                    {b.status !== "CANCELLED" && (
+                      <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
+                        <div className="flex justify-between gap-2"><dt className="text-mute">Total</dt><dd className="num font-semibold text-ink">{formatINR(b.grandTotal)}</dd></div>
+                        <div className="flex justify-between gap-2"><dt className="text-mute">Paid</dt><dd className="num font-semibold text-emerald-800">{formatINR(b.amountPaid)}</dd></div>
+                        <div className="flex justify-between gap-2"><dt className="text-mute">Balance due</dt><dd className={`num font-semibold ${b.balanceDue > 0 ? "text-amber-900" : "text-ink"}`}>{formatINR(b.balanceDue)}</dd></div>
+                        <div className="flex justify-between gap-2"><dt className="text-mute">Deposit held</dt><dd className="num font-semibold text-ink">{formatINR(b.depositStatus === "HELD" ? b.depositTotal : 0)}</dd></div>
+                      </dl>
+                    )}
                   </div>
 
                   {renderActions(b, "stretch")}

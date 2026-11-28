@@ -31,19 +31,19 @@ export function StatCard({ label, value, hint, icon: Icon, tone = "gold", href, 
   const body = (
     <>
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-[#5B5566]">{label}</span>
+        <span className="text-[11px] font-semibold tracking-wide text-[#5B5566] leading-tight">{label}</span>
         {Icon && (
-          <span className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", t.chip)}>
-            <Icon className="w-5 h-5" />
+          <span className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0", t.chip)}>
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
           </span>
         )}
       </div>
-      <div className={cn("text-[32px] font-bold tracking-[-0.03em] mt-2.5 num leading-none", t.value)}>{value}</div>
-      {hint && <span className={cn("text-[11px] font-medium mt-2 block", t.hint)}>{hint}</span>}
+      <div className={cn("text-2xl sm:text-[32px] font-bold tracking-[-0.03em] mt-2.5 num leading-none whitespace-nowrap", t.value)}>{value}</div>
+      {hint && <span className={cn("text-[11px] font-medium mt-2 block leading-snug", t.hint)}>{hint}</span>}
     </>
   );
   const cls = cn(
-    "surface p-5 block rounded-[20px]",
+    "surface p-3.5 sm:p-5 block rounded-[20px] h-full",
     href && "surface-interactive",
     className
   );

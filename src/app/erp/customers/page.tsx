@@ -23,7 +23,7 @@ import {
   List,
 } from "lucide-react";
 import { customersApi } from "@/lib/api";
-import { formatINR, formatDate } from "@/lib/utils";
+import { formatINR, formatDate, plural } from "@/lib/utils";
 import type { CustomerDto } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -161,11 +161,11 @@ export default function CustomersPage() {
           <div className="flex items-center gap-3 mt-1 flex-wrap">
             <h1 className="text-[26px] md:text-[30px] font-semibold tracking-[-0.02em] text-[#18141E]">Customer Directory</h1>
             <span className="num text-[11px] font-semibold bg-[#E0E7FF] text-[#4F46E5] border border-[#C7D2FE] px-3 py-0.5 rounded-full">
-              {customers.length} client{customers.length === 1 ? "" : "s"}
+              {plural(customers.length, "client")}
             </span>
           </div>
           <p className="text-xs text-[#5B5566] mt-1.5 max-w-xl">
-            Client profiles, <span className="font-semibold text-[#E11D48]">{totalActiveRentals} active rentals</span>, verified contact channels, and deposit ledgers.
+            Client profiles, <span className="font-semibold text-[#E11D48]">{plural(totalActiveRentals, "active rental")}</span>, verified contact channels, and deposit ledgers.
           </p>
         </div>
 
