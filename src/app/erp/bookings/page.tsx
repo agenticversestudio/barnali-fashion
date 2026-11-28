@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { bookingsApi } from "@/lib/api";
 import { formatINR, formatDate, plural } from "@/lib/utils";
+import { localISO } from "@/lib/dates";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { BookingDto, BookingStatus, PayMode, Settlement, NextAction } from "@/types/api";
@@ -59,7 +60,7 @@ function BookingsContent() {
   const [damageCharge, setDamageCharge] = useState<number>(0);
 
   useEffect(() => {
-    setActualReturnDate(new Date().toISOString().split("T")[0]);
+    setActualReturnDate(localISO());
   }, []);
   const [cleaningCharge, setCleaningCharge] = useState<number>(0);
   const [returnNotes, setReturnNotes] = useState("");
@@ -257,7 +258,7 @@ function BookingsContent() {
             onClick={() => {
               setReturnBooking(b);
               setReturnPhotoIds([]);
-              setActualReturnDate(new Date().toISOString().split("T")[0]);
+              setActualReturnDate(localISO());
               setDamageCharge(0);
               setCleaningCharge(0);
               setReturnNotes("");

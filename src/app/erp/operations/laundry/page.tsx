@@ -21,7 +21,7 @@ import { careApi, garmentsApi } from "@/lib/api";
 import { formatINR, formatDate, plural } from "@/lib/utils";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatCard } from "@/components/ui/StatCard";
-import { daysBetween, localISO } from "@/lib/dates";
+import { addDaysISO, daysBetween, localISO } from "@/lib/dates";
 import type { CareJobDto, CareKind, GarmentDto } from "@/types/api";
 
 export default function StitchingAndDryCleanPage() {
@@ -52,8 +52,8 @@ export default function StitchingAndDryCleanPage() {
   const [rcvDate, setRcvDate] = useState("");
 
   useEffect(() => {
-    const nowStr = new Date().toISOString().split("T")[0];
-    const inThreeDays = new Date(Date.now() + 86400000 * 3).toISOString().split("T")[0];
+    const nowStr = localISO();
+    const inThreeDays = addDaysISO(localISO(), 3);
     setOutDate(nowStr);
     setRcvDate(nowStr);
     setExpectedDate(inThreeDays);

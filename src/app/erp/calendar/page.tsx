@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { garmentsApi } from "@/lib/api";
 import { formatDate, formatINR } from "@/lib/utils";
+import { localISO } from "@/lib/dates";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { AvailabilityRow } from "@/types/api";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -39,7 +40,7 @@ export default function AvailabilityCalendarPage() {
     const now = new Date();
     setYear(now.getFullYear());
     setMonth(now.getMonth() + 1);
-    setTodayStr(now.toISOString().split("T")[0]);
+    setTodayStr(localISO(now));
     setReady(true);
   }, []);
   const [selectedCell, setSelectedCell] = useState<{

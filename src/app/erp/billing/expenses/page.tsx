@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { expensesApi } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
+import { localISO } from "@/lib/dates";
 import type { ExpenseDto } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -50,7 +51,7 @@ export default function ExpensesPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    setExpenseDate(new Date().toISOString().split("T")[0]);
+    setExpenseDate(localISO());
   }, []);
 
   const loadExpenses = useCallback(async () => {

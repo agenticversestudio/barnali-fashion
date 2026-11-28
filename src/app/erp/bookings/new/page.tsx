@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { bookingsApi, customersApi, garmentsApi } from "@/lib/api";
 import { formatINR } from "@/lib/utils";
+import { localISO, addDaysISO } from "@/lib/dates";
 import type { CustomerDto, GarmentDto, QuoteResponse, PayMode, ConflictInfo } from "@/types/api";
 
 function NewBookingWizardContent() {
@@ -58,10 +59,10 @@ function NewBookingWizardContent() {
   const [today, setToday] = useState("");
 
   useEffect(() => {
-    const todayStr = new Date().toISOString().split("T")[0];
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
-    const inTwoDays = new Date(Date.now() + 86400000 * 2).toISOString().split("T")[0];
-    const inFourDays = new Date(Date.now() + 86400000 * 4).toISOString().split("T")[0];
+    const todayStr = localISO();
+    const tomorrow = addDaysISO(localISO(), 1);
+    const inTwoDays = addDaysISO(localISO(), 2);
+    const inFourDays = addDaysISO(localISO(), 4);
     setToday(todayStr);
     setPickupDate(tomorrow);
     setEventDate(inTwoDays);
