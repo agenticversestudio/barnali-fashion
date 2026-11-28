@@ -77,8 +77,15 @@ export const usersApi = {
 
 // ======================== GARMENTS ========================
 export const garmentsApi = {
-  list: (query: GarmentListQuery = {}) =>
-    api.get<{ items: GarmentDto[]; nextCursor?: string }>(`/garments${toQueryString(query)}`),
+  list: async (query: GarmentListQuery = {}) => {
+    const res = await api.get<{ garments?: GarmentDto[]; items?: GarmentDto[]; nextCursor?: string }>(
+      `/garments${toQueryString(query)}`
+    );
+    return {
+      items: res.items ?? res.garments ?? [],
+      nextCursor: res.nextCursor,
+    };
+  },
 
   getById: (id: string) => api.get<GarmentDetailDto>(`/garments/${id}`),
 
@@ -98,7 +105,14 @@ export const garmentsApi = {
 
 // ======================== CUSTOMERS ========================
 export const customersApi = {
-  list: (q?: string) => api.get<{ items: CustomerDto[] }>(`/customers${toQueryString({ q })}`),
+  list: async (q?: string) => {
+    const res = await api.get<{ customers?: CustomerDto[]; items?: CustomerDto[] }>(
+      `/customers${toQueryString({ q })}`
+    );
+    return {
+      items: res.items ?? res.customers ?? [],
+    };
+  },
 
   getById: (id: string) => api.get<CustomerDto>(`/customers/${id}`),
 
@@ -113,8 +127,15 @@ export const bookingsApi = {
 
   create: (data: CreateBookingRequest) => api.post<BookingDto>("/bookings", data),
 
-  list: (query: BookingListQuery = {}) =>
-    api.get<{ items: BookingDto[]; nextCursor?: string }>(`/bookings${toQueryString(query)}`),
+  list: async (query: BookingListQuery = {}) => {
+    const res = await api.get<{ bookings?: BookingDto[]; items?: BookingDto[]; nextCursor?: string }>(
+      `/bookings${toQueryString(query)}`
+    );
+    return {
+      items: res.items ?? res.bookings ?? [],
+      nextCursor: res.nextCursor,
+    };
+  },
 
   getById: (id: string) => api.get<BookingDto>(`/bookings/${id}`),
 
@@ -131,8 +152,14 @@ export const bookingsApi = {
 
 // ======================== CARE ========================
 export const careApi = {
-  list: (status?: "OUT" | "RECEIVED", garmentId?: string) =>
-    api.get<{ items: CareJobDto[] }>(`/care${toQueryString({ status, garmentId })}`),
+  list: async (status?: "OUT" | "RECEIVED", garmentId?: string) => {
+    const res = await api.get<{ jobs?: CareJobDto[]; items?: CareJobDto[] }>(
+      `/care${toQueryString({ status, garmentId })}`
+    );
+    return {
+      items: res.items ?? res.jobs ?? [],
+    };
+  },
 
   create: (data: CreateCareRequest) => api.post<CareJobDto>("/care", data),
 
@@ -146,8 +173,14 @@ export const alertsApi = {
 
 // ======================== EXPENSES ========================
 export const expensesApi = {
-  list: (from?: string, to?: string, category?: string) =>
-    api.get<{ items: ExpenseDto[] }>(`/expenses${toQueryString({ from, to, category })}`),
+  list: async (from?: string, to?: string, category?: string) => {
+    const res = await api.get<{ expenses?: ExpenseDto[]; items?: ExpenseDto[] }>(
+      `/expenses${toQueryString({ from, to, category })}`
+    );
+    return {
+      items: res.items ?? res.expenses ?? [],
+    };
+  },
 
   create: (data: Omit<ExpenseDto, "id">) => api.post<ExpenseDto>("/expenses", data),
 
