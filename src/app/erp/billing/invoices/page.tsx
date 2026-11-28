@@ -18,7 +18,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { bookingsApi, settingsApi } from "@/lib/api";
-import { formatINR, formatDate } from "@/lib/utils";
+import { formatINR, formatDate, plural } from "@/lib/utils";
 import { formatWhatsAppReceipt, buildWhatsAppLink } from "@/lib/whatsappReceipt";
 import type { BookingDto, SettingsDto } from "@/types/api";
 
@@ -190,7 +190,7 @@ function InvoiceContent() {
       </div>
 
       {/* Select booking dropdown (Hidden during print) */}
-      <div className="no-print bg-white p-3 rounded-2xl border border-line-soft flex items-center gap-3 text-xs">
+      <div className="no-print bg-white p-3 rounded-2xl border border-line-soft flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs">
         <span className="font-bold text-[#5B5566]">Select Booking:</span>
         <select
           value={selectedBooking.id}
@@ -198,7 +198,7 @@ function InvoiceContent() {
             const b = bookings.find((item) => item.id === e.target.value);
             if (b) setSelectedBooking(b);
           }}
-          className="p-1.5 bg-ivory border border-line rounded-lg font-bold text-plum flex-1 max-w-md"
+          className="p-2 bg-ivory border border-line rounded-lg font-bold text-plum w-full sm:flex-1 sm:max-w-md min-w-0"
         >
           {bookings.map((b) => (
             <option key={b.id} value={b.id}>
@@ -211,9 +211,9 @@ function InvoiceContent() {
       {/* Printable Invoice Container */}
       {printLayout === "A4" ? (
         /* A4 Layout */
-        <div className="bg-white rounded-2xl border border-line-soft p-8 max-w-4xl mx-auto shadow-sm text-xs font-sans">
+        <div className="bg-white rounded-2xl border border-line-soft p-4 sm:p-8 max-w-4xl mx-auto shadow-sm text-xs font-sans">
           {/* Header */}
-          <div className="flex justify-between items-start border-b-2 border-plum pb-6">
+          <div className="flex flex-col sm:flex-row print:flex-row justify-between items-start gap-3 border-b-2 border-plum pb-6">
             <div>
               <div className="font-serif font-black text-2xl text-plum tracking-wider uppercase">
                 {shopName}
@@ -227,7 +227,7 @@ function InvoiceContent() {
               </div>
             </div>
 
-            <div className="text-right">
+            <div className="sm:text-right print:text-right">
               <div className="font-bold text-[#8C8499] uppercase text-[10px] tracking-wider">
                 Rental Invoice / Voucher
               </div>
@@ -246,7 +246,7 @@ function InvoiceContent() {
           </div>
 
           {/* Customer & Event Details */}
-          <div className="grid grid-cols-2 gap-6 my-6 p-4 bg-ivory rounded-xl border border-line">
+          <div className="grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-4 sm:gap-6 my-6 p-4 bg-ivory rounded-xl border border-line">
             <div>
               <div className="font-bold text-[#5B5566] uppercase text-[10px] mb-1">
                 Customer Information
@@ -273,8 +273,8 @@ function InvoiceContent() {
           </div>
 
           {/* Garments Table */}
-          <div className="border border-line-soft rounded-xl overflow-hidden mb-6">
-            <table className="w-full text-left">
+          <div className="border border-line-soft rounded-xl overflow-x-auto mb-6">
+            <table className="w-full min-w-[480px] text-left tabular-nums">
               <thead className="bg-gold-soft text-gold-dark font-bold uppercase text-[10px] border-b border-line-soft">
                 <tr>
                   <th className="py-2.5 px-4">Item #</th>
@@ -309,7 +309,7 @@ function InvoiceContent() {
           </div>
 
           {/* Financial Calculation Breakdown */}
-          <div className="grid grid-cols-2 gap-6 my-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-4 sm:gap-6 my-6">
             {/* Rental Terms & Conditions */}
             <div className="p-4 bg-gold-soft/60 rounded-xl border border-line text-[10px] text-[#5B5566] space-y-1">
               <div className="font-bold text-[#18141E] uppercase text-[11px] mb-1">
@@ -367,7 +367,7 @@ function InvoiceContent() {
                 <div className="pt-2 border-t border-line space-y-1 text-[11px] font-semibold text-[#5B5566]">
                   {selectedBooking.lateFee > 0 && (
                     <div className="flex justify-between">
-                      <span>Late fee ({selectedBooking.lateDays} day{selectedBooking.lateDays === 1 ? "" : "s"}):</span>
+                      <span>Late fee ({plural(selectedBooking.lateDays, "day")}):</span>
                       <span className="font-mono">{formatINR(selectedBooking.lateFee)}</span>
                     </div>
                   )}
@@ -399,7 +399,7 @@ function InvoiceContent() {
           </div>
 
           {/* Signature Signoff */}
-          <div className="pt-8 border-t border-line-soft grid grid-cols-2 gap-10 text-center text-xs">
+          <div className="pt-8 border-t border-line-soft grid grid-cols-2 gap-4 sm:gap-10 text-center text-xs">
             <div>
               <div className="h-10 border-b border-gray-400"></div>
               <div className="font-bold text-[#18141E] mt-1">Customer Signature</div>
