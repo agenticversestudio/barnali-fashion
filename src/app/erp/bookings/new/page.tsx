@@ -916,18 +916,31 @@ function NewBookingWizardContent() {
           <div className="pt-2">
             <a
               href={`https://wa.me/91${customerPhone.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
-                `*BARNALI FASHION — BOOKING CONFIRMATION*\n` +
-                `Order ID: ${createdBookingId}\n` +
-                `Client: ${customerName}\n` +
-                `Pickup Date: ${pickupDate}\n` +
-                `Return Due Date: ${returnDueDate}\n` +
-                `-------------------------\n` +
-                `Costumes: ${selectedCostumes.map((g) => `${g.name} (${g.id})`).join(", ")}\n` +
-                `Grand Total: ₹${quote?.grandTotal || 0}\n` +
-                `Advance Received: ₹${advanceAmount} (${paymentMode})\n` +
-                `*Balance Due at Handover: ₹${quote?.balanceDue || 0}*\n` +
-                `-------------------------\n` +
-                `Terms: Security deposit is refundable upon undamaged return. Thank you!`
+                `👑 *BARNALI FASHION*\n` +
+                `_Bridal & Festive Couture Studio_\n` +
+                `━━━━━━━━━━━━━━━━━━━━\n` +
+                `🧾 *BOOKING CONFIRMATION SLIP*\n` +
+                `*Order ID:* \`#${createdBookingId}\`\n` +
+                `━━━━━━━━━━━━━━━━━━━━\n\n` +
+                `👤 *CUSTOMER DETAILS*\n` +
+                `• *Client Name:* ${customerName}\n` +
+                `• *Phone:* ${customerPhone}\n\n` +
+                `📅 *RENTAL SCHEDULE*\n` +
+                `• *Pickup Date:* ${pickupDate}\n` +
+                `• *Return Due Date:* *${returnDueDate}*\n\n` +
+                `👗 *RESERVED OUTFITS*\n` +
+                selectedCostumes.map((g, idx) => `*${idx + 1}. ${g.name}* (\`${g.id}\`)`).join("\n") +
+                `\n────────────────────\n` +
+                `💰 *PAYMENT SUMMARY*\n` +
+                `• Grand Total: ₹${quote?.grandTotal || 0}\n` +
+                `✅ *Advance Received:* ₹${advanceAmount} (${paymentMode})\n` +
+                `⚠️ *Balance Due at Handover:* *₹${quote?.balanceDue || 0}*\n` +
+                `━━━━━━━━━━━━━━━━━━━━\n\n` +
+                `🛡️ *SECURITY DEPOSIT POLICY*\n` +
+                `Security deposit is 100% refundable upon safe return of the outfits in original condition.\n\n` +
+                `📍 *Studio Address:* LIC Office Road, Bargarh, Odisha\n` +
+                `📞 *Helpline:* +91 79782 56488\n\n` +
+                `_Thank you for choosing Barnali Fashion!_ ✨`
               )}`}
               target="_blank"
               rel="noopener noreferrer"

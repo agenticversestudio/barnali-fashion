@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { bookingsApi, settingsApi } from "@/lib/api";
 import { formatINR, formatDate } from "@/lib/utils";
+import { formatWhatsAppReceipt, buildWhatsAppLink } from "@/lib/whatsappReceipt";
 import type { BookingDto, SettingsDto } from "@/types/api";
 
 function InvoiceContent() {
@@ -111,35 +112,13 @@ function InvoiceContent() {
   const returned = selectedBooking.status === "COMPLETED";
   const extraDue = selectedBooking.additionalDue || 0;
 
-  const whatsappText = [
-    `*${shopName.toUpperCase()} — ${returned ? "RETURN RECEIPT" : "BOOKING RECEIPT"}*`,
-    `Order ID: ${selectedBooking.id}`,
-    `Client: ${selectedBooking.customer.name}`,
-    `Event: ${selectedBooking.eventName}`,
-    `Pickup: ${formatDate(selectedBooking.pickupDate)}`,
-    `Return due: ${formatDate(selectedBooking.returnDueDate)}`,
-    `-------------------------`,
-    ...selectedBooking.items.map((i) => `• ${i.name} (${i.garmentId}) — Rent ${formatINR(i.rentalPrice)}, Deposit ${formatINR(i.securityDeposit)}`),
-    `-------------------------`,
-    `Rental: ${formatINR(selectedBooking.rentalTotal)}`,
-    `Security deposit: ${formatINR(selectedBooking.depositTotal)}`,
-    ...(selectedBooking.dryCleanCharge > 0 ? [`Dry clean: ${formatINR(selectedBooking.dryCleanCharge)}`] : []),
-    ...(selectedBooking.transitCharge > 0 ? [`Delivery: ${formatINR(selectedBooking.transitCharge)}`] : []),
-    `*Grand total: ${formatINR(selectedBooking.grandTotal)}*`,
-    `Paid so far: ${formatINR(advancePayment)}`,
-    `*Balance due: ${formatINR(selectedBooking.balanceDue)}*`,
-    ...(returned
-      ? [
-          `-------------------------`,
-          `Deposit refund: ${formatINR(selectedBooking.refundAmount)}`,
-          ...(extraDue > 0 ? [`*Extra amount due: ${formatINR(extraDue)}*`] : []),
-        ]
-      : []),
-    `-------------------------`,
-    `Security deposit is refundable on undamaged return. Thank you!`,
-  ].join("\n");
+  const whatsappText = formatWhatsAppReceipt(selectedBooking, {
+    shopName,
+    shopPhone: settings?.shopPhone,
+    shopAddress: settings?.shopAddress,
+  });
   const waPhone = (selectedBooking.customer.whatsapp || selectedBooking.customer.phone || "").replace(/\D/g, "").slice(-10);
-  const waHref = `https://wa.me/${waPhone.length === 10 ? "91" + waPhone : ""}?text=${encodeURIComponent(whatsappText)}`;
+  const waHref = buildWhatsAppLink(waPhone, whatsappText);
   const copyText = async () => {
     try {
       await navigator.clipboard.writeText(whatsappText);
